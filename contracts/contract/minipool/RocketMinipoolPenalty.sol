@@ -4,12 +4,12 @@ pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-import "../RocketBase.sol";
-import "../../interface/minipool/RocketMinipoolPenaltyInterface.sol";
+import "../LQGBase.sol";
+import "../../interface/minipool/LQGMinipoolPenaltyInterface.sol";
 
 // Non-upgradable contract which gives guardian control over maximum penalty rates
 
-contract RocketMinipoolPenalty is RocketBase, RocketMinipoolPenaltyInterface {
+contract LQGMinipoolPenalty is LQGBase, LQGMinipoolPenaltyInterface {
 
     // Events
     event MaxPenaltyRateUpdated(uint256 rate, uint256 time);
@@ -17,11 +17,11 @@ contract RocketMinipoolPenalty is RocketBase, RocketMinipoolPenaltyInterface {
     // Libs
     using SafeMath for uint;
 
-    // Storage (purposefully does not use RocketStorage to prevent oDAO from having power over this feature)
+    // Storage (purposefully does not use LQGStorage to prevent oDAO from having power over this feature)
     uint256 maxPenaltyRate = 0 ether;                     // The most the oDAO is allowed to penalty a minipool (as a percentage)
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
     }
 
     // Get/set the current max penalty rate
@@ -37,7 +37,7 @@ contract RocketMinipoolPenalty is RocketBase, RocketMinipoolPenaltyInterface {
 
     // Retrieves the amount to penalty a minipool
     function getPenaltyRate(address _minipoolAddress) external override view returns(uint256) {
-        // Quick out which avoids a call to RocketStorage
+        // Quick out which avoids a call to LQGStorage
         if (maxPenaltyRate == 0) {
              return 0;
         }

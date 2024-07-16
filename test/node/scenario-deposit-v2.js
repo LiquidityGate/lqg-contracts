@@ -1,7 +1,7 @@
 import {
-    RocketMinipoolDelegate, RocketMinipoolFactory,
-    RocketMinipoolManager,
-    RocketNodeDeposit,
+    LQGMinipoolDelegate, LQGMinipoolFactory,
+    LQGMinipoolManager,
+    LQGNodeDeposit,
 } from '../_utils/artifacts';
 import { getDepositDataRoot, getValidatorPubkey, getValidatorSignature } from '../_utils/beacon';
 import { assertBN } from '../_helpers/bn';
@@ -13,20 +13,20 @@ let minipoolSalt = 0;
 export async function depositV2(minimumNodeFee, bondAmount, txOptions) {
     // Load contracts
     const [
-        rocketMinipoolManager,
-        rocketMinipoolFactory,
-        rocketNodeDeposit,
+        lqgMinipoolManager,
+        lqgMinipoolFactory,
+        lqgNodeDeposit,
     ] = await Promise.all([
-        RocketMinipoolManager.deployed(),
-        RocketMinipoolFactory.deployed(),
-        RocketNodeDeposit.deployed(),
+        LQGMinipoolManager.deployed(),
+        LQGMinipoolFactory.deployed(),
+        LQGNodeDeposit.deployed(),
     ]);
 
     // Get minipool counts
     function getMinipoolCounts(nodeAddress) {
         return Promise.all([
-            rocketMinipoolManager.getMinipoolCount(),
-            rocketMinipoolManager.getNodeMinipoolCount(nodeAddress),
+            lqgMinipoolManager.getMinipoolCount(),
+            lqgMinipoolManager.getNodeMinipoolCount(nodeAddress),
         ]).then(
             ([network, node]) =>
             ({network, node})
@@ -35,9 +35,9 @@ export async function depositV2(minimumNodeFee, bondAmount, txOptions) {
 
     // Get minipool details
     function getMinipoolDetails(minipoolAddress) {
-        const minipool = RocketMinipoolDelegate.at(minipoolAddress);
+        const minipool = LQGMinipoolDelegate.at(minipoolAddress);
         return Promise.all([
-            rocketMinipoolManager.getMinipoolExists(minipoolAddress),
+            lqgMinipoolManager.getMinipoolExists(minipoolAddress),
             minipool.getNodeAddress(),
             minipool.getNodeDepositBalance(),
             minipool.getNodeDepositAssigned(),
@@ -52,7 +52,7 @@ export async function depositV2(minimumNodeFee, bondAmount, txOptions) {
 
     // Deposit
     const salt = minipoolSalt++;
-    const minipoolAddress = await rocketMinipoolFactory.getExpectedAddress(txOptions.from, salt);
+    const minipoolAddress = await lqgMinipoolFactory.getExpectedAddress(txOptions.from, salt);
     let withdrawalCredentials = '0x010000000000000000000000' + minipoolAddress.substr(2);
 
     // Get validator deposit data
@@ -67,9 +67,9 @@ export async function depositV2(minimumNodeFee, bondAmount, txOptions) {
 
     // Make node deposit
     if (bondAmount === txOptions.value) {
-        await rocketNodeDeposit.connect(txOptions.from).deposit(bondAmount, minimumNodeFee, depositData.pubkey, depositData.signature, depositDataRoot, salt, minipoolAddress, txOptions);
+        await lqgNodeDeposit.connect(txOptions.from).deposit(bondAmount, minimumNodeFee, depositData.pubkey, depositData.signature, depositDataRoot, salt, minipoolAddress, txOptions);
     } else {
-        await rocketNodeDeposit.connect(txOptions.from).depositWithCredit(bondAmount, minimumNodeFee, depositData.pubkey, depositData.signature, depositDataRoot, salt, minipoolAddress, txOptions);
+        await lqgNodeDeposit.connect(txOptions.from).depositWithCredit(bondAmount, minimumNodeFee, depositData.pubkey, depositData.signature, depositDataRoot, salt, minipoolAddress, txOptions);
     }
 
     // Get updated minipool indexes & created minipool details
@@ -79,8 +79,8 @@ export async function depositV2(minimumNodeFee, bondAmount, txOptions) {
         lastNodeMinipoolAddress,
         minipoolDetails,
     ] = await Promise.all([
-        rocketMinipoolManager.getMinipoolAt(minipoolCounts2.network - 1n),
-        rocketMinipoolManager.getNodeMinipoolAt(txOptions.from, minipoolCounts2.node - 1n),
+        lqgMinipoolManager.getMinipoolAt(minipoolCounts2.network - 1n),
+        lqgMinipoolManager.getNodeMinipoolAt(txOptions.from, minipoolCounts2.node - 1n),
         getMinipoolDetails(minipoolAddress),
     ]);
 

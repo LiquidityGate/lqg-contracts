@@ -4,9 +4,9 @@ pragma solidity >0.5.0 <0.9.0;
 
 import "../../types/MinipoolDeposit.sol";
 import "../../types/MinipoolStatus.sol";
-import "../RocketStorageInterface.sol";
+import "../LQGStorageInterface.sol";
 
-interface RocketMinipoolInterface {
+interface LQGMinipoolInterface {
     function version() external view returns (uint8);
     function initialise(address _nodeAddress) external;
     function getStatus() external view returns (MinipoolStatus);

@@ -1,4 +1,4 @@
-import { RocketNodeManager, RocketTokenRETH } from '../_utils/artifacts';
+import { LQGNodeManager, LQGTokenRETH } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 
 const hre = require('hardhat');
@@ -7,11 +7,11 @@ const ethers = hre.ethers;
 export async function skimRewards(minipool, txOptions) {
     // Load contracts
     const [
-        rocketTokenRETH,
-        rocketNodeManager,
+        lqgTokenRETH,
+        lqgNodeManager,
     ] = await Promise.all([
-        RocketTokenRETH.deployed(),
-        RocketNodeManager.deployed(),
+        LQGTokenRETH.deployed(),
+        LQGNodeManager.deployed(),
     ]);
 
     // Get parameters
@@ -28,12 +28,12 @@ export async function skimRewards(minipool, txOptions) {
     ]);
 
     // Get node parameters
-    let nodeWithdrawalAddress = await rocketNodeManager.getNodeWithdrawalAddress(nodeAddress);
+    let nodeWithdrawalAddress = await lqgNodeManager.getNodeWithdrawalAddress(nodeAddress);
 
     // Get balances
     function getBalances() {
         return Promise.all([
-            ethers.provider.getBalance(rocketTokenRETH.target),
+            ethers.provider.getBalance(lqgTokenRETH.target),
             ethers.provider.getBalance(nodeWithdrawalAddress),
             ethers.provider.getBalance(minipool.target),
             minipool.getNodeRefundBalance(),

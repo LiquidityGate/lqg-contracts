@@ -1,8 +1,8 @@
 import {
-    RocketDAOProposal,
-    RocketDAOSecurity,
-    RocketDAOSecurityActions,
-    RocketDAOSecurityProposals,
+    LQGDAOProposal,
+    LQGDAOSecurity,
+    LQGDAOSecurityActions,
+    LQGDAOSecurityProposals,
 } from '../_utils/artifacts';
 import { getDAOProposalState, proposalStates } from './scenario-dao-proposal';
 import { assertBN } from '../_helpers/bn';
@@ -11,35 +11,35 @@ import * as assert from 'assert';
 // Returns true if the address is a DAO member
 export async function getDAOSecurityMemberIsValid(_nodeAddress) {
     // Load contracts
-    const rocketDAOSecurity = await RocketDAOSecurity.deployed();
-    return await rocketDAOSecurity.getMemberIsValid(_nodeAddress);
+    const lqgDAOSecurity = await LQGDAOSecurity.deployed();
+    return await lqgDAOSecurity.getMemberIsValid(_nodeAddress);
 }
 
 // Get the total members
 export async function getDAOSecurityMemberCount() {
     // Load contracts
-    const rocketDAOSecurity = await RocketDAOSecurity.deployed();
-    return await rocketDAOSecurity.getMemberCount();
+    const lqgDAOSecurity = await LQGDAOSecurity.deployed();
+    return await lqgDAOSecurity.getMemberCount();
 }
 
 // Get the number of votes needed for a proposal to pass
 export async function getDAOSecurityProposalQuorumVotesRequired(proposalID) {
     // Load contracts
-    const rocketDAOSecurity = await RocketDAOSecurity.deployed();
-    return await rocketDAOSecurity.getProposalQuorumVotesRequired();
+    const lqgDAOSecurity = await LQGDAOSecurity.deployed();
+    return await lqgDAOSecurity.getProposalQuorumVotesRequired();
 }
 
 // Create a proposal for this DAO
 export async function daoSecurityPropose(_proposalMessage, _payload, txOptions) {
 
     // Load contracts
-    const rocketDAOProposal = await RocketDAOProposal.deployed();
-    const rocketDAOSecurityProposals = await RocketDAOSecurityProposals.deployed();
+    const lqgDAOProposal = await LQGDAOProposal.deployed();
+    const lqgDAOSecurityProposals = await LQGDAOSecurityProposals.deployed();
 
     // Get data about the tx
     function getTxData() {
         return Promise.all([
-            rocketDAOProposal.getTotal(),
+            lqgDAOProposal.getTotal(),
         ]).then(
             ([proposalTotal]) =>
                 ({ proposalTotal }),
@@ -50,7 +50,7 @@ export async function daoSecurityPropose(_proposalMessage, _payload, txOptions) 
     let ds1 = await getTxData();
 
     // Add a new proposal
-    await rocketDAOSecurityProposals.connect(txOptions.from).propose(_proposalMessage, _payload, txOptions);
+    await lqgDAOSecurityProposals.connect(txOptions.from).propose(_proposalMessage, _payload, txOptions);
 
     // Capture data
     let ds2 = await getTxData();
@@ -69,16 +69,16 @@ export async function daoSecurityPropose(_proposalMessage, _payload, txOptions) 
 // Vote on a proposal for this DAO
 export async function daoSecurityVote(_proposalID, _vote, txOptions) {
     // Load contracts
-    const rocketDAOProposal = await RocketDAOProposal.deployed();
-    const rocketDAOSecurityProposals = await RocketDAOSecurityProposals.deployed();
+    const lqgDAOProposal = await LQGDAOProposal.deployed();
+    const lqgDAOSecurityProposals = await LQGDAOSecurityProposals.deployed();
 
     // Get data about the tx
     function getTxData() {
         return Promise.all([
-            rocketDAOProposal.getTotal(),
-            rocketDAOProposal.getState(_proposalID),
-            rocketDAOProposal.getVotesFor(_proposalID),
-            rocketDAOProposal.getVotesRequired(_proposalID),
+            lqgDAOProposal.getTotal(),
+            lqgDAOProposal.getState(_proposalID),
+            lqgDAOProposal.getVotesFor(_proposalID),
+            lqgDAOProposal.getVotesRequired(_proposalID),
         ]).then(
             ([proposalTotal, proposalState, proposalVotesFor, proposalVotesRequired]) =>
                 ({ proposalTotal, proposalState, proposalVotesFor, proposalVotesRequired }),
@@ -86,7 +86,7 @@ export async function daoSecurityVote(_proposalID, _vote, txOptions) {
     }
 
     // Add a new proposal
-    await rocketDAOSecurityProposals.connect(txOptions.from).vote(_proposalID, _vote, txOptions);
+    await lqgDAOSecurityProposals.connect(txOptions.from).vote(_proposalID, _vote, txOptions);
 
     // Capture data
     let ds2 = await getTxData();
@@ -103,13 +103,13 @@ export async function daoSecurityVote(_proposalID, _vote, txOptions) {
 // Execute a successful proposal
 export async function daoSecurityExecute(_proposalID, txOptions) {
     // Load contracts
-    const rocketDAOProposal = await RocketDAOProposal.deployed();
-    const rocketDAOSecurityProposals = await RocketDAOSecurityProposals.deployed();
+    const lqgDAOProposal = await LQGDAOProposal.deployed();
+    const lqgDAOSecurityProposals = await LQGDAOSecurityProposals.deployed();
 
     // Get data about the tx
     function getTxData() {
         return Promise.all([
-            rocketDAOProposal.getState(_proposalID),
+            lqgDAOProposal.getState(_proposalID),
         ]).then(
             ([proposalState]) =>
                 ({ proposalState }),
@@ -117,7 +117,7 @@ export async function daoSecurityExecute(_proposalID, txOptions) {
     }
 
     // Execute a proposal
-    await rocketDAOSecurityProposals.connect(txOptions.from).execute(_proposalID, txOptions);
+    await lqgDAOSecurityProposals.connect(txOptions.from).execute(_proposalID, txOptions);
 
     // Capture data
     let ds2 = await getTxData();
@@ -129,13 +129,13 @@ export async function daoSecurityExecute(_proposalID, txOptions) {
 // Join the DAO after a successful invite proposal has passed
 export async function daoSecurityMemberJoin(txOptions) {
     // Load contracts
-    const rocketDAOSecurity = await RocketDAOSecurity.deployed();
-    const rocketDAOSecurityActions = (await RocketDAOSecurityActions.deployed()).connect(txOptions.from);
+    const lqgDAOSecurity = await LQGDAOSecurity.deployed();
+    const lqgDAOSecurityActions = (await LQGDAOSecurityActions.deployed()).connect(txOptions.from);
 
     // Get data about the tx
     function getTxData() {
         return Promise.all([
-            rocketDAOSecurity.getMemberCount(),
+            lqgDAOSecurity.getMemberCount(),
         ]).then(
             ([memberTotal]) =>
                 ({ memberTotal }),
@@ -146,7 +146,7 @@ export async function daoSecurityMemberJoin(txOptions) {
     let ds1 = await getTxData();
 
     // Add a new proposal
-    await rocketDAOSecurityActions.actionJoin(txOptions);
+    await lqgDAOSecurityActions.actionJoin(txOptions);
 
     // Capture data
     let ds2 = await getTxData();
@@ -158,13 +158,13 @@ export async function daoSecurityMemberJoin(txOptions) {
 // Leave the DAO after a successful leave proposal has passed
 export async function daoSecurityMemberLeave(txOptions) {
     // Load contracts
-    const rocketDAOSecurity = await RocketDAOSecurity.deployed();
-    const rocketDAOSecurityActions = await RocketDAOSecurityActions.deployed();
+    const lqgDAOSecurity = await LQGDAOSecurity.deployed();
+    const lqgDAOSecurityActions = await LQGDAOSecurityActions.deployed();
 
     // Get data about the tx
     function getTxData() {
         return Promise.all([
-            rocketDAOSecurity.getMemberCount(),
+            lqgDAOSecurity.getMemberCount(),
         ]).then(
             ([memberTotal]) =>
                 ({ memberTotal }),
@@ -175,7 +175,7 @@ export async function daoSecurityMemberLeave(txOptions) {
     let ds1 = await getTxData();
 
     // Add a new proposal
-    await rocketDAOSecurityActions.connect(txOptions.from).actionLeave(txOptions);
+    await lqgDAOSecurityActions.connect(txOptions.from).actionLeave(txOptions);
 
     // Capture data
     let ds2 = await getTxData();
@@ -186,8 +186,8 @@ export async function daoSecurityMemberLeave(txOptions) {
 
 // Request leaving the security council
 export async function daoSecurityMemberRequestLeave(txOptions) {
-    const rocketDAOSecurityActions = await RocketDAOSecurityActions.deployed();
-    await rocketDAOSecurityActions.connect(txOptions.from).actionRequestLeave(txOptions);
+    const lqgDAOSecurityActions = await LQGDAOSecurityActions.deployed();
+    await lqgDAOSecurityActions.connect(txOptions.from).actionRequestLeave(txOptions);
 }
 
 

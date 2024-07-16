@@ -2,7 +2,7 @@ pragma solidity >0.5.0 <0.9.0;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-interface RocketDAOProtocolSettingsDepositInterface {
+interface LQGDAOProtocolSettingsDepositInterface {
     function getDepositEnabled() external view returns (bool);
     function getAssignDepositsEnabled() external view returns (bool);
     function getMinimumDeposit() external view returns (uint256);

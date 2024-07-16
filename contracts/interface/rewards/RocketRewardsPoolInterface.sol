@@ -5,7 +5,7 @@ import "../../types/RewardSubmission.sol";
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-interface RocketRewardsPoolInterface {
+interface LQGRewardsPoolInterface {
     function getRewardIndex() external view returns(uint256);
     function getRPLBalance() external view returns(uint256);
     function getPendingRPLRewards() external view returns (uint256);

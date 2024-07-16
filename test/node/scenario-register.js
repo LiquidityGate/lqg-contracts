@@ -1,17 +1,17 @@
-import { RocketNodeManager } from '../_utils/artifacts';
+import { LQGNodeManager } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 import * as assert from 'assert';
 
 // Register a node
 export async function register(timezoneLocation, txOptions) {
     // Load contracts
-    const rocketNodeManager = await RocketNodeManager.deployed();
+    const lqgNodeManager = await LQGNodeManager.deployed();
 
     // Get node details
     function getNodeDetails(nodeAddress) {
         return Promise.all([
-            rocketNodeManager.getNodeExists(nodeAddress),
-            rocketNodeManager.getNodeTimezoneLocation(nodeAddress),
+            lqgNodeManager.getNodeExists(nodeAddress),
+            lqgNodeManager.getNodeTimezoneLocation(nodeAddress),
         ]).then(
             ([exists, timezoneLocation]) =>
                 ({ exists, timezoneLocation }),
@@ -19,15 +19,15 @@ export async function register(timezoneLocation, txOptions) {
     }
 
     // Get initial node index
-    let nodeCount1 = await rocketNodeManager.getNodeCount();
+    let nodeCount1 = await lqgNodeManager.getNodeCount();
 
     // Register
-    await rocketNodeManager.connect(txOptions.from).registerNode(timezoneLocation, txOptions);
+    await lqgNodeManager.connect(txOptions.from).registerNode(timezoneLocation, txOptions);
 
     // Get updated node index & node details
-    let nodeCount2 = await rocketNodeManager.getNodeCount();
+    let nodeCount2 = await lqgNodeManager.getNodeCount();
     let [lastNodeAddress, details] = await Promise.all([
-        rocketNodeManager.getNodeAt(nodeCount2 - 1n),
+        lqgNodeManager.getNodeAt(nodeCount2 - 1n),
         getNodeDetails(txOptions.from.address),
     ]);
 

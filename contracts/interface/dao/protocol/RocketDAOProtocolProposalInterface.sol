@@ -3,9 +3,9 @@ pragma solidity >0.5.0 <0.9.0;
 pragma abicoder v2;
 
 import "../../../types/SettingType.sol";
-import "./RocketDAOProtocolVerifierInterface.sol";
+import "./LQGDAOProtocolVerifierInterface.sol";
 
-interface RocketDAOProtocolProposalInterface {
+interface LQGDAOProtocolProposalInterface {
     // Possible states that a proposal may be in
     enum ProposalState {
         Pending,

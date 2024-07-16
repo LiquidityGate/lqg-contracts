@@ -4,7 +4,7 @@ pragma solidity >0.5.0 <0.9.0;
 
 import "../../types/MinipoolDeposit.sol";
 
-interface RocketMinipoolQueueInterface {
+interface LQGMinipoolQueueInterface {
     function getTotalLength() external view returns (uint256);
     function getContainsLegacy() external view returns (bool);
     function getLengthLegacy(MinipoolDeposit _depositType) external view returns (uint256);

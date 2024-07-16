@@ -3,7 +3,7 @@ pragma solidity >0.5.0 <0.9.0;
 // SPDX-License-Identifier: GPL-3.0-only
 import "./util/IERC20Burnable.sol";
 
-interface RocketVaultInterface {
+interface LQGVaultInterface {
     function balanceOf(string memory _networkContractName) external view returns (uint256);
     function depositEther() external payable;
     function withdrawEther(uint256 _amount) external;

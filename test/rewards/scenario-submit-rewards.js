@@ -1,9 +1,9 @@
 import {
-    RocketClaimDAO,
-    RocketDAONodeTrusted,
-    RocketRewardsPool,
-    RocketTokenRETH,
-    RocketTokenRPL,
+    LQGClaimDAO,
+    LQGDAONodeTrusted,
+    LQGRewardsPool,
+    LQGTokenRETH,
+    LQGTokenRPL,
 } from '../_utils/artifacts';
 import { parseRewardsMap } from '../_utils/merkle-tree';
 import { assertBN } from '../_helpers/bn';
@@ -16,21 +16,21 @@ const ethers = hre.ethers;
 export async function submitRewards(index, rewards, treasuryRPL, userETH, txOptions) {
     // Load contracts
     const [
-        rocketDAONodeTrusted,
-        rocketRewardsPool,
-        rocketTokenRETH,
-        rocketTokenRPL,
-        rocketClaimDAO,
+        lqgDAONodeTrusted,
+        lqgRewardsPool,
+        lqgTokenRETH,
+        lqgTokenRPL,
+        lqgClaimDAO,
     ] = await Promise.all([
-        RocketDAONodeTrusted.deployed(),
-        RocketRewardsPool.deployed(),
-        RocketTokenRETH.deployed(),
-        RocketTokenRPL.deployed(),
-        RocketClaimDAO.deployed(),
+        LQGDAONodeTrusted.deployed(),
+        LQGRewardsPool.deployed(),
+        LQGTokenRETH.deployed(),
+        LQGTokenRPL.deployed(),
+        LQGClaimDAO.deployed(),
     ]);
 
     // Get parameters
-    let trustedNodeCount = await rocketDAONodeTrusted.getMemberCount();
+    let trustedNodeCount = await lqgDAONodeTrusted.getMemberCount();
 
     // Construct the merkle tree
     let treeData = parseRewardsMap(rewards);
@@ -80,8 +80,8 @@ export async function submitRewards(index, rewards, treasuryRPL, userETH, txOpti
     // Get submission details
     function getSubmissionDetails() {
         return Promise.all([
-            rocketRewardsPool.getTrustedNodeSubmitted(txOptions.from.address, index),
-            rocketRewardsPool.getSubmissionCount(submission),
+            lqgRewardsPool.getTrustedNodeSubmitted(txOptions.from.address, index),
+            lqgRewardsPool.getSubmissionCount(submission),
         ]).then(
             ([nodeSubmitted, count]) =>
                 ({ nodeSubmitted, count }),
@@ -91,23 +91,23 @@ export async function submitRewards(index, rewards, treasuryRPL, userETH, txOpti
     // Get initial submission details
     let [submission1, rewardIndex1, treasuryRpl1, rethBalance1] = await Promise.all([
         getSubmissionDetails(),
-        rocketRewardsPool.getRewardIndex(),
-        rocketTokenRPL.balanceOf(rocketClaimDAO.target),
-        ethers.provider.getBalance(rocketTokenRETH.target),
+        lqgRewardsPool.getRewardIndex(),
+        lqgTokenRPL.balanceOf(lqgClaimDAO.target),
+        ethers.provider.getBalance(lqgTokenRETH.target),
     ]);
 
     let alreadyExecuted = submission.rewardIndex !== Number(rewardIndex1);
     // Submit prices
-    await rocketRewardsPool.connect(txOptions.from).submitRewardSnapshot(submission, txOptions);
+    await lqgRewardsPool.connect(txOptions.from).submitRewardSnapshot(submission, txOptions);
     const actualExecutionBlock = await ethers.provider.getBlockNumber();
-    assert.equal(await rocketRewardsPool.getSubmissionFromNodeExists(txOptions.from.address, submission), true);
+    assert.equal(await lqgRewardsPool.getSubmissionFromNodeExists(txOptions.from.address, submission), true);
 
     // Get updated submission details & prices
     let [submission2, rewardIndex2, treasuryRpl2, rethBalance2] = await Promise.all([
         getSubmissionDetails(),
-        rocketRewardsPool.getRewardIndex(),
-        rocketTokenRPL.balanceOf(rocketClaimDAO.target),
-        ethers.provider.getBalance(rocketTokenRETH.target),
+        lqgRewardsPool.getRewardIndex(),
+        lqgTokenRPL.balanceOf(lqgClaimDAO.target),
+        ethers.provider.getBalance(lqgTokenRETH.target),
     ]);
 
     // Check if prices should be updated and were not updated yet
@@ -128,10 +128,10 @@ export async function submitRewards(index, rewards, treasuryRPL, userETH, txOpti
         assertBN.equal(treasuryRPLChange, treasuryRPL, 'Treasury RPL balance not correct');
 
         // Check block and address
-        const executionBlock = await rocketRewardsPool.getClaimIntervalExecutionBlock(index);
-        const executionAddress = await rocketRewardsPool.getClaimIntervalExecutionAddress(index);
+        const executionBlock = await lqgRewardsPool.getClaimIntervalExecutionBlock(index);
+        const executionAddress = await lqgRewardsPool.getClaimIntervalExecutionAddress(index);
         assert.equal(executionBlock, actualExecutionBlock);
-        assert.equal(executionAddress, rocketRewardsPool.target);
+        assert.equal(executionAddress, lqgRewardsPool.target);
     } else {
         assertBN.equal(rewardIndex2, rewardIndex1, 'Incorrect updated network prices block');
         assertBN.equal(rethBalance1, rethBalance2, 'User ETH balance changed');
@@ -143,9 +143,9 @@ export async function submitRewards(index, rewards, treasuryRPL, userETH, txOpti
 export async function executeRewards(index, rewards, treasuryRPL, userETH, txOptions) {
     // Load contracts
     const [
-        rocketRewardsPool,
+        lqgRewardsPool,
     ] = await Promise.all([
-        RocketRewardsPool.deployed(),
+        LQGRewardsPool.deployed(),
     ]);
 
     // Construct the merkle tree
@@ -194,9 +194,9 @@ export async function executeRewards(index, rewards, treasuryRPL, userETH, txOpt
     };
 
     // Submit prices
-    let rewardIndex1 = await rocketRewardsPool.getRewardIndex();
-    await rocketRewardsPool.connect(txOptions.from).executeRewardSnapshot(submission, txOptions);
-    let rewardIndex2 = await rocketRewardsPool.getRewardIndex();
+    let rewardIndex1 = await lqgRewardsPool.getRewardIndex();
+    await lqgRewardsPool.connect(txOptions.from).executeRewardSnapshot(submission, txOptions);
+    let rewardIndex2 = await lqgRewardsPool.getRewardIndex();
 
     // Check index incremented
     assertBN.equal(rewardIndex2, rewardIndex1 + 1n, 'Incorrect updated network prices block');

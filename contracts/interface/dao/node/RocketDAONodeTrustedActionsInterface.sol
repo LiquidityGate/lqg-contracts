@@ -2,7 +2,7 @@ pragma solidity >0.5.0 <0.9.0;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-interface RocketDAONodeTrustedActionsInterface {
+interface LQGDAONodeTrustedActionsInterface {
     function actionJoin() external;
     function actionJoinRequired(address _nodeAddress) external;
     function actionLeave(address _rplBondRefundAddress) external;

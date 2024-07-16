@@ -4,7 +4,7 @@ pragma solidity >0.5.0 <0.9.0;
 
 import "../util/IERC20.sol";
 
-interface RocketTokenRETHInterface is IERC20 {
+interface LQGTokenRETHInterface is IERC20 {
     function getEthValue(uint256 _rethAmount) external view returns (uint256);
     function getRethValue(uint256 _ethAmount) external view returns (uint256);
     function getExchangeRate() external view returns (uint256);

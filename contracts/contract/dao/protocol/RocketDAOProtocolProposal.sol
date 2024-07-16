@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.18;
 
-import "../../RocketBase.sol";
-import "../../../interface/dao/protocol/RocketDAOProtocolVerifierInterface.sol";
-import "../../../interface/network/RocketNetworkVotingInterface.sol";
-import "../../../interface/dao/protocol/settings/RocketDAOProtocolSettingsProposalsInterface.sol";
-import "../../../interface/dao/security/RocketDAOSecurityInterface.sol";
-import "../../../interface/dao/security/RocketDAOSecurityProposalsInterface.sol";
-import "../../../interface/dao/protocol/RocketDAOProtocolProposalInterface.sol";
+import "../../LQGBase.sol";
+import "../../../interface/dao/protocol/LQGDAOProtocolVerifierInterface.sol";
+import "../../../interface/network/LQGNetworkVotingInterface.sol";
+import "../../../interface/dao/protocol/settings/LQGDAOProtocolSettingsProposalsInterface.sol";
+import "../../../interface/dao/security/LQGDAOSecurityInterface.sol";
+import "../../../interface/dao/security/LQGDAOSecurityProposalsInterface.sol";
+import "../../../interface/dao/protocol/LQGDAOProtocolProposalInterface.sol";
 
 /// @notice Manages protocol DAO proposals
-contract RocketDAOProtocolProposal is RocketBase, RocketDAOProtocolProposalInterface {
+contract LQGDAOProtocolProposal is LQGBase, LQGDAOProtocolProposalInterface {
 
     // Events
     event ProposalAdded(address indexed proposer, uint256 indexed proposalID, bytes payload, uint256 time);
@@ -23,7 +23,7 @@ contract RocketDAOProtocolProposal is RocketBase, RocketDAOProtocolProposalInter
     // The namespace for any data stored in the protocol DAO (do not change)
     string constant internal daoProposalNameSpace = "dao.protocol.proposal.";
 
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         version = 2;
     }
 
@@ -36,7 +36,7 @@ contract RocketDAOProtocolProposal is RocketBase, RocketDAOProtocolProposalInter
     /// @param _payload An ABI encoded payload which is executed on this contract if the proposal is successful
     /// @param _blockNumber The block number the proposal is being made for
     /// @param _treeNodes A merkle pollard generated at _blockNumber for the voting power state of the DAO
-    function propose(string memory _proposalMessage, bytes calldata _payload, uint32 _blockNumber, Types.Node[] calldata _treeNodes) override external onlyRegisteredNode(msg.sender) onlyLatestContract("rocketDAOProtocolProposal", address(this)) returns (uint256) {
+    function propose(string memory _proposalMessage, bytes calldata _payload, uint32 _blockNumber, Types.Node[] calldata _treeNodes) override external onlyRegisteredNode(msg.sender) onlyLatestContract("lqgDAOProtocolProposal", address(this)) returns (uint256) {
         // Check on-chain governance has been enabled
         {
             uint256 enabledBlock = getUint(keccak256(abi.encodePacked("protocol.dao.enabled.block")));
@@ -51,8 +51,8 @@ contract RocketDAOProtocolProposal is RocketBase, RocketDAOProtocolProposalInter
         // Create the proposal
         uint256 proposalID = _propose(_proposalMessage, _blockNumber, totalVotingPower, _payload);
         // Add root to verifier so it can be challenged if incorrect
-        RocketDAOProtocolVerifierInterface rocketDAOProtocolVerifier = RocketDAOProtocolVerifierInterface(getContractAddress("rocketDAOProtocolVerifier"));
-        rocketDAOProtocolVerifier.submitProposalRoot(proposalID, msg.sender, _blockNumber, _treeNodes);
+        LQGDAOProtocolVerifierInterface lqgDAOProtocolVerifier = LQGDAOProtocolVerifierInterface(getContractAddress("lqgDAOProtocolVerifier"));
+        lqgDAOProtocolVerifier.submitProposalRoot(proposalID, msg.sender, _blockNumber, _treeNodes);
         return proposalID;
     }
 
@@ -62,14 +62,14 @@ contract RocketDAOProtocolProposal is RocketBase, RocketDAOProtocolProposalInter
     /// @param _votingPower Total delegated voting power for the voter at the proposal block
     /// @param _nodeIndex The index of the node voting
     /// @param _witness A merkle proof into the network voting power tree proving the supplied voting power is correct
-    function vote(uint256 _proposalID, VoteDirection _voteDirection, uint256 _votingPower, uint256 _nodeIndex, Types.Node[] calldata _witness) external onlyRegisteredNode(msg.sender) onlyLatestContract("rocketDAOProtocolProposal", address(this)) {
+    function vote(uint256 _proposalID, VoteDirection _voteDirection, uint256 _votingPower, uint256 _nodeIndex, Types.Node[] calldata _witness) external onlyRegisteredNode(msg.sender) onlyLatestContract("lqgDAOProtocolProposal", address(this)) {
         // Check valid vote
         require(_voteDirection != VoteDirection.NoVote, "Invalid vote");
         // Check the proposal is in a state that can be voted on
         require(getState(_proposalID) == ProposalState.ActivePhase1, "Phase 1 voting is not active");
         // Verify the voting power is correct
-        RocketDAOProtocolVerifierInterface rocketDAOProtocolVerifier = RocketDAOProtocolVerifierInterface(getContractAddress("rocketDAOProtocolVerifier"));
-        require(rocketDAOProtocolVerifier.verifyVote(msg.sender, _nodeIndex, _proposalID, _votingPower, _witness), "Invalid proof");
+        LQGDAOProtocolVerifierInterface lqgDAOProtocolVerifier = LQGDAOProtocolVerifierInterface(getContractAddress("lqgDAOProtocolVerifier"));
+        require(lqgDAOProtocolVerifier.verifyVote(msg.sender, _nodeIndex, _proposalID, _votingPower, _witness), "Invalid proof");
         // Apply vote
         _vote(msg.sender, _votingPower, _proposalID, _voteDirection, true);
     }
@@ -77,17 +77,17 @@ contract RocketDAOProtocolProposal is RocketBase, RocketDAOProtocolProposalInter
     /// @notice Applies a vote during phase 2 (can be used to override vote direction of delegate)
     /// @param _proposalID ID of the proposal to vote on
     /// @param _voteDirection Direction of the vote
-    function overrideVote(uint256 _proposalID, VoteDirection _voteDirection) override external onlyRegisteredNode(msg.sender) onlyLatestContract("rocketDAOProtocolProposal", address(this)) {
+    function overrideVote(uint256 _proposalID, VoteDirection _voteDirection) override external onlyRegisteredNode(msg.sender) onlyLatestContract("lqgDAOProtocolProposal", address(this)) {
         // Check valid vote
         require(_voteDirection != VoteDirection.NoVote, "Invalid vote");
         // Check the proposal is in a state that can be voted on
         require(getState(_proposalID) == ProposalState.ActivePhase2, "Phase 2 voting is not active");
         // Load contracts
-        RocketNetworkVotingInterface rocketNetworkVoting = RocketNetworkVotingInterface(getContractAddress("rocketNetworkVoting"));
+        LQGNetworkVotingInterface lqgNetworkVoting = LQGNetworkVotingInterface(getContractAddress("lqgNetworkVoting"));
         // Get caller's voting power and direction of their delegate
         uint32 blockNumber = uint32(getProposalBlock(_proposalID));
-        uint256 votingPower = rocketNetworkVoting.getVotingPower(msg.sender, blockNumber);
-        address delegate = rocketNetworkVoting.getDelegate(msg.sender, blockNumber);
+        uint256 votingPower = lqgNetworkVoting.getVotingPower(msg.sender, blockNumber);
+        address delegate = lqgNetworkVoting.getDelegate(msg.sender, blockNumber);
         // Check if delegate voted in phase 1
         if (getReceiptHasVotedPhase1(_proposalID, delegate)) {
             // Get the vote direction of their delegate
@@ -102,28 +102,28 @@ contract RocketDAOProtocolProposal is RocketBase, RocketDAOProtocolProposalInter
 
     /// @notice Finalises a vetoed proposal by burning the proposer's bond
     /// @param _proposalID ID of the proposal to finalise
-    function finalise(uint256 _proposalID) override external onlyLatestContract("rocketDAOProtocolProposal", address(this)) {
+    function finalise(uint256 _proposalID) override external onlyLatestContract("lqgDAOProtocolProposal", address(this)) {
         // Check state
         require(getState(_proposalID) == ProposalState.Vetoed, "Proposal has not been vetoed");
         bytes32 finalisedKey = keccak256(abi.encodePacked(daoProposalNameSpace, "finalised", _proposalID));
         require(getBool(finalisedKey) == false, "Proposal already finalised");
         setBool(finalisedKey, true);
         // Burn the proposer's bond
-        RocketDAOProtocolVerifierInterface rocketDAOProtocolVerifier = RocketDAOProtocolVerifierInterface(getContractAddress("rocketDAOProtocolVerifier"));
-        rocketDAOProtocolVerifier.burnProposalBond(_proposalID);
+        LQGDAOProtocolVerifierInterface lqgDAOProtocolVerifier = LQGDAOProtocolVerifierInterface(getContractAddress("lqgDAOProtocolVerifier"));
+        lqgDAOProtocolVerifier.burnProposalBond(_proposalID);
         // Log it
         emit ProposalFinalised(_proposalID, tx.origin, block.timestamp);
     }
 
     /// @notice Executes a successful proposal
     /// @param _proposalID ID of the proposal to execute
-    function execute(uint256 _proposalID) override external onlyLatestContract("rocketDAOProtocolProposal", address(this)) {
+    function execute(uint256 _proposalID) override external onlyLatestContract("lqgDAOProtocolProposal", address(this)) {
         // Firstly make sure this proposal has passed
         require(getState(_proposalID) == ProposalState.Succeeded, "Proposal has not succeeded, has expired or has already been executed");
         // Set as executed now before running payload
         setBool(keccak256(abi.encodePacked(daoProposalNameSpace, "executed", _proposalID)), true);
         // Get the proposals contract
-        address daoProtocolProposalsAddress = getContractAddress("rocketDAOProtocolProposals");
+        address daoProtocolProposalsAddress = getContractAddress("lqgDAOProtocolProposals");
         // Ok all good, lets run the payload on the dao contract that the proposal relates too, it should execute one of the methods on this contract
         (bool success, bytes memory response) = daoProtocolProposalsAddress.call(getPayload(_proposalID));
         // Was there an error?
@@ -133,7 +133,7 @@ contract RocketDAOProtocolProposal is RocketBase, RocketDAOProtocolProposalInter
     }
 
     /// @dev Called by the verifier contract to destroy a proven invalid proposal
-    function destroy(uint256 _proposalID) override external onlyLatestContract("rocketDAOProtocolProposal", address(this)) onlyLatestContract("rocketDAOProtocolVerifier", msg.sender) {
+    function destroy(uint256 _proposalID) override external onlyLatestContract("lqgDAOProtocolProposal", address(this)) onlyLatestContract("lqgDAOProtocolVerifier", msg.sender) {
         // Cancel the proposal
         bytes32 destroyedKey = keccak256(abi.encodePacked(daoProposalNameSpace, "destroyed", _proposalID));
         require(getBool(destroyedKey) == false, "Proposal already destroyed");
@@ -359,14 +359,14 @@ contract RocketDAOProtocolProposal is RocketBase, RocketDAOProtocolProposalInter
         // Validate block number
         require(_blockNumber < block.number, "Block must be in the past");
         // Load contracts
-        RocketDAOProtocolSettingsProposalsInterface rocketDAOProtocolSettingsProposals = RocketDAOProtocolSettingsProposalsInterface(getContractAddress("rocketDAOProtocolSettingsProposals"));
-        require(_blockNumber + rocketDAOProtocolSettingsProposals.getProposalMaxBlockAge() > block.number, "Block too old");
+        LQGDAOProtocolSettingsProposalsInterface lqgDAOProtocolSettingsProposals = LQGDAOProtocolSettingsProposalsInterface(getContractAddress("lqgDAOProtocolSettingsProposals"));
+        require(_blockNumber + lqgDAOProtocolSettingsProposals.getProposalMaxBlockAge() > block.number, "Block too old");
         // Calculate quorums
         uint256 quorum = 0;
         uint256 vetoQuorum = 0;
         {
-            uint256 proposalQuorum = rocketDAOProtocolSettingsProposals.getProposalQuorum();
-            uint256 vetoProposalQuorum = rocketDAOProtocolSettingsProposals.getProposalVetoQuorum();
+            uint256 proposalQuorum = lqgDAOProtocolSettingsProposals.getProposalQuorum();
+            uint256 vetoProposalQuorum = lqgDAOProtocolSettingsProposals.getProposalVetoQuorum();
             quorum = _totalVotingPower * proposalQuorum / calcBase;
             vetoQuorum = _totalVotingPower * vetoProposalQuorum / calcBase;
         }
@@ -375,10 +375,10 @@ contract RocketDAOProtocolProposal is RocketBase, RocketDAOProtocolProposalInter
             msg.sender,
             _proposalMessage,
             _blockNumber,
-            block.timestamp + rocketDAOProtocolSettingsProposals.getVoteDelayTime(),
-            rocketDAOProtocolSettingsProposals.getVotePhase1Time(),
-            rocketDAOProtocolSettingsProposals.getVotePhase2Time(),
-            rocketDAOProtocolSettingsProposals.getExecuteTime(),
+            block.timestamp + lqgDAOProtocolSettingsProposals.getVoteDelayTime(),
+            lqgDAOProtocolSettingsProposals.getVotePhase1Time(),
+            lqgDAOProtocolSettingsProposals.getVotePhase2Time(),
+            lqgDAOProtocolSettingsProposals.getExecuteTime(),
             quorum,
             vetoQuorum,
             _payload

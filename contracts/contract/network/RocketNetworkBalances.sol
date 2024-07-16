@@ -2,19 +2,19 @@
 pragma solidity 0.8.18;
 pragma abicoder v2;
 
-import "../RocketBase.sol";
-import "../../interface/dao/node/RocketDAONodeTrustedInterface.sol";
-import "../../interface/network/RocketNetworkBalancesInterface.sol";
-import "../../interface/dao/protocol/settings/RocketDAOProtocolSettingsNetworkInterface.sol";
+import "../LQGBase.sol";
+import "../../interface/dao/node/LQGDAONodeTrustedInterface.sol";
+import "../../interface/network/LQGNetworkBalancesInterface.sol";
+import "../../interface/dao/protocol/settings/LQGDAOProtocolSettingsNetworkInterface.sol";
 
 /// @notice Oracle contract for network balance data
-contract RocketNetworkBalances is RocketBase, RocketNetworkBalancesInterface {
+contract LQGNetworkBalances is LQGBase, LQGNetworkBalancesInterface {
 
     // Events
     event BalancesSubmitted(address indexed from, uint256 block, uint256 slotTimestamp, uint256 totalEth, uint256 stakingEth, uint256 rethSupply, uint256 blockTimestamp);
     event BalancesUpdated(uint256 indexed block, uint256 slotTimestamp, uint256 totalEth, uint256 stakingEth, uint256 rethSupply, uint256 blockTimestamp);
 
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         version = 3;
     }
 
@@ -69,10 +69,10 @@ contract RocketNetworkBalances is RocketBase, RocketNetworkBalancesInterface {
 
     /// @notice Submit network balances for a block.
     ///         Only accepts calls from trusted (oracle) nodes.
-    function submitBalances(uint256 _block, uint256 _slotTimestamp, uint256 _totalEth, uint256 _stakingEth, uint256 _rethSupply) override external onlyLatestContract("rocketNetworkBalances", address(this)) onlyTrustedNode(msg.sender) {
+    function submitBalances(uint256 _block, uint256 _slotTimestamp, uint256 _totalEth, uint256 _stakingEth, uint256 _rethSupply) override external onlyLatestContract("lqgNetworkBalances", address(this)) onlyTrustedNode(msg.sender) {
         // Check settings
-        RocketDAOProtocolSettingsNetworkInterface rocketDAOProtocolSettingsNetwork = RocketDAOProtocolSettingsNetworkInterface(getContractAddress("rocketDAOProtocolSettingsNetwork"));
-        require(rocketDAOProtocolSettingsNetwork.getSubmitBalancesEnabled(), "Submitting balances is currently disabled");
+        LQGDAOProtocolSettingsNetworkInterface lqgDAOProtocolSettingsNetwork = LQGDAOProtocolSettingsNetworkInterface(getContractAddress("lqgDAOProtocolSettingsNetwork"));
+        require(lqgDAOProtocolSettingsNetwork.getSubmitBalancesEnabled(), "Submitting balances is currently disabled");
         // Check block
         require(_block < block.number, "Balances can not be submitted for a future block");
         uint256 lastBalancesBlock = getBalancesBlock();
@@ -94,17 +94,17 @@ contract RocketNetworkBalances is RocketBase, RocketNetworkBalancesInterface {
             return;
         }
         // Check submission count & update network balances
-        RocketDAONodeTrustedInterface rocketDAONodeTrusted = RocketDAONodeTrustedInterface(getContractAddress("rocketDAONodeTrusted"));
-        if (calcBase * submissionCount / rocketDAONodeTrusted.getMemberCount() >= rocketDAOProtocolSettingsNetwork.getNodeConsensusThreshold()) {
+        LQGDAONodeTrustedInterface lqgDAONodeTrusted = LQGDAONodeTrustedInterface(getContractAddress("lqgDAONodeTrusted"));
+        if (calcBase * submissionCount / lqgDAONodeTrusted.getMemberCount() >= lqgDAOProtocolSettingsNetwork.getNodeConsensusThreshold()) {
             updateBalances(_block, _slotTimestamp, _totalEth, _stakingEth, _rethSupply);
         }
     }
 
     /// @notice Executes updateBalances if consensus threshold is reached
-    function executeUpdateBalances(uint256 _block, uint256 _slotTimestamp, uint256 _totalEth, uint256 _stakingEth, uint256 _rethSupply) override external onlyLatestContract("rocketNetworkBalances", address(this)) {
+    function executeUpdateBalances(uint256 _block, uint256 _slotTimestamp, uint256 _totalEth, uint256 _stakingEth, uint256 _rethSupply) override external onlyLatestContract("lqgNetworkBalances", address(this)) {
         // Check settings
-        RocketDAOProtocolSettingsNetworkInterface rocketDAOProtocolSettingsNetwork = RocketDAOProtocolSettingsNetworkInterface(getContractAddress("rocketDAOProtocolSettingsNetwork"));
-        require(rocketDAOProtocolSettingsNetwork.getSubmitBalancesEnabled(), "Submitting balances is currently disabled");
+        LQGDAOProtocolSettingsNetworkInterface lqgDAOProtocolSettingsNetwork = LQGDAOProtocolSettingsNetworkInterface(getContractAddress("lqgDAOProtocolSettingsNetwork"));
+        require(lqgDAOProtocolSettingsNetwork.getSubmitBalancesEnabled(), "Submitting balances is currently disabled");
         // Check block
         require(_block < block.number, "Balances can not be submitted for a future block");
         require(_block > getBalancesBlock(), "Network balances for an equal or higher block are set");
@@ -115,8 +115,8 @@ contract RocketNetworkBalances is RocketBase, RocketNetworkBalancesInterface {
         // Get submission count
         uint256 submissionCount = getUint(submissionCountKey);
         // Check submission count & update network balances
-        RocketDAONodeTrustedInterface rocketDAONodeTrusted = RocketDAONodeTrustedInterface(getContractAddress("rocketDAONodeTrusted"));
-        require(calcBase * submissionCount / rocketDAONodeTrusted.getMemberCount() >= rocketDAOProtocolSettingsNetwork.getNodeConsensusThreshold(), "Consensus has not been reached");
+        LQGDAONodeTrustedInterface lqgDAONodeTrusted = LQGDAONodeTrustedInterface(getContractAddress("lqgDAONodeTrusted"));
+        require(calcBase * submissionCount / lqgDAONodeTrusted.getMemberCount() >= lqgDAOProtocolSettingsNetwork.getNodeConsensusThreshold(), "Consensus has not been reached");
         updateBalances(_block, _slotTimestamp, _totalEth, _stakingEth, _rethSupply);
     }
 

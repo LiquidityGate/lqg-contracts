@@ -1,11 +1,11 @@
 import {
-    RocketMinipoolDelegate,
-    RocketMinipoolManager,
-    RocketNodeDistributorDelegate,
-    RocketNodeDistributorFactory,
-    RocketNodeManager,
-    RocketStorage,
-    RocketTokenRETH,
+    LQGMinipoolDelegate,
+    LQGMinipoolManager,
+    LQGNodeDistributorDelegate,
+    LQGNodeDistributorFactory,
+    LQGNodeManager,
+    LQGStorage,
+    LQGTokenRETH,
 } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 
@@ -14,23 +14,23 @@ const ethers = hre.ethers;
 
 export async function distributeRewards(nodeAddress, txOptions) {
     // Get contracts
-    const rocketStorage = await RocketStorage.deployed();
-    const rocketNodeDistributorFactory = await RocketNodeDistributorFactory.deployed();
-    const distributorAddress = await rocketNodeDistributorFactory.getProxyAddress(nodeAddress);
-    const distributor = await RocketNodeDistributorDelegate.at(distributorAddress);
-    const rocketTokenRETH = await RocketTokenRETH.deployed();
-    const rocketMinipoolManager = await RocketMinipoolManager.deployed();
-    const rocketNodeManager = await RocketNodeManager.deployed();
+    const lqgStorage = await LQGStorage.deployed();
+    const lqgNodeDistributorFactory = await LQGNodeDistributorFactory.deployed();
+    const distributorAddress = await lqgNodeDistributorFactory.getProxyAddress(nodeAddress);
+    const distributor = await LQGNodeDistributorDelegate.at(distributorAddress);
+    const lqgTokenRETH = await LQGTokenRETH.deployed();
+    const lqgMinipoolManager = await LQGMinipoolManager.deployed();
+    const lqgNodeManager = await LQGNodeManager.deployed();
     // Get node withdrawal address
-    const withdrawalAddress = await rocketStorage.getNodeWithdrawalAddress(nodeAddress);
+    const withdrawalAddress = await lqgStorage.getNodeWithdrawalAddress(nodeAddress);
     // Get distributor contract balance
     const distributorBalance = await ethers.provider.getBalance(distributorAddress);
     // Get nodes average fee
-    const minipoolCount = Number(await rocketMinipoolManager.getNodeMinipoolCount(nodeAddress));
+    const minipoolCount = Number(await lqgMinipoolManager.getNodeMinipoolCount(nodeAddress));
 
     async function getMinipoolDetails(index) {
-        const minipoolAddress = await rocketMinipoolManager.getNodeMinipoolAt(nodeAddress, index);
-        const minipool = await RocketMinipoolDelegate.at(minipoolAddress);
+        const minipoolAddress = await lqgMinipoolManager.getNodeMinipoolAt(nodeAddress, index);
+        const minipool = await LQGMinipoolDelegate.at(minipoolAddress);
         return Promise.all([
             minipool.getStatus(),
             minipool.getNodeFee(),
@@ -62,7 +62,7 @@ export async function distributeRewards(nodeAddress, txOptions) {
     }
 
     // Query average fee from contracts
-    const averageFee = await rocketNodeManager.getAverageNodeFee(nodeAddress.address);
+    const averageFee = await lqgNodeManager.getAverageNodeFee(nodeAddress.address);
     assertBN.equal(averageFee, expectedAverageFee, 'Incorrect average node fee');
 
     // Calculate expected node and user amounts from average fee
@@ -73,7 +73,7 @@ export async function distributeRewards(nodeAddress, txOptions) {
     async function getBalances() {
         return Promise.all([
             ethers.provider.getBalance(withdrawalAddress),
-            ethers.provider.getBalance(rocketTokenRETH.target),
+            ethers.provider.getBalance(lqgTokenRETH.target),
         ]).then(
             ([nodeEth, userEth]) =>
                 ({ nodeEth, userEth }),

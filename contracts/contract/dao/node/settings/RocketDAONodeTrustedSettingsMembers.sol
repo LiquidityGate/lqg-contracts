@@ -2,15 +2,15 @@ pragma solidity 0.7.6;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-import "./RocketDAONodeTrustedSettings.sol";
-import "../../../../interface/dao/node/settings/RocketDAONodeTrustedSettingsMembersInterface.sol";
+import "./LQGDAONodeTrustedSettings.sol";
+import "../../../../interface/dao/node/settings/LQGDAONodeTrustedSettingsMembersInterface.sol";
 
 
 // The Trusted Node DAO Members 
-contract RocketDAONodeTrustedSettingsMembers is RocketDAONodeTrustedSettings, RocketDAONodeTrustedSettingsMembersInterface { 
+contract LQGDAONodeTrustedSettingsMembers is LQGDAONodeTrustedSettings, LQGDAONodeTrustedSettingsMembersInterface { 
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketDAONodeTrustedSettings(_rocketStorageAddress, "members") {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGDAONodeTrustedSettings(_lqgStorageAddress, "members") {
         // Set version
         version = 1;
         // Initialize settings on deployment

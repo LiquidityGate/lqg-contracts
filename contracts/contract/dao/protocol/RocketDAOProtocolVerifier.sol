@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.18;
 
-import "../../RocketBase.sol";
-import "../../../interface/dao/protocol/RocketDAOProtocolVerifierInterface.sol";
-import "../../../interface/network/RocketNetworkVotingInterface.sol";
-import "../../../interface/node/RocketNodeManagerInterface.sol";
+import "../../LQGBase.sol";
+import "../../../interface/dao/protocol/LQGDAOProtocolVerifierInterface.sol";
+import "../../../interface/network/LQGNetworkVotingInterface.sol";
+import "../../../interface/node/LQGNodeManagerInterface.sol";
 
 import "@openzeppelin4/contracts/utils/math/Math.sol";
-import "../../../interface/token/RocketTokenRPLInterface.sol";
-import "../../../interface/dao/protocol/RocketDAOProtocolProposalsInterface.sol";
-import "../../../interface/dao/RocketDAOProposalInterface.sol";
-import "../../../interface/node/RocketNodeStakingInterface.sol";
-import "../../../interface/dao/protocol/settings/RocketDAOProtocolSettingsProposalsInterface.sol";
-import "../../../interface/dao/protocol/RocketDAOProtocolProposalInterface.sol";
+import "../../../interface/token/LQGTokenRPLInterface.sol";
+import "../../../interface/dao/protocol/LQGDAOProtocolProposalsInterface.sol";
+import "../../../interface/dao/LQGDAOProposalInterface.sol";
+import "../../../interface/node/LQGNodeStakingInterface.sol";
+import "../../../interface/dao/protocol/settings/LQGDAOProtocolSettingsProposalsInterface.sol";
+import "../../../interface/dao/protocol/LQGDAOProtocolProposalInterface.sol";
 
 /// @notice Implements the protocol DAO optimistic fraud proof proposal system
-contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInterface {
+contract LQGDAOProtocolVerifier is LQGBase, LQGDAOProtocolVerifierInterface {
 
     uint256 constant internal depthPerRound = 5;
 
@@ -47,7 +47,7 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
     event ProposalBondBurned(uint256 indexed proposalID, address indexed proposer, uint256 amount, uint256 timestamp);
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         // Version
         version = 2;
     }
@@ -94,12 +94,12 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
     /// @param _proposer The node raising the proposal
     /// @param _blockNumber The block number used to generate the voting power tree
     /// @param _treeNodes A pollard of the voting power tree
-    function submitProposalRoot(uint256 _proposalID, address _proposer, uint32 _blockNumber, Types.Node[] calldata _treeNodes) external onlyLatestContract("rocketDAOProtocolProposal", msg.sender) onlyLatestContract("rocketDAOProtocolVerifier", address(this)) {
+    function submitProposalRoot(uint256 _proposalID, address _proposer, uint32 _blockNumber, Types.Node[] calldata _treeNodes) external onlyLatestContract("lqgDAOProtocolProposal", msg.sender) onlyLatestContract("lqgDAOProtocolVerifier", address(this)) {
         // Retrieve the node count at _blockNumber
         uint256 nodeCount;
         {
-            RocketNetworkVotingInterface rocketNetworkVoting = RocketNetworkVotingInterface(getContractAddress("rocketNetworkVoting"));
-            nodeCount = rocketNetworkVoting.getNodeCount(_blockNumber);
+            LQGNetworkVotingInterface lqgNetworkVoting = LQGNetworkVotingInterface(getContractAddress("lqgNetworkVoting"));
+            nodeCount = lqgNetworkVoting.getNodeCount(_blockNumber);
         }
 
         // Verify proposer supplied correct number of nodes for the pollard
@@ -118,14 +118,14 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
         Types.Node memory root = computeRootFromNodes(_treeNodes);
 
         {
-            RocketDAOProtocolSettingsProposalsInterface rocketDAOProtocolSettingsProposals = RocketDAOProtocolSettingsProposalsInterface(getContractAddress("rocketDAOProtocolSettingsProposals"));
+            LQGDAOProtocolSettingsProposalsInterface lqgDAOProtocolSettingsProposals = LQGDAOProtocolSettingsProposalsInterface(getContractAddress("lqgDAOProtocolSettingsProposals"));
 
             // Get the current proposal bond amount
-            uint256 proposalBond = rocketDAOProtocolSettingsProposals.getProposalBond();
+            uint256 proposalBond = lqgDAOProtocolSettingsProposals.getProposalBond();
 
             // Lock the proposal bond (will revert if proposer doesn't have enough effective RPL staked)
-            RocketNodeStakingInterface rocketNodeStaking = RocketNodeStakingInterface(getContractAddress("rocketNodeStaking"));
-            rocketNodeStaking.lockRPL(_proposer, proposalBond);
+            LQGNodeStakingInterface lqgNodeStaking = LQGNodeStakingInterface(getContractAddress("lqgNodeStaking"));
+            lqgNodeStaking.lockRPL(_proposer, proposalBond);
 
             // Store proposal details
             uint256 proposalKey = uint256(keccak256(abi.encodePacked("dao.protocol.proposal", _proposalID)));
@@ -133,8 +133,8 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
             setUint(bytes32(proposalKey + blockNumberOffset), _blockNumber);
             setUint(bytes32(proposalKey + nodeCountOffset), nodeCount);
             setUint(bytes32(proposalKey + proposalBondOffset), proposalBond);
-            setUint(bytes32(proposalKey + challengeBondOffset), rocketDAOProtocolSettingsProposals.getChallengeBond());
-            setUint(bytes32(proposalKey + challengePeriodOffset), rocketDAOProtocolSettingsProposals.getChallengePeriod());
+            setUint(bytes32(proposalKey + challengeBondOffset), lqgDAOProtocolSettingsProposals.getChallengeBond());
+            setUint(bytes32(proposalKey + challengePeriodOffset), lqgDAOProtocolSettingsProposals.getChallengePeriod());
         }
 
         // The root was supplied so mark that index (1) as responded and store the node
@@ -149,15 +149,15 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
 
     /// @dev Called by proposal contract to burn the bond of the proposer after a successful veto
     /// @param _proposalID the proposal ID that will have the bond burnt
-    function burnProposalBond(uint256 _proposalID) override external onlyLatestContract("rocketDAOProtocolProposal", address(msg.sender)) onlyLatestContract("rocketDAOProtocolVerifier", address(this)) {
+    function burnProposalBond(uint256 _proposalID) override external onlyLatestContract("lqgDAOProtocolProposal", address(msg.sender)) onlyLatestContract("lqgDAOProtocolVerifier", address(this)) {
         // Retrieved required inputs from storage
         uint256 proposalKey = uint256(keccak256(abi.encodePacked("dao.protocol.proposal", _proposalID)));
         address proposer = getAddress(bytes32(proposalKey + proposerOffset));
         uint256 proposalBond = getUint(bytes32(proposalKey + proposalBondOffset));
         // Unlock and burn
-        RocketNodeStakingInterface rocketNodeStaking = RocketNodeStakingInterface(getContractAddress("rocketNodeStaking"));
-        rocketNodeStaking.unlockRPL(proposer, proposalBond);
-        rocketNodeStaking.burnRPL(proposer, proposalBond);
+        LQGNodeStakingInterface lqgNodeStaking = LQGNodeStakingInterface(getContractAddress("lqgNodeStaking"));
+        lqgNodeStaking.unlockRPL(proposer, proposalBond);
+        lqgNodeStaking.burnRPL(proposer, proposalBond);
         // Log it
         emit ProposalBondBurned(_proposalID, proposer, proposalBond, block.timestamp);
     }
@@ -167,12 +167,12 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
     /// @param _index The global index of the node being challenged
     /// @param _node The node that is being challenged as submitted by the proposer
     /// @param _witness A merkle proof of the challenged node (using the previously challenged index as a root)
-    function createChallenge(uint256 _proposalID, uint256 _index, Types.Node calldata _node, Types.Node[] calldata _witness) external onlyLatestContract("rocketDAOProtocolVerifier", address(this)) onlyRegisteredNode(msg.sender) {
+    function createChallenge(uint256 _proposalID, uint256 _index, Types.Node calldata _node, Types.Node[] calldata _witness) external onlyLatestContract("lqgDAOProtocolVerifier", address(this)) onlyRegisteredNode(msg.sender) {
         {  // Scope to prevent stack too deep
             // Check whether the proposal is on the Pending state
-            RocketDAOProtocolProposalInterface daoProposal = RocketDAOProtocolProposalInterface(getContractAddress("rocketDAOProtocolProposal"));
-            RocketDAOProtocolProposalInterface.ProposalState proposalState = daoProposal.getState(_proposalID);
-            require(proposalState == RocketDAOProtocolProposalInterface.ProposalState.Pending, "Can only challenge while proposal is Pending");
+            LQGDAOProtocolProposalInterface daoProposal = LQGDAOProtocolProposalInterface(getContractAddress("lqgDAOProtocolProposal"));
+            LQGDAOProtocolProposalInterface.ProposalState proposalState = daoProposal.getState(_proposalID);
+            require(proposalState == LQGDAOProtocolProposalInterface.ProposalState.Pending, "Can only challenge while proposal is Pending");
         }
         // Precompute the proposal key
         uint256 proposalKey = uint256(keccak256(abi.encodePacked("dao.protocol.proposal", _proposalID)));
@@ -223,8 +223,8 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
         // Lock the challenger's bond (reverts if not enough effective RPL)
         {
             uint256 challengeBond = getUint(bytes32(proposalKey + challengeBondOffset));
-            RocketNodeStakingInterface rocketNodeStaking = RocketNodeStakingInterface(getContractAddress("rocketNodeStaking"));
-            rocketNodeStaking.lockRPL(msg.sender, challengeBond);
+            LQGNodeStakingInterface lqgNodeStaking = LQGNodeStakingInterface(getContractAddress("lqgNodeStaking"));
+            lqgNodeStaking.lockRPL(msg.sender, challengeBond);
         }
 
         // Emit event
@@ -234,12 +234,12 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
     /// @notice Can be called if proposer fails to respond to a challenge within the required time limit. Destroys the proposal if successful
     /// @param _proposalID The ID of the challenged proposal
     /// @param _index The index which was failed to respond to
-    function defeatProposal(uint256 _proposalID, uint256 _index) external onlyLatestContract("rocketDAOProtocolVerifier", address(this)) onlyRegisteredNode(msg.sender) {
+    function defeatProposal(uint256 _proposalID, uint256 _index) external onlyLatestContract("lqgDAOProtocolVerifier", address(this)) onlyRegisteredNode(msg.sender) {
         {  // Scope to prevent stack too deep
             // Check whether the proposal is in the Pending state
-            RocketDAOProtocolProposalInterface daoProposal = RocketDAOProtocolProposalInterface(getContractAddress("rocketDAOProtocolProposal"));
-            RocketDAOProtocolProposalInterface.ProposalState proposalState = daoProposal.getState(_proposalID);
-            require(proposalState == RocketDAOProtocolProposalInterface.ProposalState.Pending, "Can not defeat a valid proposal");
+            LQGDAOProtocolProposalInterface daoProposal = LQGDAOProtocolProposalInterface(getContractAddress("lqgDAOProtocolProposal"));
+            LQGDAOProtocolProposalInterface.ProposalState proposalState = daoProposal.getState(_proposalID);
+            require(proposalState == LQGDAOProtocolProposalInterface.ProposalState.Pending, "Can not defeat a valid proposal");
         }
 
         // Check the challenge at the given index has not been responded to
@@ -263,8 +263,8 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
         require(block.timestamp > timestamp + challengePeriod, "Not enough time has passed");
 
         // Destroy the proposal
-        RocketDAOProtocolProposalInterface rocketDAOProtocolProposal = RocketDAOProtocolProposalInterface(getContractAddress("rocketDAOProtocolProposal"));
-        rocketDAOProtocolProposal.destroy(_proposalID);
+        LQGDAOProtocolProposalInterface lqgDAOProtocolProposal = LQGDAOProtocolProposalInterface(getContractAddress("lqgDAOProtocolProposal"));
+        lqgDAOProtocolProposal.destroy(_proposalID);
 
         // Record the winning index for reward payments
         setUint(defeatIndexKey, _index);
@@ -273,12 +273,12 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
     /// @notice Called by a challenger to claim bonds (both refunded bonds and any rewards paid minus the 20% bond burn)
     /// @param _proposalID The ID of the proposal
     /// @param _indices An array of indices which the challenger has a claim against
-    function claimBondChallenger(uint256 _proposalID, uint256[] calldata _indices) external onlyLatestContract("rocketDAOProtocolVerifier", address(this)) onlyRegisteredNode(msg.sender) {
+    function claimBondChallenger(uint256 _proposalID, uint256[] calldata _indices) external onlyLatestContract("lqgDAOProtocolVerifier", address(this)) onlyRegisteredNode(msg.sender) {
         {  // Scope to prevent stack too deep
             // Check whether the proposal is NOT on the Pending state
-            RocketDAOProtocolProposalInterface daoProposal = RocketDAOProtocolProposalInterface(getContractAddress("rocketDAOProtocolProposal"));
-            RocketDAOProtocolProposalInterface.ProposalState proposalState = daoProposal.getState(_proposalID);
-            require(proposalState != RocketDAOProtocolProposalInterface.ProposalState.Pending, "Can not claim bond while proposal is Pending");
+            LQGDAOProtocolProposalInterface daoProposal = LQGDAOProtocolProposalInterface(getContractAddress("lqgDAOProtocolProposal"));
+            LQGDAOProtocolProposalInterface.ProposalState proposalState = daoProposal.getState(_proposalID);
+            require(proposalState != LQGDAOProtocolProposalInterface.ProposalState.Pending, "Can not claim bond while proposal is Pending");
         }
         // Check whether the proposal was defeated
         uint256 defeatIndex = getUint(bytes32(uint256(keccak256(abi.encodePacked("dao.protocol.proposal", _proposalID)))+defeatIndexOffset));
@@ -315,13 +315,13 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
         }
 
         // Get staking contract
-        RocketNodeStakingInterface rocketNodeStaking = RocketNodeStakingInterface(getContractAddress("rocketNodeStaking"));
+        LQGNodeStakingInterface lqgNodeStaking = LQGNodeStakingInterface(getContractAddress("lqgNodeStaking"));
 
         // Unlock challenger bond
         uint256 proposalKey = uint256(keccak256(abi.encodePacked("dao.protocol.proposal", _proposalID)));
         uint256 challengeBond = getUint(bytes32(proposalKey + challengeBondOffset));
         uint256 totalBond = _indices.length * challengeBond;
-        rocketNodeStaking.unlockRPL(msg.sender, totalBond);
+        lqgNodeStaking.unlockRPL(msg.sender, totalBond);
 
         // Pay challenger their reward
         if (rewardedIndices > 0) {
@@ -333,16 +333,16 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
             uint256 burnAmount = totalReward * bondBurnPercent / calcBase;
             // Unlock the reward amount from the proposer and transfer it to the challenger
             address proposer = getAddress(bytes32(proposalKey + proposerOffset));
-            rocketNodeStaking.unlockRPL(proposer, totalReward);
-            rocketNodeStaking.burnRPL(proposer, burnAmount);
-            rocketNodeStaking.transferRPL(proposer, msg.sender, totalReward - burnAmount);
+            lqgNodeStaking.unlockRPL(proposer, totalReward);
+            lqgNodeStaking.burnRPL(proposer, burnAmount);
+            lqgNodeStaking.transferRPL(proposer, msg.sender, totalReward - burnAmount);
         }
     }
 
     /// @notice Called by a proposer to claim bonds (both refunded bond and any rewards paid minus the 20% bond burn)
     /// @param _proposalID The ID of the proposal
     /// @param _indices An array of indices which the proposer has a claim against
-    function claimBondProposer(uint256 _proposalID, uint256[] calldata _indices) external onlyLatestContract("rocketDAOProtocolVerifier", address(this)) onlyRegisteredNode(msg.sender) {
+    function claimBondProposer(uint256 _proposalID, uint256[] calldata _indices) external onlyLatestContract("lqgDAOProtocolVerifier", address(this)) onlyRegisteredNode(msg.sender) {
         uint256 defeatIndex = getUint(bytes32(uint256(keccak256(abi.encodePacked("dao.protocol.proposal", _proposalID)))+defeatIndexOffset));
 
         // Proposer has nothing to claim if their proposal was defeated
@@ -350,9 +350,9 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
 
         // Check the proposal has passed the waiting period and the voting period and wasn't cancelled
         {
-            RocketDAOProtocolProposalInterface daoProposal = RocketDAOProtocolProposalInterface(getContractAddress("rocketDAOProtocolProposal"));
-            RocketDAOProtocolProposalInterface.ProposalState proposalState = daoProposal.getState(_proposalID);
-            require(proposalState >= RocketDAOProtocolProposalInterface.ProposalState.QuorumNotMet, "Invalid proposal state");
+            LQGDAOProtocolProposalInterface daoProposal = LQGDAOProtocolProposalInterface(getContractAddress("lqgDAOProtocolProposal"));
+            LQGDAOProtocolProposalInterface.ProposalState proposalState = daoProposal.getState(_proposalID);
+            require(proposalState >= LQGDAOProtocolProposalInterface.ProposalState.QuorumNotMet, "Invalid proposal state");
         }
 
         address proposer;
@@ -369,7 +369,7 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
         }
 
         // Get staking contract
-        RocketNodeStakingInterface rocketNodeStaking = RocketNodeStakingInterface(getContractAddress("rocketNodeStaking"));
+        LQGNodeStakingInterface lqgNodeStaking = LQGNodeStakingInterface(getContractAddress("lqgNodeStaking"));
 
         uint256 burnPerChallenge = challengeBond * bondBurnPercent / calcBase;
 
@@ -387,13 +387,13 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
 
             // If claiming the root at this stage, then we return the proposal bond
             if (_indices[i] == 1) {
-                rocketNodeStaking.unlockRPL(proposer, proposalBond);
+                lqgNodeStaking.unlockRPL(proposer, proposalBond);
             } else {
                 // Unlock the challenger bond and pay to proposer
                 address challenger = getChallengeAddress(state);
-                rocketNodeStaking.unlockRPL(challenger, challengeBond);
-                rocketNodeStaking.transferRPL(challenger, proposer, challengeBond - burnPerChallenge);
-                rocketNodeStaking.burnRPL(challenger, burnPerChallenge);
+                lqgNodeStaking.unlockRPL(challenger, challengeBond);
+                lqgNodeStaking.transferRPL(challenger, proposer, challengeBond - burnPerChallenge);
+                lqgNodeStaking.burnRPL(challenger, burnPerChallenge);
             }
         }
     }
@@ -402,14 +402,14 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
     /// @param _proposalID The ID of the proposal
     /// @param _index The global index of the node for which the proposer is submitting a new pollard
     /// @param _nodes A list of nodes making up the new pollard
-    function submitRoot(uint256 _proposalID, uint256 _index, Types.Node[] calldata _nodes) external onlyLatestContract("rocketDAOProtocolVerifier", address(this)) onlyRegisteredNode(msg.sender) {
+    function submitRoot(uint256 _proposalID, uint256 _index, Types.Node[] calldata _nodes) external onlyLatestContract("lqgDAOProtocolVerifier", address(this)) onlyRegisteredNode(msg.sender) {
         uint256 proposalKey = uint256(keccak256(abi.encodePacked("dao.protocol.proposal", _proposalID)));
 
         {  // Scope to prevent stack too deep
             // Check whether the proposal is in the Pending state
-            RocketDAOProtocolProposalInterface daoProposal = RocketDAOProtocolProposalInterface(getContractAddress("rocketDAOProtocolProposal"));
-            RocketDAOProtocolProposalInterface.ProposalState proposalState = daoProposal.getState(_proposalID);
-            require(proposalState == RocketDAOProtocolProposalInterface.ProposalState.Pending, "Can not submit root for a valid proposal");
+            LQGDAOProtocolProposalInterface daoProposal = LQGDAOProtocolProposalInterface(getContractAddress("lqgDAOProtocolProposal"));
+            LQGDAOProtocolProposalInterface.ProposalState proposalState = daoProposal.getState(_proposalID);
+            require(proposalState == LQGDAOProtocolProposalInterface.ProposalState.Pending, "Can not submit root for a valid proposal");
             address proposer = getAddress(bytes32(proposalKey + proposerOffset));
             require(msg.sender == proposer, "Not proposer");
         }
@@ -475,8 +475,8 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
     /// @return True if the leaves match what is known on chain
     function verifyLeaves(uint256 _blockNumber, uint256 _nodeCount, uint256 _offset, Types.Node[] calldata _leaves) internal view returns (bool) {
         // Get contracts
-        RocketNetworkVotingInterface rocketNetworkVoting = RocketNetworkVotingInterface(getContractAddress("rocketNetworkVoting"));
-        RocketNodeManagerInterface rocketNodeManager = RocketNodeManagerInterface(getContractAddress("rocketNodeManager"));
+        LQGNetworkVotingInterface lqgNetworkVoting = LQGNetworkVotingInterface(getContractAddress("lqgNetworkVoting"));
+        LQGNodeManagerInterface lqgNodeManager = LQGNodeManagerInterface(getContractAddress("lqgNodeManager"));
         // Calculate the closest power of 2 of the node count
         uint256 nodeCount = 2 ** Math.log2(_nodeCount, Math.Rounding.Up);
         uint32 blockNumber32 = uint32(_blockNumber);
@@ -490,11 +490,11 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
             uint256 actual = 0;
             if (nodeIndex < _nodeCount && delegateIndex < _nodeCount) {
                 // Calculate the node and the delegate referred to by this leaf node
-                address nodeAddress = rocketNodeManager.getNodeAt(nodeIndex);
-                address actualDelegate = rocketNetworkVoting.getDelegate(nodeAddress, blockNumber32);
+                address nodeAddress = lqgNodeManager.getNodeAt(nodeIndex);
+                address actualDelegate = lqgNetworkVoting.getDelegate(nodeAddress, blockNumber32);
                 // If a delegation exists, retrieve the node's voting power
-                if (actualDelegate == rocketNodeManager.getNodeAt(delegateIndex)) {
-                    actual = rocketNetworkVoting.getVotingPower(nodeAddress, blockNumber32);
+                if (actualDelegate == lqgNodeManager.getNodeAt(delegateIndex)) {
+                    actual = lqgNetworkVoting.getVotingPower(nodeAddress, blockNumber32);
                 }
             }
             // Check provided leaves against actual sum
@@ -517,9 +517,9 @@ contract RocketDAOProtocolVerifier is RocketBase, RocketDAOProtocolVerifierInter
     /// @param _witness A merkle proof that will be verified
     function verifyVote(address _voter, uint256 _nodeIndex, uint256 _proposalID, uint256 _votingPower, Types.Node[] calldata _witness) external view returns (bool) {
         // Get contracts
-        RocketNodeManagerInterface rocketNodeManager = RocketNodeManagerInterface(getContractAddress("rocketNodeManager"));
+        LQGNodeManagerInterface lqgNodeManager = LQGNodeManagerInterface(getContractAddress("lqgNodeManager"));
         // Verify voter
-        if(rocketNodeManager.getNodeAt(_nodeIndex) != _voter) {
+        if(lqgNodeManager.getNodeAt(_nodeIndex) != _voter) {
             return false;
         }
         // Load the proposal

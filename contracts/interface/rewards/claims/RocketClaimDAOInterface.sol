@@ -2,7 +2,7 @@
 pragma solidity >0.5.0 <0.9.0;
 pragma abicoder v2;
 
-interface RocketClaimDAOInterface {
+interface LQGClaimDAOInterface {
     // Struct for returning data about a payment contract
     struct PaymentContract {
         address recipient;

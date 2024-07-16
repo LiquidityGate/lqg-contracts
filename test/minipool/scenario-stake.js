@@ -1,4 +1,4 @@
-import { RocketMinipoolManager } from '../_utils/artifacts';
+import { LQGMinipoolManager } from '../_utils/artifacts';
 import { getDepositDataRoot, getValidatorSignature } from '../_utils/beacon';
 import { assertBN } from '../_helpers/bn';
 import { minipoolStates } from '../_helpers/minipool';
@@ -11,16 +11,16 @@ const ethers = hre.ethers;
 export async function stake(minipool, withdrawalCredentials, txOptions, validatorPubkey = null) {
     // Load contracts
     const [
-        rocketMinipoolManager,
+        lqgMinipoolManager,
     ] = await Promise.all([
-        RocketMinipoolManager.deployed(),
+        LQGMinipoolManager.deployed(),
     ]);
 
     // Get minipool validator pubkey
-    if (!validatorPubkey) validatorPubkey = await rocketMinipoolManager.getMinipoolPubkey(minipool.target);
+    if (!validatorPubkey) validatorPubkey = await lqgMinipoolManager.getMinipoolPubkey(minipool.target);
 
     // Get minipool withdrawal credentials
-    if (!withdrawalCredentials) withdrawalCredentials = await rocketMinipoolManager.getMinipoolWithdrawalCredentials(minipool.target);
+    if (!withdrawalCredentials) withdrawalCredentials = await lqgMinipoolManager.getMinipoolWithdrawalCredentials(minipool.target);
 
     // Get validator deposit data
     let depositData = {
@@ -53,7 +53,7 @@ export async function stake(minipool, withdrawalCredentials, txOptions, validato
     // Get updated minipool details & minipool by validator pubkey
     let [details2, validatorMinipool2] = await Promise.all([
         getMinipoolDetails(),
-        rocketMinipoolManager.getMinipoolByPubkey(validatorPubkey),
+        lqgMinipoolManager.getMinipoolByPubkey(validatorPubkey),
     ]);
 
     // Check minpool details

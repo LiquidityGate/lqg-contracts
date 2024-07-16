@@ -18,7 +18,7 @@ import {
     daoSecurityVote,
 } from './scenario-dao-security';
 import { getDepositSetting } from '../_helpers/settings';
-import { RocketDAOSecurityProposals } from '../_utils/artifacts';
+import { LQGDAOSecurityProposals } from '../_utils/artifacts';
 import * as assert from 'assert';
 import { globalSnapShot } from '../_utils/snapshotting';
 
@@ -27,7 +27,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketDAOSecurity', () => {
+    describe('LQGDAOSecurity', () => {
         let owner,
             securityMember1,
             securityMember2,
@@ -95,11 +95,11 @@ export default function() {
         });
 
         describe('With Existing Council', () => {
-            let rocketDAOSecurityProposals;
+            let lqgDAOSecurityProposals;
 
             before(async () => {
                 // Preload contracts
-                rocketDAOSecurityProposals = await RocketDAOSecurityProposals.deployed();
+                lqgDAOSecurityProposals = await LQGDAOSecurityProposals.deployed();
 
                 // Set up a council of 3 members
                 await setDAOProtocolBootstrapSecurityInvite('Member 1', securityMember1, { from: owner });
@@ -112,7 +112,7 @@ export default function() {
 
             it(printTitle('security member', 'can propose and execute a valid setting change'), async () => {
                 // Raise a proposal to disable deposits
-                let proposalCalldata = rocketDAOSecurityProposals.interface.encodeFunctionData('proposalSettingBool', ['deposit', 'deposit.enabled', false]);
+                let proposalCalldata = lqgDAOSecurityProposals.interface.encodeFunctionData('proposalSettingBool', ['deposit', 'deposit.enabled', false]);
                 // Add the proposal
                 let proposalId = await daoSecurityPropose('Disable deposits urgently', proposalCalldata, {
                     from: securityMember1,
@@ -128,7 +128,7 @@ export default function() {
 
             it(printTitle('security member', 'can not execute a setting change on a non-approved setting path'), async () => {
                 // Raise a proposal to increase deposit pool maximum to 10,000 ether
-                let proposalCalldata = rocketDAOSecurityProposals.interface.encodeFunctionData('proposalSettingUint', ['deposit', 'deposit.pool.maximum', '10000'.ether]);
+                let proposalCalldata = lqgDAOSecurityProposals.interface.encodeFunctionData('proposalSettingUint', ['deposit', 'deposit.pool.maximum', '10000'.ether]);
                 // Add the proposal
                 let proposalId = await daoSecurityPropose('I want more rETH!', proposalCalldata, {
                     from: securityMember1,
@@ -142,7 +142,7 @@ export default function() {
 
             it(printTitle('security member', 'can not execute a proposal without quorum'), async () => {
                 // Raise a proposal to disable deposits
-                let proposalCalldata = rocketDAOSecurityProposals.interface.encodeFunctionData('proposalSettingBool', ['deposit', 'deposit.enabled', false]);
+                let proposalCalldata = lqgDAOSecurityProposals.interface.encodeFunctionData('proposalSettingBool', ['deposit', 'deposit.enabled', false]);
                 // Add the proposal
                 let proposalId = await daoSecurityPropose('Disable deposits urgently', proposalCalldata, {
                     from: securityMember1,

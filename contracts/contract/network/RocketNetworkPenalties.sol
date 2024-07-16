@@ -4,15 +4,15 @@ pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-import "../RocketBase.sol";
-import "../../interface/dao/node/RocketDAONodeTrustedInterface.sol";
-import "../../interface/network/RocketNetworkPenaltiesInterface.sol";
-import "../../interface/dao/protocol/settings/RocketDAOProtocolSettingsNetworkInterface.sol";
-import "../../interface/minipool/RocketMinipoolPenaltyInterface.sol";
+import "../LQGBase.sol";
+import "../../interface/dao/node/LQGDAONodeTrustedInterface.sol";
+import "../../interface/network/LQGNetworkPenaltiesInterface.sol";
+import "../../interface/dao/protocol/settings/LQGDAOProtocolSettingsNetworkInterface.sol";
+import "../../interface/minipool/LQGMinipoolPenaltyInterface.sol";
 
 // Minipool penalties
 
-contract RocketNetworkPenalties is RocketBase, RocketNetworkPenaltiesInterface {
+contract LQGNetworkPenalties is LQGBase, LQGNetworkPenaltiesInterface {
 
     // Libs
     using SafeMath for uint;
@@ -22,14 +22,14 @@ contract RocketNetworkPenalties is RocketBase, RocketNetworkPenaltiesInterface {
     event PenaltyUpdated(address indexed minipoolAddress, uint256 penalty, uint256 time);
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         version = 1;
     }
 
     // Submit penalty for node operator non-compliance
-    function submitPenalty(address _minipoolAddress, uint256 _block) override external onlyLatestContract("rocketNetworkPenalties", address(this)) onlyTrustedNode(msg.sender) onlyRegisteredMinipool(_minipoolAddress) {
+    function submitPenalty(address _minipoolAddress, uint256 _block) override external onlyLatestContract("lqgNetworkPenalties", address(this)) onlyTrustedNode(msg.sender) onlyRegisteredMinipool(_minipoolAddress) {
         // Get contracts
-        RocketDAOProtocolSettingsNetworkInterface rocketDAOProtocolSettingsNetwork = RocketDAOProtocolSettingsNetworkInterface(getContractAddress("rocketDAOProtocolSettingsNetwork"));
+        LQGDAOProtocolSettingsNetworkInterface lqgDAOProtocolSettingsNetwork = LQGDAOProtocolSettingsNetworkInterface(getContractAddress("lqgDAOProtocolSettingsNetwork"));
         // Get submission keys
         bytes32 nodeSubmissionKey = keccak256(abi.encodePacked("network.penalties.submitted.node", msg.sender, _minipoolAddress, _block));
         bytes32 submissionCountKey = keccak256(abi.encodePacked("network.penalties.submitted.count", _minipoolAddress, _block));
@@ -44,17 +44,17 @@ contract RocketNetworkPenalties is RocketBase, RocketNetworkPenaltiesInterface {
         // Emit balances submitted event
         emit PenaltySubmitted(msg.sender, _minipoolAddress, _block, block.timestamp);
         // Check submission count & update network balances
-        RocketDAONodeTrustedInterface rocketDAONodeTrusted = RocketDAONodeTrustedInterface(getContractAddress("rocketDAONodeTrusted"));
-        if (calcBase.mul(submissionCount).div(rocketDAONodeTrusted.getMemberCount()) >= rocketDAOProtocolSettingsNetwork.getNodePenaltyThreshold()) {
+        LQGDAONodeTrustedInterface lqgDAONodeTrusted = LQGDAONodeTrustedInterface(getContractAddress("lqgDAONodeTrusted"));
+        if (calcBase.mul(submissionCount).div(lqgDAONodeTrusted.getMemberCount()) >= lqgDAOProtocolSettingsNetwork.getNodePenaltyThreshold()) {
             setBool(executedKey, true);
             incrementMinipoolPenaltyCount(_minipoolAddress);
         }
     }
 
     // Executes incrementMinipoolPenaltyCount if consensus threshold is reached
-    function executeUpdatePenalty(address _minipoolAddress, uint256 _block) override external onlyLatestContract("rocketNetworkPenalties", address(this)) {
+    function executeUpdatePenalty(address _minipoolAddress, uint256 _block) override external onlyLatestContract("lqgNetworkPenalties", address(this)) {
         // Get contracts
-        RocketDAOProtocolSettingsNetworkInterface rocketDAOProtocolSettingsNetwork = RocketDAOProtocolSettingsNetworkInterface(getContractAddress("rocketDAOProtocolSettingsNetwork"));
+        LQGDAOProtocolSettingsNetworkInterface lqgDAOProtocolSettingsNetwork = LQGDAOProtocolSettingsNetworkInterface(getContractAddress("lqgDAOProtocolSettingsNetwork"));
         // Get submission keys
         bytes32 submissionCountKey = keccak256(abi.encodePacked("network.penalties.submitted.count", _minipoolAddress, _block));
         bytes32 executedKey = keccak256(abi.encodePacked("network.penalties.executed", _minipoolAddress, _block));
@@ -63,8 +63,8 @@ contract RocketNetworkPenalties is RocketBase, RocketNetworkPenaltiesInterface {
         // Get submission count
         uint256 submissionCount = getUint(submissionCountKey);
         // Check submission count & update network balances
-        RocketDAONodeTrustedInterface rocketDAONodeTrusted = RocketDAONodeTrustedInterface(getContractAddress("rocketDAONodeTrusted"));
-        require(calcBase.mul(submissionCount).div(rocketDAONodeTrusted.getMemberCount()) >= rocketDAOProtocolSettingsNetwork.getNodePenaltyThreshold(), "Consensus has not been reached");
+        LQGDAONodeTrustedInterface lqgDAONodeTrusted = LQGDAONodeTrustedInterface(getContractAddress("lqgDAONodeTrusted"));
+        require(calcBase.mul(submissionCount).div(lqgDAONodeTrusted.getMemberCount()) >= lqgDAOProtocolSettingsNetwork.getNodePenaltyThreshold(), "Consensus has not been reached");
         setBool(executedKey, true);
         incrementMinipoolPenaltyCount(_minipoolAddress);
     }
@@ -77,7 +77,7 @@ contract RocketNetworkPenalties is RocketBase, RocketNetworkPenaltiesInterface {
     // Increments the number of penalties against given minipool and updates penalty rate appropriately
     function incrementMinipoolPenaltyCount(address _minipoolAddress) private {
         // Get contracts
-        RocketDAOProtocolSettingsNetworkInterface rocketDAOProtocolSettingsNetwork = RocketDAOProtocolSettingsNetworkInterface(getContractAddress("rocketDAOProtocolSettingsNetwork"));
+        LQGDAOProtocolSettingsNetworkInterface lqgDAOProtocolSettingsNetwork = LQGDAOProtocolSettingsNetworkInterface(getContractAddress("lqgDAOProtocolSettingsNetwork"));
         // Calculate penalty count key
         bytes32 key = keccak256(abi.encodePacked("network.penalties.penalty", _minipoolAddress));
         // Get the current penalty count
@@ -90,10 +90,10 @@ contract RocketNetworkPenalties is RocketBase, RocketNetworkPenaltiesInterface {
         }
         newPenaltyCount = newPenaltyCount.sub(2);
         // Calculate the new penalty rate
-        uint256 penaltyRate = newPenaltyCount.mul(rocketDAOProtocolSettingsNetwork.getPerPenaltyRate());
+        uint256 penaltyRate = newPenaltyCount.mul(lqgDAOProtocolSettingsNetwork.getPerPenaltyRate());
         // Set the penalty rate
-        RocketMinipoolPenaltyInterface rocketMinipoolPenalty = RocketMinipoolPenaltyInterface(getContractAddress("rocketMinipoolPenalty"));
-        rocketMinipoolPenalty.setPenaltyRate(_minipoolAddress, penaltyRate);
+        LQGMinipoolPenaltyInterface lqgMinipoolPenalty = LQGMinipoolPenaltyInterface(getContractAddress("lqgMinipoolPenalty"));
+        lqgMinipoolPenalty.setPenaltyRate(_minipoolAddress, penaltyRate);
         // Emit penalty updated event
         emit PenaltyUpdated(_minipoolAddress, penaltyRate, block.timestamp);
     }

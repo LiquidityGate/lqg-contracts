@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.18;
 
-import "../RocketBase.sol";
-import "../../interface/token/RocketTokenRPLInterface.sol";
-import "../../interface/RocketVaultInterface.sol";
-import "../../interface/node/RocketNodeStakingInterface.sol";
-import "../../interface/rewards/RocketRewardsRelayInterface.sol";
-import "../../interface/rewards/RocketSmoothingPoolInterface.sol";
-import "../../interface/RocketVaultWithdrawerInterface.sol";
-import "../../interface/node/RocketNodeManagerInterface.sol";
-import "../../interface/rewards/RocketMerkleDistributorMainnetInterface.sol";
+import "../LQGBase.sol";
+import "../../interface/token/LQGTokenRPLInterface.sol";
+import "../../interface/LQGVaultInterface.sol";
+import "../../interface/node/LQGNodeStakingInterface.sol";
+import "../../interface/rewards/LQGRewardsRelayInterface.sol";
+import "../../interface/rewards/LQGSmoothingPoolInterface.sol";
+import "../../interface/LQGVaultWithdrawerInterface.sol";
+import "../../interface/node/LQGNodeManagerInterface.sol";
+import "../../interface/rewards/LQGMerkleDistributorMainnetInterface.sol";
 
 import "@openzeppelin4/contracts/utils/cryptography/MerkleProof.sol";
 
 /// @dev On mainnet, the relay and the distributor are the same contract as there is no need for an intermediate contract to
 ///      handle cross-chain messaging.
-contract RocketMerkleDistributorMainnet is RocketBase, RocketMerkleDistributorMainnetInterface, RocketVaultWithdrawerInterface {
+contract LQGMerkleDistributorMainnet is LQGBase, LQGMerkleDistributorMainnetInterface, LQGVaultWithdrawerInterface {
 
     // Events
     event RewardsClaimed(address indexed claimer, uint256[] rewardIndex, uint256[] amountRPL, uint256[] amountETH);
@@ -24,37 +24,37 @@ contract RocketMerkleDistributorMainnet is RocketBase, RocketMerkleDistributorMa
     uint256 constant network = 0;
 
     // Immutables
-    bytes32 immutable rocketVaultKey;
-    bytes32 immutable rocketTokenRPLKey;
+    bytes32 immutable lqgVaultKey;
+    bytes32 immutable lqgTokenRPLKey;
 
     // Allow receiving ETH
     receive() payable external {}
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         // Version
         version = 2;
         // Precompute keys
-        rocketVaultKey = keccak256(abi.encodePacked("contract.address", "rocketVault"));
-        rocketTokenRPLKey = keccak256(abi.encodePacked("contract.address", "rocketTokenRPL"));
+        lqgVaultKey = keccak256(abi.encodePacked("contract.address", "lqgVault"));
+        lqgTokenRPLKey = keccak256(abi.encodePacked("contract.address", "lqgTokenRPL"));
         // Set this contract as the relay for network 0
         setAddress(keccak256(abi.encodePacked("rewards.relay.address", uint256(0))), address(this));
     }
 
-    // Called by RocketRewardsPool to include a snapshot into this distributor
-    function relayRewards(uint256 _rewardIndex, bytes32 _root, uint256 _rewardsRPL, uint256 _rewardsETH) external override onlyLatestContract("rocketMerkleDistributorMainnet", address(this)) onlyLatestContract("rocketRewardsPool", msg.sender) {
+    // Called by LQGRewardsPool to include a snapshot into this distributor
+    function relayRewards(uint256 _rewardIndex, bytes32 _root, uint256 _rewardsRPL, uint256 _rewardsETH) external override onlyLatestContract("lqgMerkleDistributorMainnet", address(this)) onlyLatestContract("lqgRewardsPool", msg.sender) {
         bytes32 key = keccak256(abi.encodePacked('rewards.merkle.root', _rewardIndex));
         require(getBytes32(key) == bytes32(0));
         setBytes32(key, _root);
         // Send the ETH and RPL to the vault
-        RocketVaultInterface rocketVault = RocketVaultInterface(getAddress(rocketVaultKey));
+        LQGVaultInterface lqgVault = LQGVaultInterface(getAddress(lqgVaultKey));
         if (_rewardsETH > 0) {
-            rocketVault.depositEther{value: _rewardsETH}();
+            lqgVault.depositEther{value: _rewardsETH}();
         }
         if (_rewardsRPL > 0) {
-            IERC20 rocketTokenRPL = IERC20(getAddress(rocketTokenRPLKey));
-            rocketTokenRPL.approve(address(rocketVault), _rewardsRPL);
-            rocketVault.depositToken("rocketMerkleDistributorMainnet", rocketTokenRPL, _rewardsRPL);
+            IERC20 lqgTokenRPL = IERC20(getAddress(lqgTokenRPLKey));
+            lqgTokenRPL.approve(address(lqgVault), _rewardsRPL);
+            lqgVault.depositToken("lqgMerkleDistributorMainnet", lqgTokenRPL, _rewardsRPL);
         }
     }
 
@@ -71,17 +71,17 @@ contract RocketMerkleDistributorMainnet is RocketBase, RocketMerkleDistributorMa
     // Node operators can call this method to claim rewards for one or more reward intervals and specify an amount of RPL to stake at the same time
     function _claimAndStake(address _nodeAddress, uint256[] calldata _rewardIndex, uint256[] calldata _amountRPL, uint256[] calldata _amountETH, uint256 _stakeAmount) internal {
         // Get contracts
-        RocketVaultInterface rocketVault = RocketVaultInterface(getAddress(rocketVaultKey));
+        LQGVaultInterface lqgVault = LQGVaultInterface(getAddress(lqgVaultKey));
 
         address rplWithdrawalAddress;
         address withdrawalAddress;
 
         // Confirm caller is permitted
         {
-            RocketNodeManagerInterface rocketNodeManager = RocketNodeManagerInterface(getContractAddress("rocketNodeManager"));
-            rplWithdrawalAddress = rocketNodeManager.getNodeRPLWithdrawalAddress(_nodeAddress);
-            withdrawalAddress = rocketStorage.getNodeWithdrawalAddress(_nodeAddress);
-            if (rocketNodeManager.getNodeRPLWithdrawalAddressIsSet(_nodeAddress)) {
+            LQGNodeManagerInterface lqgNodeManager = LQGNodeManagerInterface(getContractAddress("lqgNodeManager"));
+            rplWithdrawalAddress = lqgNodeManager.getNodeRPLWithdrawalAddress(_nodeAddress);
+            withdrawalAddress = lqgStorage.getNodeWithdrawalAddress(_nodeAddress);
+            if (lqgNodeManager.getNodeRPLWithdrawalAddressIsSet(_nodeAddress)) {
                 if (_stakeAmount > 0) {
                     // If staking and RPL withdrawal address is set, must be called from RPL withdrawal address
                     require(msg.sender == rplWithdrawalAddress, "Can only claim and stake from RPL withdrawal address");
@@ -95,7 +95,7 @@ contract RocketMerkleDistributorMainnet is RocketBase, RocketMerkleDistributorMa
             }
         }
 
-        address rocketTokenRPLAddress = getAddress(rocketTokenRPLKey);
+        address lqgTokenRPLAddress = getAddress(lqgTokenRPLKey);
 
         // Calculate totals
         {
@@ -111,12 +111,12 @@ contract RocketMerkleDistributorMainnet is RocketBase, RocketMerkleDistributorMa
                 // Distribute any remaining tokens to the node's withdrawal address
                 uint256 remaining = totalAmountRPL - _stakeAmount;
                 if (remaining > 0) {
-                    rocketVault.withdrawToken(rplWithdrawalAddress, IERC20(rocketTokenRPLAddress), remaining);
+                    lqgVault.withdrawToken(rplWithdrawalAddress, IERC20(lqgTokenRPLAddress), remaining);
                 }
             }
             // Distribute ETH
             if (totalAmountETH > 0) {
-                rocketVault.withdrawEther(totalAmountETH);
+                lqgVault.withdrawEther(totalAmountETH);
                 // Allow up to 10000 gas to send ETH to the withdrawal address
                 (bool result,) = withdrawalAddress.call{value: totalAmountETH, gas: 10000}("");
                 if (!result) {
@@ -124,18 +124,18 @@ contract RocketMerkleDistributorMainnet is RocketBase, RocketMerkleDistributorMa
                     bytes32 balanceKey = keccak256(abi.encodePacked('rewards.eth.balance', withdrawalAddress));
                     addUint(balanceKey, totalAmountETH);
                     // Return the ETH to the vault
-                    rocketVault.depositEther{value: totalAmountETH}();
+                    lqgVault.depositEther{value: totalAmountETH}();
                 }
             }
         }
 
         // Restake requested amount
         if (_stakeAmount > 0) {
-            RocketTokenRPLInterface rocketTokenRPL = RocketTokenRPLInterface(rocketTokenRPLAddress);
-            RocketNodeStakingInterface rocketNodeStaking = RocketNodeStakingInterface(getContractAddress("rocketNodeStaking"));
-            rocketVault.withdrawToken(address(this), IERC20(rocketTokenRPLAddress), _stakeAmount);
-            rocketTokenRPL.approve(address(rocketNodeStaking), _stakeAmount);
-            rocketNodeStaking.stakeRPLFor(_nodeAddress, _stakeAmount);
+            LQGTokenRPLInterface lqgTokenRPL = LQGTokenRPLInterface(lqgTokenRPLAddress);
+            LQGNodeStakingInterface lqgNodeStaking = LQGNodeStakingInterface(getContractAddress("lqgNodeStaking"));
+            lqgVault.withdrawToken(address(this), IERC20(lqgTokenRPLAddress), _stakeAmount);
+            lqgTokenRPL.approve(address(lqgNodeStaking), _stakeAmount);
+            lqgNodeStaking.stakeRPLFor(_nodeAddress, _stakeAmount);
         }
 
         // Emit event
@@ -145,13 +145,13 @@ contract RocketMerkleDistributorMainnet is RocketBase, RocketMerkleDistributorMa
     // If ETH was claimed but was unable to be sent to the withdrawal address, it can be claimed via this function
     function claimOutstandingEth() external override {
         // Get contracts
-        RocketVaultInterface rocketVault = RocketVaultInterface(getAddress(rocketVaultKey));
+        LQGVaultInterface lqgVault = LQGVaultInterface(getAddress(lqgVaultKey));
         // Get the amount and zero it out
         bytes32 balanceKey = keccak256(abi.encodePacked('rewards.eth.balance', msg.sender));
         uint256 amount = getUint(balanceKey);
         setUint(balanceKey, 0);
         // Withdraw the ETH from the vault
-        rocketVault.withdrawEther(amount);
+        lqgVault.withdrawEther(amount);
         // Attempt to send it to the caller
         (bool result,) = payable(msg.sender).call{value: amount}("");
         require(result, 'Transfer failed');
@@ -214,6 +214,6 @@ contract RocketMerkleDistributorMainnet is RocketBase, RocketMerkleDistributorMa
         return claimedWord & mask == mask;
     }
 
-    // Allow receiving ETH from RocketVault, no action required
+    // Allow receiving ETH from LQGVault, no action required
     function receiveVaultWithdrawalETH() external override payable {}
 }

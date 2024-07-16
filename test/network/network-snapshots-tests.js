@@ -1,6 +1,6 @@
 import { before, describe, it } from 'mocha';
 import { printTitle } from '../_utils/formatting';
-import { RocketNetworkSnapshots, RocketStorage, SnapshotTest } from '../_utils/artifacts';
+import { LQGNetworkSnapshots, LQGStorage, SnapshotTest } from '../_utils/artifacts';
 import { setDaoNodeTrustedBootstrapUpgrade } from '../dao/scenario-dao-node-trusted-bootstrap';
 import { assertBN } from '../_helpers/bn';
 import { globalSnapShot } from '../_utils/snapshotting';
@@ -10,7 +10,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketNetworkSnapshots', () => {
+    describe('LQGNetworkSnapshots', () => {
         let owner;
 
         let snapshotTest;
@@ -25,14 +25,14 @@ export default function() {
             ] = await ethers.getSigners();
 
             // Add penalty helper contract
-            const rocketStorage = await RocketStorage.deployed();
-            snapshotTest = await SnapshotTest.new(rocketStorage.target, { from: owner });
-            await setDaoNodeTrustedBootstrapUpgrade('addContract', 'rocketSnapshotTest', SnapshotTest.abi, snapshotTest.target, {
+            const lqgStorage = await LQGStorage.deployed();
+            snapshotTest = await SnapshotTest.new(lqgStorage.target, { from: owner });
+            await setDaoNodeTrustedBootstrapUpgrade('addContract', 'lqgSnapshotTest', SnapshotTest.abi, snapshotTest.target, {
                 from: owner,
             });
 
             // Get contracts
-            networkSnapshots = await RocketNetworkSnapshots.deployed();
+            networkSnapshots = await LQGNetworkSnapshots.deployed();
         });
 
         it(printTitle('contract', 'can insert values into snapshot'), async () => {

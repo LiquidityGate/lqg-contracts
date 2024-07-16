@@ -2,7 +2,7 @@ pragma solidity >0.5.0 <0.9.0;
 pragma abicoder v2;
 // SPDX-License-Identifier: GPL-3.0-only
 
-interface RocketNetworkBalancesInterface {
+interface LQGNetworkBalancesInterface {
     function getBalancesBlock() external view returns (uint256);
     function getTotalETHBalance() external view returns (uint256);
     function getStakingETHBalance() external view returns (uint256);

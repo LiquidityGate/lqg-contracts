@@ -5,7 +5,7 @@ import { endSnapShot, startSnapShot } from '../test/_utils/snapshotting';
 
 const hre = require('hardhat');
 
-const rocketStorageAddress = process.env.MAINNET_ROCKET_STORAGE || '0x1d8f8f00cfa6758d7bE78336684788Fb0ee0Fa46';
+const lqgStorageAddress = process.env.MAINNET_ROCKET_STORAGE || '0x1d8f8f00cfa6758d7bE78336684788Fb0ee0Fa46';
 
 injectBNHelpers();
 beforeEach(startSnapShot);

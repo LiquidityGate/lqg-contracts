@@ -1,28 +1,28 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.18;
 
-import "../../RocketBase.sol";
-import "../../../interface/dao/security/RocketDAOSecurityInterface.sol";
-import "../../../interface/dao/security/RocketDAOSecurityProposalsInterface.sol";
-import "../../../interface/dao/protocol/settings/RocketDAOProtocolSettingsSecurityInterface.sol";
+import "../../LQGBase.sol";
+import "../../../interface/dao/security/LQGDAOSecurityInterface.sol";
+import "../../../interface/dao/security/LQGDAOSecurityProposalsInterface.sol";
+import "../../../interface/dao/protocol/settings/LQGDAOProtocolSettingsSecurityInterface.sol";
 import "../../../interface/util/AddressSetStorageInterface.sol";
 
-/// @notice The Rocket Pool Security Council DAO
-contract RocketDAOSecurity is RocketBase, RocketDAOSecurityInterface {
+/// @notice The LQG Pool Security Council DAO
+contract LQGDAOSecurity is LQGBase, LQGDAOSecurityInterface {
 
     // The namespace for any data stored in the network DAO (do not change)
     string constant internal daoNameSpace = "dao.security.";
 
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         version = 1;
     }
 
     /// @notice Return the amount of member votes need for a proposal to pass (as a fraction of 1e18)
     function getMemberQuorumVotesRequired() override external view returns (uint256) {
         // Load contracts
-        RocketDAOProtocolSettingsSecurityInterface rocketDAOProtocolSettingsSecurity = RocketDAOProtocolSettingsSecurityInterface(getContractAddress("rocketDAOProtocolSettingsSecurity"));
+        LQGDAOProtocolSettingsSecurityInterface lqgDAOProtocolSettingsSecurity = LQGDAOProtocolSettingsSecurityInterface(getContractAddress("lqgDAOProtocolSettingsSecurity"));
         // Calculate and return votes required
-        return getMemberCount() * rocketDAOProtocolSettingsSecurity.getQuorum();
+        return getMemberCount() * lqgDAOProtocolSettingsSecurity.getQuorum();
     }
 
     /*** Members ******************/

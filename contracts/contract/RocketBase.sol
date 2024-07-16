@@ -2,12 +2,12 @@ pragma solidity >0.5.0 <0.9.0;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-import "../interface/RocketStorageInterface.sol";
+import "../interface/LQGStorageInterface.sol";
 
-/// @title Base settings / modifiers for each contract in Rocket Pool
+/// @title Base settings / modifiers for each contract in LQG Pool
 /// @author David Rugendyke
 
-abstract contract RocketBase {
+abstract contract LQGBase {
 
     // Calculate using this as the base
     uint256 constant calcBase = 1 ether;
@@ -16,13 +16,13 @@ abstract contract RocketBase {
     uint8 public version;
 
     // The main storage contract where primary persistant storage is maintained
-    RocketStorageInterface rocketStorage = RocketStorageInterface(address(0));
+    LQGStorageInterface lqgStorage = LQGStorageInterface(address(0));
 
 
     /*** Modifiers **********************************************************/
 
     /**
-    * @dev Throws if called by any sender that doesn't match a Rocket Pool network contract
+    * @dev Throws if called by any sender that doesn't match a LQG Pool network contract
     */
     modifier onlyLatestNetworkContract() {
         require(getBool(keccak256(abi.encodePacked("contract.exists", msg.sender))), "Invalid or outdated network contract");
@@ -66,7 +66,7 @@ abstract contract RocketBase {
     * @dev Throws if called by any account other than a guardian account (temporary account allowed access to settings before DAO is fully enabled)
     */
     modifier onlyGuardian() {
-        require(msg.sender == rocketStorage.getGuardian(), "Account is not a temporary guardian");
+        require(msg.sender == lqgStorage.getGuardian(), "Account is not a temporary guardian");
         _;
     }
 
@@ -75,10 +75,10 @@ abstract contract RocketBase {
 
     /*** Methods **********************************************************/
 
-    /// @dev Set the main Rocket Storage address
-    constructor(RocketStorageInterface _rocketStorageAddress) {
+    /// @dev Set the main LQG Storage address
+    constructor(LQGStorageInterface _lqgStorageAddress) {
         // Update the contract address
-        rocketStorage = RocketStorageInterface(_rocketStorageAddress);
+        lqgStorage = LQGStorageInterface(_lqgStorageAddress);
     }
 
 
@@ -125,38 +125,38 @@ abstract contract RocketBase {
 
 
 
-    /*** Rocket Storage Methods ****************************************/
+    /*** LQG Storage Methods ****************************************/
 
     // Note: Unused helpers have been removed to keep contract sizes down
 
     /// @dev Storage get methods
-    function getAddress(bytes32 _key) internal view returns (address) { return rocketStorage.getAddress(_key); }
-    function getUint(bytes32 _key) internal view returns (uint) { return rocketStorage.getUint(_key); }
-    function getString(bytes32 _key) internal view returns (string memory) { return rocketStorage.getString(_key); }
-    function getBytes(bytes32 _key) internal view returns (bytes memory) { return rocketStorage.getBytes(_key); }
-    function getBool(bytes32 _key) internal view returns (bool) { return rocketStorage.getBool(_key); }
-    function getInt(bytes32 _key) internal view returns (int) { return rocketStorage.getInt(_key); }
-    function getBytes32(bytes32 _key) internal view returns (bytes32) { return rocketStorage.getBytes32(_key); }
+    function getAddress(bytes32 _key) internal view returns (address) { return lqgStorage.getAddress(_key); }
+    function getUint(bytes32 _key) internal view returns (uint) { return lqgStorage.getUint(_key); }
+    function getString(bytes32 _key) internal view returns (string memory) { return lqgStorage.getString(_key); }
+    function getBytes(bytes32 _key) internal view returns (bytes memory) { return lqgStorage.getBytes(_key); }
+    function getBool(bytes32 _key) internal view returns (bool) { return lqgStorage.getBool(_key); }
+    function getInt(bytes32 _key) internal view returns (int) { return lqgStorage.getInt(_key); }
+    function getBytes32(bytes32 _key) internal view returns (bytes32) { return lqgStorage.getBytes32(_key); }
 
     /// @dev Storage set methods
-    function setAddress(bytes32 _key, address _value) internal { rocketStorage.setAddress(_key, _value); }
-    function setUint(bytes32 _key, uint _value) internal { rocketStorage.setUint(_key, _value); }
-    function setString(bytes32 _key, string memory _value) internal { rocketStorage.setString(_key, _value); }
-    function setBytes(bytes32 _key, bytes memory _value) internal { rocketStorage.setBytes(_key, _value); }
-    function setBool(bytes32 _key, bool _value) internal { rocketStorage.setBool(_key, _value); }
-    function setInt(bytes32 _key, int _value) internal { rocketStorage.setInt(_key, _value); }
-    function setBytes32(bytes32 _key, bytes32 _value) internal { rocketStorage.setBytes32(_key, _value); }
+    function setAddress(bytes32 _key, address _value) internal { lqgStorage.setAddress(_key, _value); }
+    function setUint(bytes32 _key, uint _value) internal { lqgStorage.setUint(_key, _value); }
+    function setString(bytes32 _key, string memory _value) internal { lqgStorage.setString(_key, _value); }
+    function setBytes(bytes32 _key, bytes memory _value) internal { lqgStorage.setBytes(_key, _value); }
+    function setBool(bytes32 _key, bool _value) internal { lqgStorage.setBool(_key, _value); }
+    function setInt(bytes32 _key, int _value) internal { lqgStorage.setInt(_key, _value); }
+    function setBytes32(bytes32 _key, bytes32 _value) internal { lqgStorage.setBytes32(_key, _value); }
 
     /// @dev Storage delete methods
-    function deleteAddress(bytes32 _key) internal { rocketStorage.deleteAddress(_key); }
-    function deleteUint(bytes32 _key) internal { rocketStorage.deleteUint(_key); }
-    function deleteString(bytes32 _key) internal { rocketStorage.deleteString(_key); }
-    function deleteBytes(bytes32 _key) internal { rocketStorage.deleteBytes(_key); }
-    function deleteBool(bytes32 _key) internal { rocketStorage.deleteBool(_key); }
-    function deleteInt(bytes32 _key) internal { rocketStorage.deleteInt(_key); }
-    function deleteBytes32(bytes32 _key) internal { rocketStorage.deleteBytes32(_key); }
+    function deleteAddress(bytes32 _key) internal { lqgStorage.deleteAddress(_key); }
+    function deleteUint(bytes32 _key) internal { lqgStorage.deleteUint(_key); }
+    function deleteString(bytes32 _key) internal { lqgStorage.deleteString(_key); }
+    function deleteBytes(bytes32 _key) internal { lqgStorage.deleteBytes(_key); }
+    function deleteBool(bytes32 _key) internal { lqgStorage.deleteBool(_key); }
+    function deleteInt(bytes32 _key) internal { lqgStorage.deleteInt(_key); }
+    function deleteBytes32(bytes32 _key) internal { lqgStorage.deleteBytes32(_key); }
 
     /// @dev Storage arithmetic methods
-    function addUint(bytes32 _key, uint256 _amount) internal { rocketStorage.addUint(_key, _amount); }
-    function subUint(bytes32 _key, uint256 _amount) internal { rocketStorage.subUint(_key, _amount); }
+    function addUint(bytes32 _key, uint256 _amount) internal { lqgStorage.addUint(_key, _amount); }
+    function subUint(bytes32 _key, uint256 _amount) internal { lqgStorage.subUint(_key, _amount); }
 }

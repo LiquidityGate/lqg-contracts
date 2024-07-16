@@ -4,7 +4,7 @@ pragma abicoder v2;
 
 import "../../types/NodeDetails.sol";
 
-interface RocketNodeManagerInterface {
+interface LQGNodeManagerInterface {
 
     // Structs
     struct TimezoneCount {

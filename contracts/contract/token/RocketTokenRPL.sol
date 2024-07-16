@@ -2,17 +2,17 @@ pragma solidity 0.7.6;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-import "../RocketBase.sol";
-import "../../interface/dao/protocol/settings/RocketDAOProtocolSettingsInflationInterface.sol";
-import "../../interface/token/RocketTokenRPLInterface.sol";
-import "../../interface/RocketVaultInterface.sol";
+import "../LQGBase.sol";
+import "../../interface/dao/protocol/settings/LQGDAOProtocolSettingsInflationInterface.sol";
+import "../../interface/token/LQGTokenRPLInterface.sol";
+import "../../interface/LQGVaultInterface.sol";
 import "../util/ERC20Burnable.sol";
 import "../util/SafeMath.sol";
 
 // RPL Governance and utility token
 // Inlfationary with rate determined by DAO
 
-contract RocketTokenRPL is RocketBase, ERC20Burnable, RocketTokenRPLInterface {
+contract LQGTokenRPL is LQGBase, ERC20Burnable, LQGTokenRPLInterface {
 
     // Libs
     using SafeMath for uint;
@@ -43,11 +43,11 @@ contract RocketTokenRPL is RocketBase, ERC20Burnable, RocketTokenRPLInterface {
 
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress, IERC20 _rocketTokenRPLFixedSupplyAddress) RocketBase(_rocketStorageAddress) ERC20("Rocket Pool Protocol", "RPL") {
+    constructor(LQGStorageInterface _lqgStorageAddress, IERC20 _lqgTokenRPLFixedSupplyAddress) LQGBase(_lqgStorageAddress) ERC20("LQG Pool Protocol", "RPL") {
         // Version
         version = 1;
         // Set the mainnet RPL fixed supply token address
-        rplFixedSupplyContract = IERC20(_rocketTokenRPLFixedSupplyAddress);
+        rplFixedSupplyContract = IERC20(_lqgTokenRPLFixedSupplyAddress);
         // Mint the 18m tokens that currently exist and allow them to be sent to people burning existing fixed supply RPL
         _mint(address(this), totalInitialSupply);
     }
@@ -77,7 +77,7 @@ contract RocketTokenRPL is RocketBase, ERC20Burnable, RocketTokenRPLInterface {
     */
     function getInflationIntervalRate() override public view returns(uint256) {
         // Inflation rate controlled by the DAO
-        RocketDAOProtocolSettingsInflationInterface daoSettingsInflation = RocketDAOProtocolSettingsInflationInterface(getContractAddress("rocketDAOProtocolSettingsInflation"));
+        LQGDAOProtocolSettingsInflationInterface daoSettingsInflation = LQGDAOProtocolSettingsInflationInterface(getContractAddress("lqgDAOProtocolSettingsInflation"));
         return daoSettingsInflation.getInflationIntervalRate();
     }
 
@@ -87,7 +87,7 @@ contract RocketTokenRPL is RocketBase, ERC20Burnable, RocketTokenRPLInterface {
     */
     function getInflationIntervalStartTime() override public view returns(uint256) {
         // Inflation rate start time controlled by the DAO
-        RocketDAOProtocolSettingsInflationInterface daoSettingsInflation = RocketDAOProtocolSettingsInflationInterface(getContractAddress("rocketDAOProtocolSettingsInflation"));
+        LQGDAOProtocolSettingsInflationInterface daoSettingsInflation = LQGDAOProtocolSettingsInflationInterface(getContractAddress("lqgDAOProtocolSettingsInflation"));
         return daoSettingsInflation.getInflationIntervalStartTime();
     }
 
@@ -97,7 +97,7 @@ contract RocketTokenRPL is RocketBase, ERC20Burnable, RocketTokenRPLInterface {
     */
     function getInflationRewardsContractAddress() override external view returns(address) {
         // Inflation rate start block controlled by the DAO
-        return getContractAddress("rocketRewardsPool");
+        return getContractAddress("lqgRewardsPool");
     }
 
 
@@ -166,10 +166,10 @@ contract RocketTokenRPL is RocketBase, ERC20Burnable, RocketTokenRPLInterface {
             return 0;
         }
         // Address of the vault where to send tokens
-        address rocketVaultAddress = getContractAddress("rocketVault");
-        require(rocketVaultAddress != address(0x0), "rocketVault address not set");
+        address lqgVaultAddress = getContractAddress("lqgVault");
+        require(lqgVaultAddress != address(0x0), "lqgVault address not set");
         // Only mint if we have new tokens to mint since last interval and an address is set to receive them
-        RocketVaultInterface rocketVaultContract = RocketVaultInterface(rocketVaultAddress);
+        LQGVaultInterface lqgVaultContract = LQGVaultInterface(lqgVaultAddress);
         // Calculate the amount of tokens now based on inflation rate
         uint256 newTokens = _inflationCalculate(intervalsSinceLastMint);
         // Update last inflation calculation timestamp even if inflation rate is 0
@@ -180,12 +180,12 @@ contract RocketTokenRPL is RocketBase, ERC20Burnable, RocketTokenRPLInterface {
             _mint(address(this), newTokens);
             // Initialise itself and allow from it's own balance (cant just do an allow as it could be any user calling this so they are msg.sender)
             IERC20 rplInflationContract = IERC20(address(this));
-            // Get the current allowance for Rocket Vault
-            uint256 vaultAllowance = rplFixedSupplyContract.allowance(rocketVaultAddress, address(this));
-            // Now allow Rocket Vault to move those tokens, we also need to account of any other allowances for this token from other contracts in the same block
-            require(rplInflationContract.approve(rocketVaultAddress, vaultAllowance.add(newTokens)), "Allowance for Rocket Vault could not be approved");
+            // Get the current allowance for LQG Vault
+            uint256 vaultAllowance = rplFixedSupplyContract.allowance(lqgVaultAddress, address(this));
+            // Now allow LQG Vault to move those tokens, we also need to account of any other allowances for this token from other contracts in the same block
+            require(rplInflationContract.approve(lqgVaultAddress, vaultAllowance.add(newTokens)), "Allowance for LQG Vault could not be approved");
             // Let vault know it can move these tokens to itself now and credit the balance to the RPL rewards pool contract
-            rocketVaultContract.depositToken("rocketRewardsPool", IERC20(address(this)), newTokens);
+            lqgVaultContract.depositToken("lqgRewardsPool", IERC20(address(this)), newTokens);
         }
         // Log it
         emit RPLInflationLog(msg.sender, newTokens, inflationCalcTime);

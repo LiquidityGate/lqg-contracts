@@ -2,7 +2,7 @@
 pragma solidity >0.5.0 <0.9.0;
 pragma abicoder v2;
 
-interface RocketMinipoolBondReducerInterface {
+interface LQGMinipoolBondReducerInterface {
     function beginReduceBondAmount(address _minipoolAddress, uint256 _newBondAmount) external;
     function getReduceBondTime(address _minipoolAddress) external view returns (uint256);
     function getReduceBondValue(address _minipoolAddress) external view returns (uint256);

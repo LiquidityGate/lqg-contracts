@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.18;
 
-import "./RocketDAOProtocolSettings.sol";
-import "../../../../interface/dao/protocol/settings/RocketDAOProtocolSettingsSecurityInterface.sol";
+import "./LQGDAOProtocolSettings.sol";
+import "../../../../interface/dao/protocol/settings/LQGDAOProtocolSettingsSecurityInterface.sol";
 
 /// @notice Protocol parameters relating to the security council
-contract RocketDAOProtocolSettingsSecurity is RocketDAOProtocolSettings, RocketDAOProtocolSettingsSecurityInterface {
+contract LQGDAOProtocolSettingsSecurity is LQGDAOProtocolSettings, LQGDAOProtocolSettingsSecurityInterface {
 
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketDAOProtocolSettings(_rocketStorageAddress, "security") {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGDAOProtocolSettings(_lqgStorageAddress, "security") {
         version = 1;
         // Initialize settings on deployment
         if(!getBool(keccak256(abi.encodePacked(settingNameSpace, "deployed")))) {

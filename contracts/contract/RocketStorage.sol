@@ -2,13 +2,13 @@ pragma solidity 0.7.6;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-import "../interface/RocketStorageInterface.sol";
+import "../interface/LQGStorageInterface.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-/// @title The primary persistent storage for Rocket Pool
+/// @title The primary persistent storage for LQG Pool
 /// @author David Rugendyke
 
-contract RocketStorage is RocketStorageInterface {
+contract LQGStorage is LQGStorageInterface {
 
     // Events
     event NodeWithdrawalAddressSet(address indexed node, address indexed withdrawalAddress, uint256 time);
@@ -37,8 +37,8 @@ contract RocketStorage is RocketStorageInterface {
     // Flag storage has been initialised
     bool storageInit = false;
 
-    /// @dev Only allow access from the latest version of a contract in the Rocket Pool network after deployment
-    modifier onlyLatestRocketNetworkContract() {
+    /// @dev Only allow access from the latest version of a contract in the LQG Pool network after deployment
+    modifier onlyLatestLQGNetworkContract() {
         if (storageInit == true) {
             // Make sure the access is permitted to only contracts in our Dapp
             require(booleanStorage[keccak256(abi.encodePacked("contract.exists", msg.sender))], "Invalid or outdated network contract");
@@ -53,7 +53,7 @@ contract RocketStorage is RocketStorageInterface {
     }
 
 
-    /// @dev Construct RocketStorage
+    /// @dev Construct LQGStorage
     constructor() {
         // Set the guardian upon deployment
         guardian = msg.sender;
@@ -186,86 +186,86 @@ contract RocketStorage is RocketStorageInterface {
 
 
     /// @param _key The key for the record
-    function setAddress(bytes32 _key, address _value) onlyLatestRocketNetworkContract override external {
+    function setAddress(bytes32 _key, address _value) onlyLatestLQGNetworkContract override external {
         addressStorage[_key] = _value;
     }
 
     /// @param _key The key for the record
-    function setUint(bytes32 _key, uint _value) onlyLatestRocketNetworkContract override external {
+    function setUint(bytes32 _key, uint _value) onlyLatestLQGNetworkContract override external {
         uintStorage[_key] = _value;
     }
 
     /// @param _key The key for the record
-    function setString(bytes32 _key, string calldata _value) onlyLatestRocketNetworkContract override external {
+    function setString(bytes32 _key, string calldata _value) onlyLatestLQGNetworkContract override external {
         stringStorage[_key] = _value;
     }
 
     /// @param _key The key for the record
-    function setBytes(bytes32 _key, bytes calldata _value) onlyLatestRocketNetworkContract override external {
+    function setBytes(bytes32 _key, bytes calldata _value) onlyLatestLQGNetworkContract override external {
         bytesStorage[_key] = _value;
     }
 
     /// @param _key The key for the record
-    function setBool(bytes32 _key, bool _value) onlyLatestRocketNetworkContract override external {
+    function setBool(bytes32 _key, bool _value) onlyLatestLQGNetworkContract override external {
         booleanStorage[_key] = _value;
     }
 
     /// @param _key The key for the record
-    function setInt(bytes32 _key, int _value) onlyLatestRocketNetworkContract override external {
+    function setInt(bytes32 _key, int _value) onlyLatestLQGNetworkContract override external {
         intStorage[_key] = _value;
     }
 
     /// @param _key The key for the record
-    function setBytes32(bytes32 _key, bytes32 _value) onlyLatestRocketNetworkContract override external {
+    function setBytes32(bytes32 _key, bytes32 _value) onlyLatestLQGNetworkContract override external {
         bytes32Storage[_key] = _value;
     }
 
 
     /// @param _key The key for the record
-    function deleteAddress(bytes32 _key) onlyLatestRocketNetworkContract override external {
+    function deleteAddress(bytes32 _key) onlyLatestLQGNetworkContract override external {
         delete addressStorage[_key];
     }
 
     /// @param _key The key for the record
-    function deleteUint(bytes32 _key) onlyLatestRocketNetworkContract override external {
+    function deleteUint(bytes32 _key) onlyLatestLQGNetworkContract override external {
         delete uintStorage[_key];
     }
 
     /// @param _key The key for the record
-    function deleteString(bytes32 _key) onlyLatestRocketNetworkContract override external {
+    function deleteString(bytes32 _key) onlyLatestLQGNetworkContract override external {
         delete stringStorage[_key];
     }
 
     /// @param _key The key for the record
-    function deleteBytes(bytes32 _key) onlyLatestRocketNetworkContract override external {
+    function deleteBytes(bytes32 _key) onlyLatestLQGNetworkContract override external {
         delete bytesStorage[_key];
     }
 
     /// @param _key The key for the record
-    function deleteBool(bytes32 _key) onlyLatestRocketNetworkContract override external {
+    function deleteBool(bytes32 _key) onlyLatestLQGNetworkContract override external {
         delete booleanStorage[_key];
     }
 
     /// @param _key The key for the record
-    function deleteInt(bytes32 _key) onlyLatestRocketNetworkContract override external {
+    function deleteInt(bytes32 _key) onlyLatestLQGNetworkContract override external {
         delete intStorage[_key];
     }
 
     /// @param _key The key for the record
-    function deleteBytes32(bytes32 _key) onlyLatestRocketNetworkContract override external {
+    function deleteBytes32(bytes32 _key) onlyLatestLQGNetworkContract override external {
         delete bytes32Storage[_key];
     }
 
 
     /// @param _key The key for the record
     /// @param _amount An amount to add to the record's value
-    function addUint(bytes32 _key, uint256 _amount) onlyLatestRocketNetworkContract override external {
+    function addUint(bytes32 _key, uint256 _amount) onlyLatestLQGNetworkContract override external {
         uintStorage[_key] = uintStorage[_key].add(_amount);
     }
 
     /// @param _key The key for the record
     /// @param _amount An amount to subtract from the record's value
-    function subUint(bytes32 _key, uint256 _amount) onlyLatestRocketNetworkContract override external {
+    function subUint(bytes32 _key, uint256 _amount) onlyLatestLQGNetworkContract override external {
         uintStorage[_key] = uintStorage[_key].sub(_amount);
     }
 }

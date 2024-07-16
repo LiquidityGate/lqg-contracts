@@ -1,16 +1,16 @@
-import { RocketTokenRETH } from '../_utils/artifacts';
+import { LQGTokenRETH } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 
 // Transfer rETH between accounts
 export async function transferReth(to, amount, txOptions) {
     // Load contracts
-    const rocketTokenRETH = await RocketTokenRETH.deployed();
+    const lqgTokenRETH = await LQGTokenRETH.deployed();
 
     // Get balances
     function getBalances() {
         return Promise.all([
-            rocketTokenRETH.balanceOf(txOptions.from),
-            rocketTokenRETH.balanceOf(to),
+            lqgTokenRETH.balanceOf(txOptions.from),
+            lqgTokenRETH.balanceOf(to),
         ]).then(
             ([userFromTokenBalance, userToTokenBalance]) =>
                 ({ userFromTokenBalance, userToTokenBalance }),
@@ -21,7 +21,7 @@ export async function transferReth(to, amount, txOptions) {
     let balances1 = await getBalances();
 
     // Transfer tokens
-    await rocketTokenRETH.connect(txOptions.from).transfer(to, amount, txOptions);
+    await lqgTokenRETH.connect(txOptions.from).transfer(to, amount, txOptions);
 
     // Get updated balances
     let balances2 = await getBalances();

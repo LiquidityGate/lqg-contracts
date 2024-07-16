@@ -1,9 +1,9 @@
 import { before, describe, it } from 'mocha';
 import {
-    RocketDAONodeTrustedSettingsMinipool,
-    RocketDAOProtocolSettingsMinipool,
-    RocketDAOProtocolSettingsNetwork,
-    RocketNodeStaking,
+    LQGDAONodeTrustedSettingsMinipool,
+    LQGDAOProtocolSettingsMinipool,
+    LQGDAOProtocolSettingsNetwork,
+    LQGNodeStaking,
 } from '../_utils/artifacts';
 import { printTitle } from '../_utils/formatting';
 import { shouldRevert } from '../_utils/testing';
@@ -35,7 +35,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketMinipool', () => {
+    describe('LQGMinipool', () => {
         let owner,
             node,
             nodeWithdrawalAddress,
@@ -51,7 +51,7 @@ export default function() {
         let prelaunchMinipool16;
         let prelaunchMinipool8;
 
-        let rocketNodeStaking;
+        let lqgNodeStaking;
 
         before(async () => {
             await globalSnapShot();
@@ -66,7 +66,7 @@ export default function() {
                 random,
             ] = await ethers.getSigners();
 
-            rocketNodeStaking = await RocketNodeStaking.deployed();
+            lqgNodeStaking = await LQGNodeStaking.deployed();
 
             // Register node & set withdrawal address
             await registerNode({ from: node });
@@ -79,12 +79,12 @@ export default function() {
             await setNodeTrusted(trustedNode2, 'saas_2', 'node@home.com', owner);
 
             // Set settings
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsMinipool, 'minipool.launch.timeout', launchTimeout, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsMinipool, 'minipool.withdrawal.delay', withdrawalDelay, { from: owner });
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsMinipool, 'minipool.promotion.scrub.period', promotionScrubDelay, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsMinipool, 'minipool.launch.timeout', launchTimeout, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsMinipool, 'minipool.withdrawal.delay', withdrawalDelay, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsMinipool, 'minipool.promotion.scrub.period', promotionScrubDelay, { from: owner });
 
             // Set rETH collateralisation target to a value high enough it won't cause excess ETH to be funneled back into deposit pool and mess with our calcs
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.reth.collateral.target', '50'.ether, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.reth.collateral.target', '50'.ether, { from: owner });
 
             // Stake RPL to cover minipools
             let minipoolRplStake = await getMinipoolMinimumRPLStake();
@@ -101,7 +101,7 @@ export default function() {
             assertBN.equal(prelaunch8Status, minipoolStates.Prelaunch, 'Incorrect prelaunch minipool status');
 
             // ETH matched for node should be 40 ETH (24 + 16)
-            assertBN.equal(await rocketNodeStaking.getNodeETHMatched(node), '40'.ether, 'Incorrect ETH matched');
+            assertBN.equal(await lqgNodeStaking.getNodeETHMatched(node), '40'.ether, 'Incorrect ETH matched');
         });
 
         //
@@ -182,20 +182,20 @@ export default function() {
             await voteScrub(prelaunchMinipool16, { from: trustedNode1 });
             await voteScrub(prelaunchMinipool16, { from: trustedNode2 });
             // ETH matched should still be 40 ETH
-            assertBN.equal(await rocketNodeStaking.getNodeETHMatched(node), '40'.ether, 'Incorrect ETH matched');
+            assertBN.equal(await lqgNodeStaking.getNodeETHMatched(node), '40'.ether, 'Incorrect ETH matched');
             // After closing ETH matched should drop by 16
             await closeMinipool(prelaunchMinipool16, { from: node });
-            assertBN.equal(await rocketNodeStaking.getNodeETHMatched(node), '24'.ether, 'Incorrect ETH matched');
+            assertBN.equal(await lqgNodeStaking.getNodeETHMatched(node), '24'.ether, 'Incorrect ETH matched');
             // 2 out of 3 should dissolve the minipool
             await voteScrub(prelaunchMinipool8, { from: trustedNode1 });
             await voteScrub(prelaunchMinipool8, { from: trustedNode2 });
             await closeMinipool(prelaunchMinipool8, { from: node });
-            assertBN.equal(await rocketNodeStaking.getNodeETHMatched(node), '0'.ether, 'Incorrect ETH matched');
+            assertBN.equal(await lqgNodeStaking.getNodeETHMatched(node), '0'.ether, 'Incorrect ETH matched');
         });
 
         it(printTitle('trusted node', 'can scrub a prelaunch minipool (no penalty applied even with scrub penalty active)'), async () => {
             // Enabled penalty
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsMinipool, 'minipool.scrub.penalty.enabled', true, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsMinipool, 'minipool.scrub.penalty.enabled', true, { from: owner });
             // 2 out of 3 should dissolve the minipool
             await voteScrub(prelaunchMinipool16, { from: trustedNode1 });
             await voteScrub(prelaunchMinipool16, { from: trustedNode2 });

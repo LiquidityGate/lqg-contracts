@@ -29,7 +29,7 @@ interface Types {
     }
 }
 
-interface RocketDAOProtocolVerifierInterface {
+interface LQGDAOProtocolVerifierInterface {
     function getDefeatIndex(uint256 _proposalID) external view returns (uint256);
     function getProposalBond(uint256 _proposalID) external view returns (uint256);
     function getChallengeBond(uint256 _proposalID) external view returns (uint256);

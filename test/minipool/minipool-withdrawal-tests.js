@@ -1,12 +1,12 @@
 import { before, describe, it } from 'mocha';
 import {
     PenaltyTest,
-    RocketDAONodeTrustedSettingsMinipool,
-    RocketDAOProtocolSettingsMinipool,
-    RocketDAOProtocolSettingsNetwork,
-    RocketMinipoolPenalty,
-    RocketNodeStaking,
-    RocketStorage,
+    LQGDAONodeTrustedSettingsMinipool,
+    LQGDAOProtocolSettingsMinipool,
+    LQGDAOProtocolSettingsNetwork,
+    LQGMinipoolPenalty,
+    LQGNodeStaking,
+    LQGStorage,
 } from '../_utils/artifacts';
 import { printTitle } from '../_utils/formatting';
 import { shouldRevert } from '../_utils/testing';
@@ -29,7 +29,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketMinipool', () => {
+    describe('LQGMinipool', () => {
         let owner,
             node,
             nodeWithdrawalAddress,
@@ -58,9 +58,9 @@ export default function() {
 
             // Hard code fee to 10%
             const fee = '0.1'.ether;
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.node.fee.minimum', fee, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.node.fee.target', fee, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.node.fee.maximum', fee, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.node.fee.minimum', fee, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.node.fee.target', fee, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.node.fee.maximum', fee, { from: owner });
 
             // Register node & set withdrawal address
             await registerNode({ from: node });
@@ -71,14 +71,14 @@ export default function() {
             await setNodeTrusted(trustedNode, 'saas_1', 'node@home.com', owner);
 
             // Set settings
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsMinipool, 'minipool.launch.timeout', launchTimeout, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsMinipool, 'minipool.withdrawal.delay', withdrawalDelay, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsMinipool, 'minipool.user.distribute.window.start', userDistributeStartTime, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsMinipool, 'minipool.user.distribute.window.length', userDistributeLength, { from: owner });
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsMinipool, 'minipool.scrub.period', scrubPeriod, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsMinipool, 'minipool.launch.timeout', launchTimeout, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsMinipool, 'minipool.withdrawal.delay', withdrawalDelay, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsMinipool, 'minipool.user.distribute.window.start', userDistributeStartTime, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsMinipool, 'minipool.user.distribute.window.length', userDistributeLength, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsMinipool, 'minipool.scrub.period', scrubPeriod, { from: owner });
 
             // Set rETH collateralisation target to a value high enough it won't cause excess ETH to be funneled back into deposit pool and mess with our calcs
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.reth.collateral.target', '50'.ether, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.reth.collateral.target', '50'.ether, { from: owner });
 
             // Set RPL price
             let block = await ethers.provider.getBlockNumber();
@@ -86,15 +86,15 @@ export default function() {
             await submitPrices(block, slotTimestamp, '1'.ether, { from: trustedNode });
 
             // Add penalty helper contract
-            const rocketStorage = await RocketStorage.deployed();
-            penaltyTestContract = await PenaltyTest.new(rocketStorage.target);
-            await setDaoNodeTrustedBootstrapUpgrade('addContract', 'rocketPenaltyTest', PenaltyTest.abi, penaltyTestContract.target, {
+            const lqgStorage = await LQGStorage.deployed();
+            penaltyTestContract = await PenaltyTest.new(lqgStorage.target);
+            await setDaoNodeTrustedBootstrapUpgrade('addContract', 'lqgPenaltyTest', PenaltyTest.abi, penaltyTestContract.target, {
                 from: owner,
             });
 
             // Enable penalties
-            const rocketMinipoolPenalty = await RocketMinipoolPenalty.deployed();
-            await rocketMinipoolPenalty.connect(owner).setMaxPenaltyRate(maxPenaltyRate);
+            const lqgMinipoolPenalty = await LQGMinipoolPenalty.deployed();
+            await lqgMinipoolPenalty.connect(owner).setMaxPenaltyRate(maxPenaltyRate);
 
             // Deposit some user funds to assign to pools
             let userDepositAmount = '16'.ether;
@@ -149,10 +149,10 @@ export default function() {
 
         async function slashAndCheck(from, expectedSlash) {
             // Get contracts
-            const rocketNodeStaking = await RocketNodeStaking.deployed();
-            const rplStake1 = await rocketNodeStaking.getNodeRPLStake(node);
+            const lqgNodeStaking = await LQGNodeStaking.deployed();
+            const rplStake1 = await lqgNodeStaking.getNodeRPLStake(node);
             await minipool.slash({ from: from });
-            const rplStake2 = await rocketNodeStaking.getNodeRPLStake(node);
+            const rplStake2 = await lqgNodeStaking.getNodeRPLStake(node);
             const slashedAmount = rplStake1 - rplStake2;
             assertBN.equal(expectedSlash, slashedAmount, 'Slashed amount was incorrect');
         }
@@ -260,8 +260,8 @@ export default function() {
 
         it(printTitle('guardian', 'can disable penalising all together'), async () => {
             // Disable penalising by setting rate to 0
-            const rocketMinipoolPenalty = await RocketMinipoolPenalty.deployed();
-            await rocketMinipoolPenalty.connect(owner).setMaxPenaltyRate('0');
+            const lqgMinipoolPenalty = await LQGMinipoolPenalty.deployed();
+            await lqgMinipoolPenalty.connect(owner).setMaxPenaltyRate('0');
             // Try to penalise the minipool 50%
             await penaltyTestContract.setPenaltyRate(minipool.target, '0.5'.ether);
             // Process withdraw

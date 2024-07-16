@@ -5,29 +5,29 @@ pragma solidity 0.8.18;
 
 import "@openzeppelin4/contracts/utils/math/Math.sol";
 
-import "../RocketBase.sol";
-import "../../interface/network/RocketNetworkSnapshotsInterface.sol";
+import "../LQGBase.sol";
+import "../../interface/network/LQGNetworkSnapshotsInterface.sol";
 
 /// @notice Accounting for snapshotting of values based on block numbers
-contract RocketNetworkSnapshots is RocketBase, RocketNetworkSnapshotsInterface {
+contract LQGNetworkSnapshots is LQGBase, LQGNetworkSnapshotsInterface {
 
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         // Set contract version
         version = 1;
 
         // Setup for if this contract is being deployed as part of a new instance deployment
-        if (!rocketStorage.getDeployedStatus()) {
+        if (!lqgStorage.getDeployedStatus()) {
             _insert(keccak256("network.prices.rpl"), 0.01 ether);
             _insert(keccak256("node.voting.power.stake.maximum"), 1.5 ether);
         }
     }
 
-    function push(bytes32 _key, uint224 _value) onlyLatestContract("rocketNetworkSnapshots", address(this)) onlyLatestNetworkContract external {
+    function push(bytes32 _key, uint224 _value) onlyLatestContract("lqgNetworkSnapshots", address(this)) onlyLatestNetworkContract external {
         _insert(_key, _value);
     }
 
     function length(bytes32 _key) public view returns (uint256) {
-        return rocketStorage.getUint(keccak256(abi.encodePacked("snapshot.length", _key)));
+        return lqgStorage.getUint(keccak256(abi.encodePacked("snapshot.length", _key)));
     }
 
     function latest(bytes32 _key) external view returns (bool, uint32, uint224) {
@@ -116,7 +116,7 @@ contract RocketNetworkSnapshots is RocketBase, RocketNetworkSnapshotsInterface {
 
     function _load(bytes32 _key, uint256 _pos) private view returns (Checkpoint224 memory) {
         bytes32 key = bytes32(uint256(_key) + _pos);
-        bytes32 raw = rocketStorage.getBytes32(key);
+        bytes32 raw = lqgStorage.getBytes32(key);
         Checkpoint224 memory result;
         result._block = uint32(uint256(raw) >> 224);
         result._value = uint224(uint256(raw));
@@ -125,27 +125,27 @@ contract RocketNetworkSnapshots is RocketBase, RocketNetworkSnapshotsInterface {
 
     function _blockAt(bytes32 _key, uint256 _pos) private view returns (uint32) {
         bytes32 key = bytes32(uint256(_key) + _pos);
-        bytes32 raw = rocketStorage.getBytes32(key);
+        bytes32 raw = lqgStorage.getBytes32(key);
         return uint32(uint256(raw) >> 224);
     }
 
     function _valueAt(bytes32 _key, uint256 _pos) private view returns (uint224) {
         bytes32 key = bytes32(uint256(_key) + _pos);
-        bytes32 raw = rocketStorage.getBytes32(key);
+        bytes32 raw = lqgStorage.getBytes32(key);
         return uint224(uint256(raw));
     }
 
     function _push(bytes32 _key, Checkpoint224 memory _item) private {
         bytes32 lengthKey = keccak256(abi.encodePacked("snapshot.length", _key));
-        uint256 snapshotLength = rocketStorage.getUint(lengthKey);
+        uint256 snapshotLength = lqgStorage.getUint(lengthKey);
         bytes32 key = bytes32(uint256(_key) + snapshotLength);
-        rocketStorage.setUint(lengthKey, snapshotLength + 1);
-        rocketStorage.setBytes32(key, _encode(_item));
+        lqgStorage.setUint(lengthKey, snapshotLength + 1);
+        lqgStorage.setBytes32(key, _encode(_item));
     }
 
     function _set(bytes32 _key, uint256 _pos, Checkpoint224 memory _item) private {
         bytes32 key = bytes32(uint256(_key) + _pos);
-        rocketStorage.setBytes32(key, _encode(_item));
+        lqgStorage.setBytes32(key, _encode(_item));
     }
 
     function _encode(Checkpoint224 memory _item) private pure returns (bytes32) {

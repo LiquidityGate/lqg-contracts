@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.18;
 
-import "../../RocketBase.sol";
-import "../../../interface/RocketVaultInterface.sol";
-import "../../../interface/dao/protocol/settings/RocketDAOProtocolSettingsSecurityInterface.sol";
-import "../../../interface/dao/security/RocketDAOSecurityActionsInterface.sol";
-import "../../../interface/dao/security/RocketDAOSecurityInterface.sol";
+import "../../LQGBase.sol";
+import "../../../interface/LQGVaultInterface.sol";
+import "../../../interface/dao/protocol/settings/LQGDAOProtocolSettingsSecurityInterface.sol";
+import "../../../interface/dao/security/LQGDAOSecurityActionsInterface.sol";
+import "../../../interface/dao/security/LQGDAOSecurityInterface.sol";
 import "../../../interface/util/IERC20Burnable.sol";
 
 import "../../../interface/util/AddressSetStorageInterface.sol";
 
 /// @notice Executes proposals which affect security council members
-contract RocketDAOSecurityActions is RocketBase, RocketDAOSecurityActionsInterface {
+contract LQGDAOSecurityActions is LQGBase, LQGDAOSecurityActionsInterface {
 
     // The namespace for any data stored in the network DAO (do not change)
     string constant internal daoNameSpace = "dao.security.";
@@ -22,7 +22,7 @@ contract RocketDAOSecurityActions is RocketBase, RocketDAOSecurityActionsInterfa
     event ActionRequestLeave(address indexed nodeAddress, uint256 time);
     event ActionKick(address indexed nodeAddress, uint256 time);
 
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         version = 1;
     }
 
@@ -30,7 +30,7 @@ contract RocketDAOSecurityActions is RocketBase, RocketDAOSecurityActionsInterfa
 
     /// @notice Removes a member from the security council
     /// @param _memberAddress The address of the member to kick
-    function actionKick(address _memberAddress) override public onlyLatestContract("rocketDAOSecurityProposals", msg.sender) {
+    function actionKick(address _memberAddress) override public onlyLatestContract("lqgDAOSecurityProposals", msg.sender) {
         // Remove the member now
         _memberRemove(_memberAddress);
         // Log it
@@ -39,7 +39,7 @@ contract RocketDAOSecurityActions is RocketBase, RocketDAOSecurityActionsInterfa
 
     /// @notice Removes multiple members from the security council
     /// @param _memberAddresses An array of addresses of the member to kick
-    function actionKickMulti(address[] calldata _memberAddresses) override external onlyLatestContract("rocketDAOSecurityProposals", msg.sender) {
+    function actionKickMulti(address[] calldata _memberAddresses) override external onlyLatestContract("lqgDAOSecurityProposals", msg.sender) {
         // Remove the members
         for (uint256 i = 0; i < _memberAddresses.length; ++i) {
             actionKick(_memberAddresses[i]);
@@ -47,7 +47,7 @@ contract RocketDAOSecurityActions is RocketBase, RocketDAOSecurityActionsInterfa
     }
 
     /// @notice An invited member can execute this function to join the security council
-    function actionJoin() override external onlyLatestContract("rocketDAOSecurityActions", address(this)) {
+    function actionJoin() override external onlyLatestContract("lqgDAOSecurityActions", address(this)) {
         // Add the member
         _memberJoin(msg.sender);
         // Log it
@@ -55,31 +55,31 @@ contract RocketDAOSecurityActions is RocketBase, RocketDAOSecurityActionsInterfa
     }
 
     /// @notice A member who wishes to leave the security council can call this method to initiate the process
-    function actionRequestLeave() override external onlyLatestContract("rocketDAOSecurityActions", address(this)) {
+    function actionRequestLeave() override external onlyLatestContract("lqgDAOSecurityActions", address(this)) {
         // Load contracts
-        RocketDAOSecurityInterface rocketDAOSecurity = RocketDAOSecurityInterface(getContractAddress("rocketDAOSecurity"));
-        RocketDAOProtocolSettingsSecurityInterface rocketDAOProtocolSettingsSecurity = RocketDAOProtocolSettingsSecurityInterface(getContractAddress("rocketDAOProtocolSettingsSecurity"));
+        LQGDAOSecurityInterface lqgDAOSecurity = LQGDAOSecurityInterface(getContractAddress("lqgDAOSecurity"));
+        LQGDAOProtocolSettingsSecurityInterface lqgDAOProtocolSettingsSecurity = LQGDAOProtocolSettingsSecurityInterface(getContractAddress("lqgDAOProtocolSettingsSecurity"));
         // Check they are currently a member
-        require(rocketDAOSecurity.getMemberIsValid(msg.sender), "Not a current member");
+        require(lqgDAOSecurity.getMemberIsValid(msg.sender), "Not a current member");
         // Update the leave time to include the required notice period set by the protocol DAO
-        setUint(keccak256(abi.encodePacked(daoNameSpace, "member.executed.time", "leave", msg.sender)), block.timestamp + rocketDAOProtocolSettingsSecurity.getLeaveTime());
+        setUint(keccak256(abi.encodePacked(daoNameSpace, "member.executed.time", "leave", msg.sender)), block.timestamp + lqgDAOProtocolSettingsSecurity.getLeaveTime());
         // Log it
         emit ActionRequestLeave(msg.sender, block.timestamp);
     }
 
     /// @notice A member who has asked to leave and waited the required time can call this method to formally leave the security council
-    function actionLeave() override external onlyLatestContract("rocketDAOSecurityActions", address(this)) {
+    function actionLeave() override external onlyLatestContract("lqgDAOSecurityActions", address(this)) {
         // Load contracts
-        RocketDAOSecurityInterface rocketDAOSecurity = RocketDAOSecurityInterface(getContractAddress("rocketDAOSecurity"));
-        RocketDAOProtocolSettingsSecurityInterface rocketDAOProtocolSettingsSecurity = RocketDAOProtocolSettingsSecurityInterface(getContractAddress("rocketDAOProtocolSettingsSecurity"));
+        LQGDAOSecurityInterface lqgDAOSecurity = LQGDAOSecurityInterface(getContractAddress("lqgDAOSecurity"));
+        LQGDAOProtocolSettingsSecurityInterface lqgDAOProtocolSettingsSecurity = LQGDAOProtocolSettingsSecurityInterface(getContractAddress("lqgDAOProtocolSettingsSecurity"));
         // Check they are currently a member
-        require(rocketDAOSecurity.getMemberIsValid(msg.sender), "Not a current member");
+        require(lqgDAOSecurity.getMemberIsValid(msg.sender), "Not a current member");
         // Get the time that they were approved to leave at
-        uint256 leaveAcceptedTime = rocketDAOSecurity.getMemberProposalExecutedTime("leave", msg.sender);
+        uint256 leaveAcceptedTime = lqgDAOSecurity.getMemberProposalExecutedTime("leave", msg.sender);
         // Has the member waiting long enough?
         require(leaveAcceptedTime < block.timestamp, "Member has not waited required time to leave");
         // Has the leave request expired?
-        require(leaveAcceptedTime + rocketDAOProtocolSettingsSecurity.getActionTime() > block.timestamp, "This member has not been approved to leave or request has expired, please apply to leave again");
+        require(leaveAcceptedTime + lqgDAOProtocolSettingsSecurity.getActionTime() > block.timestamp, "This member has not been approved to leave or request has expired, please apply to leave again");
         // Remove them now
         _memberRemove(msg.sender);
         // Log it
@@ -108,16 +108,16 @@ contract RocketDAOSecurityActions is RocketBase, RocketDAOSecurityActionsInterfa
     function _memberJoin(address _nodeAddress) private {
         AddressSetStorageInterface addressSetStorage = AddressSetStorageInterface(getContractAddress("addressSetStorage"));
         // Load contracts
-        RocketDAOSecurityInterface rocketDAOSecurity = RocketDAOSecurityInterface(getContractAddress("rocketDAOSecurity"));
-        RocketDAOProtocolSettingsSecurityInterface rocketDAOProtocolSettingsSecurity = RocketDAOProtocolSettingsSecurityInterface(getContractAddress("rocketDAOProtocolSettingsSecurity"));
+        LQGDAOSecurityInterface lqgDAOSecurity = LQGDAOSecurityInterface(getContractAddress("lqgDAOSecurity"));
+        LQGDAOProtocolSettingsSecurityInterface lqgDAOProtocolSettingsSecurity = LQGDAOProtocolSettingsSecurityInterface(getContractAddress("lqgDAOProtocolSettingsSecurity"));
         // The time that the member was successfully invited to join the DAO
-        uint256 memberInvitedTime = rocketDAOSecurity.getMemberProposalExecutedTime("invited", _nodeAddress);
+        uint256 memberInvitedTime = lqgDAOSecurity.getMemberProposalExecutedTime("invited", _nodeAddress);
         // Have they been invited?
         require(memberInvitedTime > 0, "This address has not been invited to join");
         // Has their invite expired?
-        require(memberInvitedTime + rocketDAOProtocolSettingsSecurity.getActionTime() > block.timestamp, "This node's invitation to join has expired, please apply again");
+        require(memberInvitedTime + lqgDAOProtocolSettingsSecurity.getActionTime() > block.timestamp, "This node's invitation to join has expired, please apply again");
         // Check current node status
-        require(rocketDAOSecurity.getMemberIsValid(_nodeAddress) != true, "This node is already part of the security council");
+        require(lqgDAOSecurity.getMemberIsValid(_nodeAddress) != true, "This node is already part of the security council");
         // Mark them as a valid security council member
         setBool(keccak256(abi.encodePacked(daoNameSpace, "member", _nodeAddress)), true);
         // Record the block number they joined at

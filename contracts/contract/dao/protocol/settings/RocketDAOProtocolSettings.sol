@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >0.5.0 <0.9.0;
 
-import "../../../RocketBase.sol";
-import "../../../../interface/dao/protocol/settings/RocketDAOProtocolSettingsInterface.sol";
+import "../../../LQGBase.sol";
+import "../../../../interface/dao/protocol/settings/LQGDAOProtocolSettingsInterface.sol";
 
 // Settings in RP which the DAO will have full control over
 // This settings contract enables storage using setting paths with namespaces, rather than explicit set methods
-abstract contract RocketDAOProtocolSettings is RocketBase, RocketDAOProtocolSettingsInterface {
+abstract contract LQGDAOProtocolSettings is LQGBase, LQGDAOProtocolSettingsInterface {
 
 
     // The namespace for a particular group of settings
@@ -16,13 +16,13 @@ abstract contract RocketDAOProtocolSettings is RocketBase, RocketDAOProtocolSett
     // Only allow updating from the DAO proposals contract
     modifier onlyDAOProtocolProposal() {
         // If this contract has been initialised, only allow access from the proposals contract
-        if(getBool(keccak256(abi.encodePacked(settingNameSpace, "deployed")))) require(getContractAddress("rocketDAOProtocolProposals") == msg.sender, "Only DAO Protocol Proposals contract can update a setting");
+        if(getBool(keccak256(abi.encodePacked(settingNameSpace, "deployed")))) require(getContractAddress("lqgDAOProtocolProposals") == msg.sender, "Only DAO Protocol Proposals contract can update a setting");
         _;
     }
 
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress, string memory _settingNameSpace) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress, string memory _settingNameSpace) LQGBase(_lqgStorageAddress) {
         // Apply the setting namespace
         settingNameSpace = keccak256(abi.encodePacked("dao.protocol.setting.", _settingNameSpace));
     }

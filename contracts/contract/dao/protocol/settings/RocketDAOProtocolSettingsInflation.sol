@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.18;
 
-import "./RocketDAOProtocolSettings.sol";
-import "../../../../interface/dao/protocol/settings/RocketDAOProtocolSettingsInflationInterface.sol";
-import "../../../../interface/token/RocketTokenRPLInterface.sol";
+import "./LQGDAOProtocolSettings.sol";
+import "../../../../interface/dao/protocol/settings/LQGDAOProtocolSettingsInflationInterface.sol";
+import "../../../../interface/token/LQGTokenRPLInterface.sol";
 
 /// @notice RPL Inflation settings in RP which the DAO will have full control over
-contract RocketDAOProtocolSettingsInflation is RocketDAOProtocolSettings, RocketDAOProtocolSettingsInflationInterface {
+contract LQGDAOProtocolSettingsInflation is LQGDAOProtocolSettings, LQGDAOProtocolSettingsInflationInterface {
 
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketDAOProtocolSettings(_rocketStorageAddress, "inflation") {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGDAOProtocolSettings(_lqgStorageAddress, "inflation") {
         version = 2;
          // Set some initial settings on first deployment
         if(!getBool(keccak256(abi.encodePacked(settingNameSpace, "deployed")))) {
@@ -40,10 +40,10 @@ contract RocketDAOProtocolSettingsInflation is RocketDAOProtocolSettings, Rocket
                 require(_value <= getSettingUint("rpl.inflation.interval.rate") + 0.01 ether, "No greater than 1e16 more than the previous value");
                 require(_value >= 1, "Inflation can't be negative");
                 // RPL contract address
-                address rplContractAddress = getContractAddressUnsafe("rocketTokenRPL");
+                address rplContractAddress = getContractAddressUnsafe("lqgTokenRPL");
                 if(rplContractAddress != address(0x0)) {
                     // Force inflation at old rate before updating inflation rate
-                    RocketTokenRPLInterface rplContract = RocketTokenRPLInterface(rplContractAddress);
+                    LQGTokenRPLInterface rplContract = LQGTokenRPLInterface(rplContractAddress);
                     // Mint any new tokens from the RPL inflation
                     rplContract.inflationMintTokens();
                 }

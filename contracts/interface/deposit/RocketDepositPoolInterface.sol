@@ -2,7 +2,7 @@ pragma solidity >0.5.0 <0.9.0;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-interface RocketDepositPoolInterface {
+interface LQGDepositPoolInterface {
     function getBalance() external view returns (uint256);
     function getNodeBalance() external view returns (uint256);
     function getUserBalance() external view returns (int256);

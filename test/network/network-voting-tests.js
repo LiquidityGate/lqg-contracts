@@ -1,6 +1,6 @@
 import { before, describe, it } from 'mocha';
 import { printTitle } from '../_utils/formatting';
-import { RocketNetworkSnapshots, RocketNetworkVoting } from '../_utils/artifacts';
+import { LQGNetworkSnapshots, LQGNetworkVoting } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 import { nodeStakeRPL, registerNode } from '../_helpers/node';
 import { createMinipool, getMinipoolMaximumRPLStake } from '../_helpers/minipool';
@@ -14,7 +14,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketNetworkVoting', () => {
+    describe('LQGNetworkVoting', () => {
         let owner,
             node,
             random;
@@ -33,8 +33,8 @@ export default function() {
             ] = await ethers.getSigners();
 
             // Get contracts
-            networkSnapshots = await RocketNetworkSnapshots.deployed();
-            networkVoting = await RocketNetworkVoting.deployed();
+            networkSnapshots = await LQGNetworkSnapshots.deployed();
+            networkVoting = await LQGNetworkVoting.deployed();
 
             // Register node & set withdrawal address
             await registerNode({ from: node });

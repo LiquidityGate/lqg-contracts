@@ -5,9 +5,9 @@ pragma abicoder v2;
 
 import "../../types/MinipoolDeposit.sol";
 import "../../types/MinipoolDetails.sol";
-import "./RocketMinipoolInterface.sol";
+import "./LQGMinipoolInterface.sol";
 
-interface RocketMinipoolManagerInterface {
+interface LQGMinipoolManagerInterface {
     function getMinipoolCount() external view returns (uint256);
     function getStakingMinipoolCount() external view returns (uint256);
     function getFinalisedMinipoolCount() external view returns (uint256);
@@ -30,8 +30,8 @@ interface RocketMinipoolManagerInterface {
     function getMinipoolPubkey(address _minipoolAddress) external view returns (bytes memory);
     function updateNodeStakingMinipoolCount(uint256 _previousBond, uint256 _newBond, uint256 _previousFee, uint256 _newFee) external;
     function getMinipoolWithdrawalCredentials(address _minipoolAddress) external pure returns (bytes memory);
-    function createMinipool(address _nodeAddress, uint256 _salt) external returns (RocketMinipoolInterface);
-    function createVacantMinipool(address _nodeAddress, uint256 _salt, bytes calldata _validatorPubkey, uint256 _bondAmount, uint256 _currentBalance) external returns (RocketMinipoolInterface);
+    function createMinipool(address _nodeAddress, uint256 _salt) external returns (LQGMinipoolInterface);
+    function createVacantMinipool(address _nodeAddress, uint256 _salt, bytes calldata _validatorPubkey, uint256 _bondAmount, uint256 _currentBalance) external returns (LQGMinipoolInterface);
     function removeVacantMinipool() external;
     function getVacantMinipoolCount() external view returns (uint256);
     function getVacantMinipoolAt(uint256 _index) external view returns (address);

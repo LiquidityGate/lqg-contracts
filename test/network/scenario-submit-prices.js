@@ -1,4 +1,4 @@
-import { RocketDAONodeTrusted, RocketNetworkPrices, RocketStorage } from '../_utils/artifacts';
+import { LQGDAONodeTrusted, LQGNetworkPrices, LQGStorage } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 import * as assert from 'assert';
 
@@ -9,17 +9,17 @@ const ethers = hre.ethers;
 export async function submitPrices(block, slotTimestamp, rplPrice, txOptions) {
     // Load contracts
     const [
-        rocketDAONodeTrusted,
-        rocketNetworkPrices,
-        rocketStorage,
+        lqgDAONodeTrusted,
+        lqgNetworkPrices,
+        lqgStorage,
     ] = await Promise.all([
-        RocketDAONodeTrusted.deployed(),
-        RocketNetworkPrices.deployed(),
-        RocketStorage.deployed(),
+        LQGDAONodeTrusted.deployed(),
+        LQGNetworkPrices.deployed(),
+        LQGStorage.deployed(),
     ]);
 
     // Get parameters
-    let trustedNodeCount = await rocketDAONodeTrusted.getMemberCount();
+    let trustedNodeCount = await lqgDAONodeTrusted.getMemberCount();
 
     // Get submission keys
     let nodeSubmissionKey = ethers.solidityPackedKeccak256(
@@ -34,8 +34,8 @@ export async function submitPrices(block, slotTimestamp, rplPrice, txOptions) {
     // Get submission details
     function getSubmissionDetails() {
         return Promise.all([
-            rocketStorage.getBool(nodeSubmissionKey),
-            rocketStorage.getUint(submissionCountKey),
+            lqgStorage.getBool(nodeSubmissionKey),
+            lqgStorage.getUint(submissionCountKey),
         ]).then(
             ([nodeSubmitted, count]) =>
                 ({ nodeSubmitted, count }),
@@ -45,8 +45,8 @@ export async function submitPrices(block, slotTimestamp, rplPrice, txOptions) {
     // Get prices
     function getPrices() {
         return Promise.all([
-            rocketNetworkPrices.getPricesBlock(),
-            rocketNetworkPrices.getRPLPrice(),
+            lqgNetworkPrices.getPricesBlock(),
+            lqgNetworkPrices.getRPLPrice(),
         ]).then(
             ([block, rplPrice]) =>
                 ({ block, rplPrice }),
@@ -57,7 +57,7 @@ export async function submitPrices(block, slotTimestamp, rplPrice, txOptions) {
     let submission1 = await getSubmissionDetails();
 
     // Submit prices
-    await rocketNetworkPrices.connect(txOptions.from).submitPrices(block, slotTimestamp, rplPrice, txOptions);
+    await lqgNetworkPrices.connect(txOptions.from).submitPrices(block, slotTimestamp, rplPrice, txOptions);
 
     // Get updated submission details & prices
     let [submission2, prices] = await Promise.all([
@@ -86,13 +86,13 @@ export async function submitPrices(block, slotTimestamp, rplPrice, txOptions) {
 // Execute price update
 export async function executeUpdatePrices(block, slotTimestamp, rplPrice, txOptions) {
     // Load contracts
-    const rocketNetworkPrices = await RocketNetworkPrices.deployed();
+    const lqgNetworkPrices = await LQGNetworkPrices.deployed();
 
     // Get prices
     function getPrices() {
         return Promise.all([
-            rocketNetworkPrices.getPricesBlock(),
-            rocketNetworkPrices.getRPLPrice(),
+            lqgNetworkPrices.getPricesBlock(),
+            lqgNetworkPrices.getRPLPrice(),
         ]).then(
             ([block, rplPrice]) =>
                 ({ block, rplPrice }),
@@ -100,7 +100,7 @@ export async function executeUpdatePrices(block, slotTimestamp, rplPrice, txOpti
     }
 
     // Submit prices
-    await rocketNetworkPrices.connect(txOptions.from).executeUpdatePrices(block, slotTimestamp, rplPrice, txOptions);
+    await lqgNetworkPrices.connect(txOptions.from).executeUpdatePrices(block, slotTimestamp, rplPrice, txOptions);
 
     // Get updated submission details & prices
     let prices = await getPrices();

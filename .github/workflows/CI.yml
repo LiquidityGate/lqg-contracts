@@ -14,5 +14,5 @@ jobs:
       - name: Install Components
         run: npm install
 
-      - name: Run Rocket Pool tests
+      - name: Run LQG Pool tests
         run: npm test

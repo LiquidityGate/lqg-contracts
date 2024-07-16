@@ -2,25 +2,25 @@
 pragma solidity 0.8.18;
 pragma abicoder v2;
 
-import "../RocketBase.sol";
+import "../LQGBase.sol";
 import "../../types/MinipoolStatus.sol";
 import "../../types/NodeDetails.sol";
-import "../../interface/node/RocketNodeManagerInterface.sol";
-import "../../interface/dao/protocol/settings/RocketDAOProtocolSettingsNodeInterface.sol";
+import "../../interface/node/LQGNodeManagerInterface.sol";
+import "../../interface/dao/protocol/settings/LQGDAOProtocolSettingsNodeInterface.sol";
 import "../../interface/util/AddressSetStorageInterface.sol";
-import "../../interface/node/RocketNodeDistributorFactoryInterface.sol";
-import "../../interface/minipool/RocketMinipoolManagerInterface.sol";
-import "../../interface/node/RocketNodeDistributorInterface.sol";
-import "../../interface/dao/node/settings/RocketDAONodeTrustedSettingsRewardsInterface.sol";
-import "../../interface/dao/protocol/settings/RocketDAOProtocolSettingsRewardsInterface.sol";
-import "../../interface/node/RocketNodeStakingInterface.sol";
-import "../../interface/node/RocketNodeDepositInterface.sol";
-import "../../interface/dao/protocol/settings/RocketDAOProtocolSettingsMinipoolInterface.sol";
+import "../../interface/node/LQGNodeDistributorFactoryInterface.sol";
+import "../../interface/minipool/LQGMinipoolManagerInterface.sol";
+import "../../interface/node/LQGNodeDistributorInterface.sol";
+import "../../interface/dao/node/settings/LQGDAONodeTrustedSettingsRewardsInterface.sol";
+import "../../interface/dao/protocol/settings/LQGDAOProtocolSettingsRewardsInterface.sol";
+import "../../interface/node/LQGNodeStakingInterface.sol";
+import "../../interface/node/LQGNodeDepositInterface.sol";
+import "../../interface/dao/protocol/settings/LQGDAOProtocolSettingsMinipoolInterface.sol";
 import "../../interface/util/IERC20.sol";
-import "../../interface/network/RocketNetworkSnapshotsInterface.sol";
+import "../../interface/network/LQGNetworkSnapshotsInterface.sol";
 
 /// @notice Node registration and management
-contract RocketNodeManager is RocketBase, RocketNodeManagerInterface {
+contract LQGNodeManager is LQGBase, LQGNodeManagerInterface {
 
     // Events
     event NodeRegistered(address indexed node, uint256 time);
@@ -30,7 +30,7 @@ contract RocketNodeManager is RocketBase, RocketNodeManagerInterface {
     event NodeRPLWithdrawalAddressSet(address indexed node, address indexed withdrawalAddress, uint256 time);
     event NodeRPLWithdrawalAddressUnset(address indexed node, uint256 time);
 
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         version = 4;
     }
 
@@ -94,12 +94,12 @@ contract RocketNodeManager is RocketBase, RocketNodeManagerInterface {
 
     /// @notice Get a node's current withdrawal address
     function getNodeWithdrawalAddress(address _nodeAddress) override public view returns (address) {
-        return rocketStorage.getNodeWithdrawalAddress(_nodeAddress);
+        return lqgStorage.getNodeWithdrawalAddress(_nodeAddress);
     }
 
     /// @notice Get a node's pending withdrawal address
     function getNodePendingWithdrawalAddress(address _nodeAddress) override public view returns (address) {
-        return rocketStorage.getNodePendingWithdrawalAddress(_nodeAddress);
+        return lqgStorage.getNodePendingWithdrawalAddress(_nodeAddress);
     }
 
     /// @notice Get a node's current RPL withdrawal address
@@ -107,7 +107,7 @@ contract RocketNodeManager is RocketBase, RocketNodeManagerInterface {
         address withdrawalAddress = getAddress(keccak256(abi.encodePacked("node.rpl.withdrawal.address", _nodeAddress)));
         if (withdrawalAddress == address(0)) {
             // Defaults to current withdrawal address if unset
-            return rocketStorage.getNodeWithdrawalAddress(_nodeAddress);
+            return lqgStorage.getNodeWithdrawalAddress(_nodeAddress);
         }
         return withdrawalAddress;
     }
@@ -176,14 +176,14 @@ contract RocketNodeManager is RocketBase, RocketNodeManagerInterface {
         return getString(keccak256(abi.encodePacked("node.timezone.location", _nodeAddress)));
     }
 
-    /// @notice Register a new node with Rocket Pool
-    function registerNode(string calldata _timezoneLocation) override external onlyLatestContract("rocketNodeManager", address(this)) {
+    /// @notice Register a new node with LQG Pool
+    function registerNode(string calldata _timezoneLocation) override external onlyLatestContract("lqgNodeManager", address(this)) {
         // Load contracts
-        RocketDAOProtocolSettingsNodeInterface rocketDAOProtocolSettingsNode = RocketDAOProtocolSettingsNodeInterface(getContractAddress("rocketDAOProtocolSettingsNode"));
+        LQGDAOProtocolSettingsNodeInterface lqgDAOProtocolSettingsNode = LQGDAOProtocolSettingsNodeInterface(getContractAddress("lqgDAOProtocolSettingsNode"));
         AddressSetStorageInterface addressSetStorage = AddressSetStorageInterface(getContractAddress("addressSetStorage"));
-        RocketNetworkSnapshotsInterface rocketNetworkSnapshots = RocketNetworkSnapshotsInterface(getContractAddress("rocketNetworkSnapshots"));
+        LQGNetworkSnapshotsInterface lqgNetworkSnapshots = LQGNetworkSnapshotsInterface(getContractAddress("lqgNetworkSnapshots"));
         // Check node settings
-        require(rocketDAOProtocolSettingsNode.getRegistrationEnabled(), "Rocket Pool node registrations are currently disabled");
+        require(lqgDAOProtocolSettingsNode.getRegistrationEnabled(), "LQG Pool node registrations are currently disabled");
         // Check timezone location
         require(bytes(_timezoneLocation).length >= 4, "The timezone location is invalid");
         // Initialise node data
@@ -196,22 +196,22 @@ contract RocketNodeManager is RocketBase, RocketNodeManagerInterface {
         // Initialise fee distributor for this node
         _initialiseFeeDistributor(msg.sender);
         // Set node registration time (uses old storage key name for backwards compatibility)
-        setUint(keccak256(abi.encodePacked("rewards.pool.claim.contract.registered.time", "rocketClaimNode", msg.sender)), block.timestamp);
+        setUint(keccak256(abi.encodePacked("rewards.pool.claim.contract.registered.time", "lqgClaimNode", msg.sender)), block.timestamp);
         // Update count
-        rocketNetworkSnapshots.push(keccak256(abi.encodePacked("node.count")), uint224(addressSetStorage.getCount(nodeIndexKey)));
+        lqgNetworkSnapshots.push(keccak256(abi.encodePacked("node.count")), uint224(addressSetStorage.getCount(nodeIndexKey)));
         // Default voting delegate to themself
-        rocketNetworkSnapshots.push(keccak256(abi.encodePacked("node.delegate", msg.sender)), uint224(uint160(msg.sender)));
+        lqgNetworkSnapshots.push(keccak256(abi.encodePacked("node.delegate", msg.sender)), uint224(uint160(msg.sender)));
         // Emit node registered event
         emit NodeRegistered(msg.sender, block.timestamp);
     }
 
     /// @notice Gets the timestamp of when a node was registered
     function getNodeRegistrationTime(address _nodeAddress) onlyRegisteredNode(_nodeAddress) override public view returns (uint256) {
-        return getUint(keccak256(abi.encodePacked("rewards.pool.claim.contract.registered.time", "rocketClaimNode", _nodeAddress)));
+        return getUint(keccak256(abi.encodePacked("rewards.pool.claim.contract.registered.time", "lqgClaimNode", _nodeAddress)));
     }
 
     /// @notice Set a node's timezone location
-    function setTimezoneLocation(string calldata _timezoneLocation) override external onlyLatestContract("rocketNodeManager", address(this)) onlyRegisteredNode(msg.sender) {
+    function setTimezoneLocation(string calldata _timezoneLocation) override external onlyLatestContract("lqgNodeManager", address(this)) onlyRegisteredNode(msg.sender) {
         // Check timezone location
         require(bytes(_timezoneLocation).length >= 4, "The timezone location is invalid");
         // Set timezone location
@@ -223,9 +223,9 @@ contract RocketNodeManager is RocketBase, RocketNodeManagerInterface {
     /// @notice Returns true if node has initialised their fee distributor contract
     function getFeeDistributorInitialised(address _nodeAddress) override public view returns (bool) {
         // Load contracts
-        RocketNodeDistributorFactoryInterface rocketNodeDistributorFactory = RocketNodeDistributorFactoryInterface(getContractAddress("rocketNodeDistributorFactory"));
+        LQGNodeDistributorFactoryInterface lqgNodeDistributorFactory = LQGNodeDistributorFactoryInterface(getContractAddress("lqgNodeDistributorFactory"));
         // Get distributor address
-        address contractAddress = rocketNodeDistributorFactory.getProxyAddress(_nodeAddress);
+        address contractAddress = lqgNodeDistributorFactory.getProxyAddress(_nodeAddress);
         // Check if contract exists at that address
         uint32 codeSize;
         assembly {
@@ -235,18 +235,18 @@ contract RocketNodeManager is RocketBase, RocketNodeManagerInterface {
     }
 
     /// @notice Node operators created before the distributor was implemented must call this to setup their distributor contract
-    function initialiseFeeDistributor() override external onlyLatestContract("rocketNodeManager", address(this)) onlyRegisteredNode(msg.sender) {
+    function initialiseFeeDistributor() override external onlyLatestContract("lqgNodeManager", address(this)) onlyRegisteredNode(msg.sender) {
         // Prevent multiple calls
         require(!getFeeDistributorInitialised(msg.sender), "Already initialised");
         // Load contracts
-        RocketMinipoolManagerInterface rocketMinipoolManager = RocketMinipoolManagerInterface(getContractAddress("rocketMinipoolManager"));
+        LQGMinipoolManagerInterface lqgMinipoolManager = LQGMinipoolManagerInterface(getContractAddress("lqgMinipoolManager"));
         // Calculate and set current average fee numerator
-        uint256 count = rocketMinipoolManager.getNodeMinipoolCount(msg.sender);
+        uint256 count = lqgMinipoolManager.getNodeMinipoolCount(msg.sender);
         if (count > 0){
             uint256 numerator = 0;
             // Note: this loop is safe as long as all current node operators at the time of upgrade have few enough minipools
             for (uint256 i = 0; i < count; ++i) {
-                RocketMinipoolInterface minipool = RocketMinipoolInterface(rocketMinipoolManager.getNodeMinipoolAt(msg.sender, i));
+                LQGMinipoolInterface minipool = LQGMinipoolInterface(lqgMinipoolManager.getNodeMinipoolAt(msg.sender, i));
                 if (minipool.getStatus() == MinipoolStatus.Staking){
                     numerator = numerator + minipool.getNodeFee();
                 }
@@ -260,28 +260,28 @@ contract RocketNodeManager is RocketBase, RocketNodeManagerInterface {
     /// @notice Deploys the fee distributor contract for a given node
     function _initialiseFeeDistributor(address _nodeAddress) internal {
         // Load contracts
-        RocketNodeDistributorFactoryInterface rocketNodeDistributorFactory = RocketNodeDistributorFactoryInterface(getContractAddress("rocketNodeDistributorFactory"));
+        LQGNodeDistributorFactoryInterface lqgNodeDistributorFactory = LQGNodeDistributorFactoryInterface(getContractAddress("lqgNodeDistributorFactory"));
         // Create the distributor proxy
-        rocketNodeDistributorFactory.createProxy(_nodeAddress);
+        lqgNodeDistributorFactory.createProxy(_nodeAddress);
     }
 
     /// @notice Calculates a nodes average node fee
     function getAverageNodeFee(address _nodeAddress) override external view returns (uint256) {
         // Load contracts
-        RocketMinipoolManagerInterface rocketMinipoolManager = RocketMinipoolManagerInterface(getContractAddress("rocketMinipoolManager"));
-        RocketNodeDepositInterface rocketNodeDeposit = RocketNodeDepositInterface(getContractAddress("rocketNodeDeposit"));
-        RocketDAOProtocolSettingsMinipoolInterface rocketDAOProtocolSettingsMinipool = RocketDAOProtocolSettingsMinipoolInterface(getContractAddress("rocketDAOProtocolSettingsMinipool"));
+        LQGMinipoolManagerInterface lqgMinipoolManager = LQGMinipoolManagerInterface(getContractAddress("lqgMinipoolManager"));
+        LQGNodeDepositInterface lqgNodeDeposit = LQGNodeDepositInterface(getContractAddress("lqgNodeDeposit"));
+        LQGDAOProtocolSettingsMinipoolInterface lqgDAOProtocolSettingsMinipool = LQGDAOProtocolSettingsMinipoolInterface(getContractAddress("lqgDAOProtocolSettingsMinipool"));
         // Get valid deposit amounts
-        uint256[] memory depositSizes = rocketNodeDeposit.getDepositAmounts();
+        uint256[] memory depositSizes = lqgNodeDeposit.getDepositAmounts();
         // Setup memory for calculations
         uint256[] memory depositWeights = new uint256[](depositSizes.length);
         uint256[] memory depositCounts = new uint256[](depositSizes.length);
         uint256 depositWeightTotal;
         uint256 totalCount;
-        uint256 launchAmount = rocketDAOProtocolSettingsMinipool.getLaunchBalance();
+        uint256 launchAmount = lqgDAOProtocolSettingsMinipool.getLaunchBalance();
         // Retrieve the number of staking minipools per deposit size
         for (uint256 i = 0; i < depositSizes.length; ++i) {
-            depositCounts[i] = rocketMinipoolManager.getNodeStakingMinipoolCountBySize(_nodeAddress, depositSizes[i]);
+            depositCounts[i] = lqgMinipoolManager.getNodeStakingMinipoolCountBySize(_nodeAddress, depositSizes[i]);
             totalCount = totalCount + depositCounts[i];
         }
         if (totalCount == 0) {
@@ -313,13 +313,13 @@ contract RocketNodeManager is RocketBase, RocketNodeManagerInterface {
     }
 
     /// @notice Designates which network a node would like their rewards relayed to
-    function setRewardNetwork(address _nodeAddress, uint256 _network) override external onlyLatestContract("rocketNodeManager", address(this)) {
+    function setRewardNetwork(address _nodeAddress, uint256 _network) override external onlyLatestContract("lqgNodeManager", address(this)) {
         // Confirm the transaction is from the node's current withdrawal address
-        address withdrawalAddress = rocketStorage.getNodeWithdrawalAddress(_nodeAddress);
+        address withdrawalAddress = lqgStorage.getNodeWithdrawalAddress(_nodeAddress);
         require(withdrawalAddress == msg.sender, "Only a tx from a node's withdrawal address can change reward network");
         // Check network is enabled
-        RocketDAONodeTrustedSettingsRewardsInterface rocketDAONodeTrustedSettingsRewards = RocketDAONodeTrustedSettingsRewardsInterface(getContractAddress("rocketDAONodeTrustedSettingsRewards"));
-        require(rocketDAONodeTrustedSettingsRewards.getNetworkEnabled(_network), "Network is not enabled");
+        LQGDAONodeTrustedSettingsRewardsInterface lqgDAONodeTrustedSettingsRewards = LQGDAONodeTrustedSettingsRewardsInterface(getContractAddress("lqgDAONodeTrustedSettingsRewards"));
+        require(lqgDAONodeTrustedSettingsRewards.getNetworkEnabled(_network), "Network is not enabled");
         // Set the network
         setUint(keccak256(abi.encodePacked("node.reward.network", _nodeAddress)), _network);
         // Emit event
@@ -327,20 +327,20 @@ contract RocketNodeManager is RocketBase, RocketNodeManagerInterface {
     }
 
     /// @notice Returns which network a node has designated as their desired reward network
-    function getRewardNetwork(address _nodeAddress) override public view onlyLatestContract("rocketNodeManager", address(this)) returns (uint256) {
+    function getRewardNetwork(address _nodeAddress) override public view onlyLatestContract("lqgNodeManager", address(this)) returns (uint256) {
         return getUint(keccak256(abi.encodePacked("node.reward.network", _nodeAddress)));
     }
 
     /// @notice Allows a node to register or deregister from the smoothing pool
-    function setSmoothingPoolRegistrationState(bool _state) override external onlyLatestContract("rocketNodeManager", address(this)) onlyRegisteredNode(msg.sender) {
+    function setSmoothingPoolRegistrationState(bool _state) override external onlyLatestContract("lqgNodeManager", address(this)) onlyRegisteredNode(msg.sender) {
         // Ensure registration is enabled
-        RocketDAOProtocolSettingsNodeInterface daoSettingsNode = RocketDAOProtocolSettingsNodeInterface(getContractAddress("rocketDAOProtocolSettingsNode"));
+        LQGDAOProtocolSettingsNodeInterface daoSettingsNode = LQGDAOProtocolSettingsNodeInterface(getContractAddress("lqgDAOProtocolSettingsNode"));
         require(daoSettingsNode.getSmoothingPoolRegistrationEnabled(), "Smoothing pool registrations are not active");
         // Precompute storage keys
         bytes32 changeKey = keccak256(abi.encodePacked("node.smoothing.pool.changed.time", msg.sender));
         bytes32 stateKey = keccak256(abi.encodePacked("node.smoothing.pool.state", msg.sender));
         // Get from the DAO settings
-        RocketDAOProtocolSettingsRewardsInterface daoSettingsRewards = RocketDAOProtocolSettingsRewardsInterface(getContractAddress("rocketDAOProtocolSettingsRewards"));
+        LQGDAOProtocolSettingsRewardsInterface daoSettingsRewards = LQGDAOProtocolSettingsRewardsInterface(getContractAddress("lqgDAOProtocolSettingsRewards"));
         uint256 rewardInterval = daoSettingsRewards.getRewardsClaimIntervalTime();
         // Ensure node operator has waited the required time
         uint256 lastChange = getUint(changeKey);
@@ -388,43 +388,43 @@ contract RocketNodeManager is RocketBase, RocketNodeManagerInterface {
     /// @param _nodeAddress Address of the node to query details for
     function getNodeDetails(address _nodeAddress) override public view returns (NodeDetails memory nodeDetails) {
         // Get contracts
-        RocketNodeStakingInterface rocketNodeStaking = RocketNodeStakingInterface(getContractAddress("rocketNodeStaking"));
-        RocketNodeDepositInterface rocketNodeDeposit = RocketNodeDepositInterface(getContractAddress("rocketNodeDeposit"));
-        RocketNodeDistributorFactoryInterface rocketNodeDistributorFactory = RocketNodeDistributorFactoryInterface(getContractAddress("rocketNodeDistributorFactory"));
-        RocketMinipoolManagerInterface rocketMinipoolManager = RocketMinipoolManagerInterface(getContractAddress("rocketMinipoolManager"));
-        IERC20 rocketTokenRETH = IERC20(getContractAddress("rocketTokenRETH"));
-        IERC20 rocketTokenRPL = IERC20(getContractAddress("rocketTokenRPL"));
-        IERC20 rocketTokenRPLFixedSupply = IERC20(getContractAddress("rocketTokenRPLFixedSupply"));
+        LQGNodeStakingInterface lqgNodeStaking = LQGNodeStakingInterface(getContractAddress("lqgNodeStaking"));
+        LQGNodeDepositInterface lqgNodeDeposit = LQGNodeDepositInterface(getContractAddress("lqgNodeDeposit"));
+        LQGNodeDistributorFactoryInterface lqgNodeDistributorFactory = LQGNodeDistributorFactoryInterface(getContractAddress("lqgNodeDistributorFactory"));
+        LQGMinipoolManagerInterface lqgMinipoolManager = LQGMinipoolManagerInterface(getContractAddress("lqgMinipoolManager"));
+        IERC20 lqgTokenRETH = IERC20(getContractAddress("lqgTokenRETH"));
+        IERC20 lqgTokenRPL = IERC20(getContractAddress("lqgTokenRPL"));
+        IERC20 lqgTokenRPLFixedSupply = IERC20(getContractAddress("lqgTokenRPLFixedSupply"));
         // Node details
         nodeDetails.nodeAddress = _nodeAddress;
-        nodeDetails.withdrawalAddress = rocketStorage.getNodeWithdrawalAddress(_nodeAddress);
-        nodeDetails.pendingWithdrawalAddress = rocketStorage.getNodePendingWithdrawalAddress(_nodeAddress);
+        nodeDetails.withdrawalAddress = lqgStorage.getNodeWithdrawalAddress(_nodeAddress);
+        nodeDetails.pendingWithdrawalAddress = lqgStorage.getNodePendingWithdrawalAddress(_nodeAddress);
         nodeDetails.exists = getNodeExists(_nodeAddress);
         nodeDetails.registrationTime = getNodeRegistrationTime(_nodeAddress);
         nodeDetails.timezoneLocation = getNodeTimezoneLocation(_nodeAddress);
         nodeDetails.feeDistributorInitialised = getFeeDistributorInitialised(_nodeAddress);
         nodeDetails.rewardNetwork = getRewardNetwork(_nodeAddress);
         // Staking details
-        nodeDetails.rplStake = rocketNodeStaking.getNodeRPLStake(_nodeAddress);
-        nodeDetails.effectiveRPLStake = rocketNodeStaking.getNodeEffectiveRPLStake(_nodeAddress);
-        nodeDetails.minimumRPLStake = rocketNodeStaking.getNodeMinimumRPLStake(_nodeAddress);
-        nodeDetails.maximumRPLStake = rocketNodeStaking.getNodeMaximumRPLStake(_nodeAddress);
-        nodeDetails.ethMatched = rocketNodeStaking.getNodeETHMatched(_nodeAddress);
-        nodeDetails.ethMatchedLimit = rocketNodeStaking.getNodeETHMatchedLimit(_nodeAddress);
+        nodeDetails.rplStake = lqgNodeStaking.getNodeRPLStake(_nodeAddress);
+        nodeDetails.effectiveRPLStake = lqgNodeStaking.getNodeEffectiveRPLStake(_nodeAddress);
+        nodeDetails.minimumRPLStake = lqgNodeStaking.getNodeMinimumRPLStake(_nodeAddress);
+        nodeDetails.maximumRPLStake = lqgNodeStaking.getNodeMaximumRPLStake(_nodeAddress);
+        nodeDetails.ethMatched = lqgNodeStaking.getNodeETHMatched(_nodeAddress);
+        nodeDetails.ethMatchedLimit = lqgNodeStaking.getNodeETHMatchedLimit(_nodeAddress);
         // Distributor details
-        nodeDetails.feeDistributorAddress = rocketNodeDistributorFactory.getProxyAddress(_nodeAddress);
+        nodeDetails.feeDistributorAddress = lqgNodeDistributorFactory.getProxyAddress(_nodeAddress);
         uint256 distributorBalance = nodeDetails.feeDistributorAddress.balance;
-        RocketNodeDistributorInterface distributor = RocketNodeDistributorInterface(nodeDetails.feeDistributorAddress);
+        LQGNodeDistributorInterface distributor = LQGNodeDistributorInterface(nodeDetails.feeDistributorAddress);
         nodeDetails.distributorBalanceNodeETH = distributor.getNodeShare();
         nodeDetails.distributorBalanceUserETH = distributorBalance - nodeDetails.distributorBalanceNodeETH;
         // Minipool details
-        nodeDetails.minipoolCount = rocketMinipoolManager.getNodeMinipoolCount(_nodeAddress);
+        nodeDetails.minipoolCount = lqgMinipoolManager.getNodeMinipoolCount(_nodeAddress);
         // Balance details
         nodeDetails.balanceETH = _nodeAddress.balance;
-        nodeDetails.balanceRETH = rocketTokenRETH.balanceOf(_nodeAddress);
-        nodeDetails.balanceRPL = rocketTokenRPL.balanceOf(_nodeAddress);
-        nodeDetails.balanceOldRPL = rocketTokenRPLFixedSupply.balanceOf(_nodeAddress);
-        nodeDetails.depositCreditBalance = rocketNodeDeposit.getNodeDepositCredit(_nodeAddress);
+        nodeDetails.balanceRETH = lqgTokenRETH.balanceOf(_nodeAddress);
+        nodeDetails.balanceRPL = lqgTokenRPL.balanceOf(_nodeAddress);
+        nodeDetails.balanceOldRPL = lqgTokenRPLFixedSupply.balanceOf(_nodeAddress);
+        nodeDetails.depositCreditBalance = lqgNodeDeposit.getNodeDepositCredit(_nodeAddress);
         // Return
         return nodeDetails;
     }

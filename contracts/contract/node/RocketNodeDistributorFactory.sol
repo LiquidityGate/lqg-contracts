@@ -2,38 +2,38 @@ pragma solidity 0.7.6;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-import "../RocketBase.sol";
-import "./RocketNodeDistributor.sol";
-import "./RocketNodeDistributorStorageLayout.sol";
-import "../../interface/node/RocketNodeDistributorFactoryInterface.sol";
+import "../LQGBase.sol";
+import "./LQGNodeDistributor.sol";
+import "./LQGNodeDistributorStorageLayout.sol";
+import "../../interface/node/LQGNodeDistributorFactoryInterface.sol";
 
-contract RocketNodeDistributorFactory is RocketBase, RocketNodeDistributorFactoryInterface {
+contract LQGNodeDistributorFactory is LQGBase, LQGNodeDistributorFactoryInterface {
     // Events
     event ProxyCreated(address _address);
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         version = 1;
     }
 
     function getProxyBytecode() override public pure returns (bytes memory) {
-        return type(RocketNodeDistributor).creationCode;
+        return type(LQGNodeDistributor).creationCode;
     }
 
     // Calculates the predetermined distributor contract address from given node address
     function getProxyAddress(address _nodeAddress) override external view returns(address) {
         bytes memory contractCode = getProxyBytecode();
-        bytes memory initCode = abi.encodePacked(contractCode, abi.encode(_nodeAddress, rocketStorage));
+        bytes memory initCode = abi.encodePacked(contractCode, abi.encode(_nodeAddress, lqgStorage));
 
         bytes32 hash = keccak256(abi.encodePacked(bytes1(0xff), address(this), uint256(0), keccak256(initCode)));
 
         return address(uint160(uint(hash)));
     }
 
-    // Uses CREATE2 to deploy a RocketNodeDistributor at predetermined address
-    function createProxy(address _nodeAddress) override external onlyLatestContract("rocketNodeManager", msg.sender) {
+    // Uses CREATE2 to deploy a LQGNodeDistributor at predetermined address
+    function createProxy(address _nodeAddress) override external onlyLatestContract("lqgNodeManager", msg.sender) {
         // Salt is not required as the initCode is already unique per node address (node address is constructor argument)
-        RocketNodeDistributor dist = new RocketNodeDistributor{salt: ''}(_nodeAddress, address(rocketStorage));
+        LQGNodeDistributor dist = new LQGNodeDistributor{salt: ''}(_nodeAddress, address(lqgStorage));
         emit ProxyCreated(address(dist));
     }
 }

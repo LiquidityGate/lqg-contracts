@@ -2,13 +2,13 @@
 pragma solidity 0.8.18;
 pragma abicoder v2;
 
-import "../../RocketBase.sol";
-import "../../../interface/dao/protocol/RocketDAOProtocolInterface.sol";
-import "../../../interface/dao/protocol/RocketDAOProtocolProposalsInterface.sol";
+import "../../LQGBase.sol";
+import "../../../interface/dao/protocol/LQGDAOProtocolInterface.sol";
+import "../../../interface/dao/protocol/LQGDAOProtocolProposalsInterface.sol";
 import "../../../types/SettingType.sol";
 
-/// @notice The Rocket Pool Protocol DAO
-contract RocketDAOProtocol is RocketBase, RocketDAOProtocolInterface {
+/// @notice The LQG Pool Protocol DAO
+contract LQGDAOProtocol is LQGBase, LQGDAOProtocolInterface {
 
     // Events
     event BootstrapSettingMulti(string[] settingContractNames, string[] settingPaths, SettingType[] types, bytes[] values, uint256 time);
@@ -33,7 +33,7 @@ contract RocketDAOProtocol is RocketBase, RocketDAOProtocolInterface {
         _;
     }
 
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         version = 2;
     }
 
@@ -53,67 +53,67 @@ contract RocketDAOProtocol is RocketBase, RocketDAOProtocolInterface {
     // While bootstrap mode is engaged, RP can change settings alongside the DAO. When disabled, only DAO will be able to control settings
 
     /// @notice Bootstrap mode - multi Setting
-    function bootstrapSettingMulti(string[] memory _settingContractNames, string[] memory _settingPaths, SettingType[] memory _types, bytes[] memory _values) override external onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAOProtocol", address(this)) {
-        RocketDAOProtocolProposalsInterface(getContractAddress("rocketDAOProtocolProposals")).proposalSettingMulti(_settingContractNames, _settingPaths, _types, _values);
+    function bootstrapSettingMulti(string[] memory _settingContractNames, string[] memory _settingPaths, SettingType[] memory _types, bytes[] memory _values) override external onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAOProtocol", address(this)) {
+        LQGDAOProtocolProposalsInterface(getContractAddress("lqgDAOProtocolProposals")).proposalSettingMulti(_settingContractNames, _settingPaths, _types, _values);
         emit BootstrapSettingMulti(_settingContractNames, _settingPaths, _types, _values, block.timestamp);
     }
 
     /// @notice Bootstrap mode - Uint Setting
-    function bootstrapSettingUint(string memory _settingContractName, string memory _settingPath, uint256 _value) override external onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAOProtocol", address(this)) {
-        RocketDAOProtocolProposalsInterface(getContractAddress("rocketDAOProtocolProposals")).proposalSettingUint(_settingContractName, _settingPath, _value);
+    function bootstrapSettingUint(string memory _settingContractName, string memory _settingPath, uint256 _value) override external onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAOProtocol", address(this)) {
+        LQGDAOProtocolProposalsInterface(getContractAddress("lqgDAOProtocolProposals")).proposalSettingUint(_settingContractName, _settingPath, _value);
         emit BootstrapSettingUint(_settingContractName, _settingPath, _value, block.timestamp);
     }
 
     /// @notice Bootstrap mode - Bool Setting
-    function bootstrapSettingBool(string memory _settingContractName, string memory _settingPath, bool _value) override external onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAOProtocol", address(this)) {
-        RocketDAOProtocolProposalsInterface(getContractAddress("rocketDAOProtocolProposals")).proposalSettingBool(_settingContractName, _settingPath, _value);
+    function bootstrapSettingBool(string memory _settingContractName, string memory _settingPath, bool _value) override external onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAOProtocol", address(this)) {
+        LQGDAOProtocolProposalsInterface(getContractAddress("lqgDAOProtocolProposals")).proposalSettingBool(_settingContractName, _settingPath, _value);
         emit BootstrapSettingBool(_settingContractName, _settingPath, _value, block.timestamp);
     }
 
     /// @notice Bootstrap mode - Address Setting
-    function bootstrapSettingAddress(string memory _settingContractName, string memory _settingPath, address _value) override external onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAOProtocol", address(this)) {
-        RocketDAOProtocolProposalsInterface(getContractAddress("rocketDAOProtocolProposals")).proposalSettingAddress(_settingContractName, _settingPath, _value);
+    function bootstrapSettingAddress(string memory _settingContractName, string memory _settingPath, address _value) override external onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAOProtocol", address(this)) {
+        LQGDAOProtocolProposalsInterface(getContractAddress("lqgDAOProtocolProposals")).proposalSettingAddress(_settingContractName, _settingPath, _value);
         emit BootstrapSettingAddress(_settingContractName, _settingPath, _value, block.timestamp);
     }
 
     /// @notice Bootstrap mode - Set a claiming contract to receive a % of RPL inflation rewards
-    function bootstrapSettingClaimers(uint256 _trustedNodePercent, uint256 _protocolPercent, uint256 _nodePercent) override external onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAOProtocol", address(this)) {
-        RocketDAOProtocolProposalsInterface(getContractAddress("rocketDAOProtocolProposals")).proposalSettingRewardsClaimers(_trustedNodePercent, _protocolPercent, _nodePercent);
+    function bootstrapSettingClaimers(uint256 _trustedNodePercent, uint256 _protocolPercent, uint256 _nodePercent) override external onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAOProtocol", address(this)) {
+        LQGDAOProtocolProposalsInterface(getContractAddress("lqgDAOProtocolProposals")).proposalSettingRewardsClaimers(_trustedNodePercent, _protocolPercent, _nodePercent);
         emit BootstrapSettingClaimers(_trustedNodePercent, _protocolPercent, _nodePercent, block.timestamp);
     }
 
     /// @notice Bootstrap mode - Spend DAO treasury
-    function bootstrapSpendTreasury(string memory _invoiceID, address _recipientAddress, uint256 _amount) override external onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAOProtocol", address(this)) {
-        RocketDAOProtocolProposalsInterface(getContractAddress("rocketDAOProtocolProposals")).proposalTreasuryOneTimeSpend(_invoiceID, _recipientAddress, _amount);
+    function bootstrapSpendTreasury(string memory _invoiceID, address _recipientAddress, uint256 _amount) override external onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAOProtocol", address(this)) {
+        LQGDAOProtocolProposalsInterface(getContractAddress("lqgDAOProtocolProposals")).proposalTreasuryOneTimeSpend(_invoiceID, _recipientAddress, _amount);
         emit BootstrapSpendTreasury(_invoiceID, _recipientAddress, _amount, block.timestamp);
     }
 
     /// @notice Bootstrap mode - New treasury contract
-    function bootstrapTreasuryNewContract(string memory _contractName, address _recipientAddress, uint256 _amountPerPeriod, uint256 _periodLength, uint256 _startTime, uint256 _numPeriods) override external onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAOProtocol", address(this)) {
-        RocketDAOProtocolProposalsInterface(getContractAddress("rocketDAOProtocolProposals")).proposalTreasuryNewContract(_contractName, _recipientAddress, _amountPerPeriod, _periodLength, _startTime, _numPeriods);
+    function bootstrapTreasuryNewContract(string memory _contractName, address _recipientAddress, uint256 _amountPerPeriod, uint256 _periodLength, uint256 _startTime, uint256 _numPeriods) override external onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAOProtocol", address(this)) {
+        LQGDAOProtocolProposalsInterface(getContractAddress("lqgDAOProtocolProposals")).proposalTreasuryNewContract(_contractName, _recipientAddress, _amountPerPeriod, _periodLength, _startTime, _numPeriods);
         emit BootstrapTreasuryNewContract(_contractName, _recipientAddress, _amountPerPeriod, _periodLength, _startTime, _numPeriods, block.timestamp);
     }
 
     /// @notice Bootstrap mode - Update treasury contract
-    function bootstrapTreasuryUpdateContract(string memory _contractName, address _recipientAddress, uint256 _amountPerPeriod, uint256 _periodLength, uint256 _numPeriods) override external  onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAOProtocol", address(this)) {
-        RocketDAOProtocolProposalsInterface(getContractAddress("rocketDAOProtocolProposals")).proposalTreasuryUpdateContract(_contractName, _recipientAddress, _amountPerPeriod, _periodLength, _numPeriods);
+    function bootstrapTreasuryUpdateContract(string memory _contractName, address _recipientAddress, uint256 _amountPerPeriod, uint256 _periodLength, uint256 _numPeriods) override external  onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAOProtocol", address(this)) {
+        LQGDAOProtocolProposalsInterface(getContractAddress("lqgDAOProtocolProposals")).proposalTreasuryUpdateContract(_contractName, _recipientAddress, _amountPerPeriod, _periodLength, _numPeriods);
         emit BootstrapTreasuryUpdateContract(_contractName, _recipientAddress, _amountPerPeriod, _periodLength, _numPeriods, block.timestamp);
     }
 
     /// @notice Bootstrap mode - Invite security council member
-    function bootstrapSecurityInvite(string memory _id, address _memberAddress) override external onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAOProtocol", address(this)) {
-        RocketDAOProtocolProposalsInterface(getContractAddress("rocketDAOProtocolProposals")).proposalSecurityInvite(_id, _memberAddress);
+    function bootstrapSecurityInvite(string memory _id, address _memberAddress) override external onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAOProtocol", address(this)) {
+        LQGDAOProtocolProposalsInterface(getContractAddress("lqgDAOProtocolProposals")).proposalSecurityInvite(_id, _memberAddress);
         emit BootstrapSecurityInvite(_id, _memberAddress, block.timestamp);
     }
 
     /// @notice Bootstrap mode - Kick security council member
-    function bootstrapSecurityKick(address _memberAddress) override external onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAOProtocol", address(this)) {
-        RocketDAOProtocolProposalsInterface(getContractAddress("rocketDAOProtocolProposals")).proposalSecurityKick(_memberAddress);
+    function bootstrapSecurityKick(address _memberAddress) override external onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAOProtocol", address(this)) {
+        LQGDAOProtocolProposalsInterface(getContractAddress("lqgDAOProtocolProposals")).proposalSecurityKick(_memberAddress);
         emit BootstrapSecurityKick(_memberAddress, block.timestamp);
     }
 
     /// @notice Bootstrap mode - Disable RP Access (only RP can call this to hand over full control to the DAO)
-    function bootstrapDisable(bool _confirmDisableBootstrapMode) override external onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAOProtocol", address(this)) {
+    function bootstrapDisable(bool _confirmDisableBootstrapMode) override external onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAOProtocol", address(this)) {
         // Prevent disabling bootstrap if on-chain governance has not been enabled
         require(getUint(keccak256(abi.encodePacked("protocol.dao.enabled.block"))) > 0, "On-chain governance must be enabled first");
         // Disable bootstrap
@@ -123,7 +123,7 @@ contract RocketDAOProtocol is RocketBase, RocketDAOProtocolInterface {
     }
 
     /// @notice Bootstrap mode - Enables on-chain governance proposals
-    function bootstrapEnableGovernance() override external onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAOProtocol", address(this)) {
+    function bootstrapEnableGovernance() override external onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAOProtocol", address(this)) {
         setUint(keccak256(abi.encodePacked("protocol.dao.enabled.block")), block.number);
         emit BootstrapProtocolDAOEnabled(block.number, block.timestamp);
     }

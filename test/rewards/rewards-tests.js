@@ -11,13 +11,13 @@ import {
     setNodeWithdrawalAddress,
 } from '../_helpers/node';
 import {
-    RevertOnTransfer, RocketDAONodeTrustedProposals,
-    RocketDAONodeTrustedSettingsMinipool,
-    RocketDAOProtocolSettingsNode,
-    RocketMerkleDistributorMainnet,
-    RocketRewardsPool,
-    RocketSmoothingPool,
-    RocketStorage,
+    RevertOnTransfer, LQGDAONodeTrustedProposals,
+    LQGDAONodeTrustedSettingsMinipool,
+    LQGDAOProtocolSettingsNode,
+    LQGMerkleDistributorMainnet,
+    LQGRewardsPool,
+    LQGSmoothingPool,
+    LQGStorage,
 } from '../_utils/artifacts';
 import {
     setDAONetworkBootstrapRewardsClaimers,
@@ -45,7 +45,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketRewardsPool', () => {
+    describe('LQGRewardsPool', () => {
         let owner,
             userOne,
             registeredNode1,
@@ -92,8 +92,8 @@ export default function() {
         };
 
         async function kickTrustedNode(nodeAddress, voters) {
-            let rocketDAONodeTrustedProposals = await RocketDAONodeTrustedProposals.deployed();
-            let proposalCalldata = rocketDAONodeTrustedProposals.interface.encodeFunctionData('proposalKick', [nodeAddress.address, 0n]);
+            let lqgDAONodeTrustedProposals = await LQGDAONodeTrustedProposals.deployed();
+            let proposalCalldata = lqgDAONodeTrustedProposals.interface.encodeFunctionData('proposalKick', [nodeAddress.address, 0n]);
             // Add the proposal
             let proposalID = await daoNodeTrustedPropose(`Kick ${nodeAddress.address}`, proposalCalldata, {
                 from: registeredNodeTrusted1,
@@ -130,7 +130,7 @@ export default function() {
             let slotTimestamp = '1600000000';
 
             // Set settings
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsMinipool, 'minipool.scrub.period', scrubPeriod, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsMinipool, 'minipool.scrub.period', scrubPeriod, { from: owner });
 
             // Register nodes
             await registerNode({ from: registeredNode1 });
@@ -149,7 +149,7 @@ export default function() {
 
             // Set max per-minipool stake to 100% and RPL price to 1 ether
             const block = await ethers.provider.getBlockNumber();
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNode, 'node.per.minipool.stake.maximum', '1'.ether, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNode, 'node.per.minipool.stake.maximum', '1'.ether, { from: owner });
             await submitPrices(block, slotTimestamp, '1'.ether, { from: registeredNodeTrusted1 });
             await submitPrices(block, slotTimestamp, '1'.ether, { from: registeredNodeTrusted2 });
 
@@ -239,14 +239,14 @@ export default function() {
             await helpers.time.increase(rplInflationStartTime - currentTime + claimIntervalTime);
 
             // Send ETH to rewards pool
-            const rocketSmoothingPool = await RocketSmoothingPool.deployed();
+            const lqgSmoothingPool = await LQGSmoothingPool.deployed();
             await owner.sendTransaction({
-                to: rocketSmoothingPool.target,
+                to: lqgSmoothingPool.target,
                 value: '20'.ether
             });
 
-            const rocketRewardsPool = await RocketRewardsPool.deployed();
-            const pendingRewards = await rocketRewardsPool.getPendingETHRewards.call();
+            const lqgRewardsPool = await LQGRewardsPool.deployed();
+            const pendingRewards = await lqgRewardsPool.getPendingETHRewards.call();
 
             // Submit rewards snapshot
             const rewards = [
@@ -320,9 +320,9 @@ export default function() {
             await helpers.time.increase(rplInflationStartTime - currentTime + claimIntervalTime);
 
             // Send ETH to rewards pool
-            const rocketSmoothingPool = await RocketSmoothingPool.deployed();
+            const lqgSmoothingPool = await LQGSmoothingPool.deployed();
             await owner.sendTransaction({
-                to: rocketSmoothingPool.target,
+                to: lqgSmoothingPool.target,
                 value: '20'.ether
             });
 
@@ -376,10 +376,10 @@ export default function() {
             let amountsETH = [proof.amountETH];
             let proofs = [proof.proof];
 
-            let rocketMerkleDistributorMainnet = await RocketMerkleDistributorMainnet.deployed();
+            let lqgMerkleDistributorMainnet = await LQGMerkleDistributorMainnet.deployed();
 
             // Attempt to claim reward for registeredNode1 with registeredNode2
-            await shouldRevert(rocketMerkleDistributorMainnet.connect(registeredNode2).claim(registeredNode2, [0], amountsRPL, amountsETH, proofs, { from: registeredNode2 }), 'Was able to claim with invalid proof', 'Invalid proof');
+            await shouldRevert(lqgMerkleDistributorMainnet.connect(registeredNode2).claim(registeredNode2, [0], amountsRPL, amountsETH, proofs, { from: registeredNode2 }), 'Was able to claim with invalid proof', 'Invalid proof');
         });
 
         it(printTitle('node', 'can not claim same interval twice'), async () => {
@@ -801,12 +801,12 @@ export default function() {
             });
 
             // Retrieve the bitmap of claims
-            const rocketStorage = await RocketStorage.deployed();
+            const lqgStorage = await LQGStorage.deployed();
             const key = ethers.solidityPackedKeccak256(
                 ['string', 'address', 'uint256'],
                 ['rewards.interval.claimed', registeredNode1.address, 0n]
             );
-            const bitmap = Number(await rocketStorage.getUint(key));
+            const bitmap = Number(await lqgStorage.getUint(key));
 
             // Construct the expected bitmap and compare
             let expected = 0;
@@ -838,9 +838,9 @@ export default function() {
             await helpers.time.increase(rplInflationStartTime - currentTime + claimIntervalTime);
 
             // Send ETH to rewards pool
-            const rocketSmoothingPool = await RocketSmoothingPool.deployed();
+            const lqgSmoothingPool = await LQGSmoothingPool.deployed();
             await owner.sendTransaction({
-                to: rocketSmoothingPool.target,
+                to: lqgSmoothingPool.target,
                 value: '20'.ether
             });
 
@@ -862,16 +862,16 @@ export default function() {
                 from: registeredNode1,
             });
 
-            const rocketMerkleDistributorMainnet = await RocketMerkleDistributorMainnet.deployed();
+            const lqgMerkleDistributorMainnet = await LQGMerkleDistributorMainnet.deployed();
 
             // Check outstanding balance is correct
-            const balance = await rocketMerkleDistributorMainnet.getOutstandingEth(revertOnTransfer.target);
+            const balance = await lqgMerkleDistributorMainnet.getOutstandingEth(revertOnTransfer.target);
             assertBN.equal(balance, '1'.ether);
 
             // Attempt to claim the ETH from the previously reverting withdrawal address
             await revertOnTransfer.setEnabled(false);
-            const payload = rocketMerkleDistributorMainnet.interface.encodeFunctionData('claimOutstandingEth()');
-            await revertOnTransfer.call(rocketMerkleDistributorMainnet.target, payload);
+            const payload = lqgMerkleDistributorMainnet.interface.encodeFunctionData('claimOutstandingEth()');
+            await revertOnTransfer.call(lqgMerkleDistributorMainnet.target, payload);
 
             // Check ETH was sent to withdrawal address
             const withdrawalAddressBalance = await ethers.provider.getBalance(revertOnTransfer.target);

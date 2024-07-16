@@ -2,7 +2,7 @@ pragma solidity >0.5.0 <0.9.0;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-interface RocketDAOProtocolSettingsProposalsInterface {
+interface LQGDAOProtocolSettingsProposalsInterface {
     function getVotePhase1Time() external view returns(uint256);
     function getVotePhase2Time() external view returns(uint256);
     function getVoteDelayTime() external view returns(uint256);

@@ -1,4 +1,4 @@
-import { RocketDAOProposal } from '../_utils/artifacts';
+import { LQGDAOProposal } from '../_utils/artifacts';
 
 // Possible states that a proposal may be in
 export const proposalStates = {
@@ -23,48 +23,48 @@ export const voteStates = {
 // Get the status of a proposal
 export async function getDAOProposalState(proposalID, txOptions) {
     // Load contracts
-    const rocketDAOProposal = await RocketDAOProposal.deployed();
-    return Number(await rocketDAOProposal.getState(proposalID));
+    const lqgDAOProposal = await LQGDAOProposal.deployed();
+    return Number(await lqgDAOProposal.getState(proposalID));
 }
 
 // Get the block a proposal can start being voted on
 export async function getDAOProposalStartTime(proposalID, txOptions) {
     // Load contracts
-    const rocketDAOProposal = await RocketDAOProposal.deployed();
-    return Number(await rocketDAOProposal.getStart(proposalID));
+    const lqgDAOProposal = await LQGDAOProposal.deployed();
+    return Number(await lqgDAOProposal.getStart(proposalID));
 }
 
 // Get the block a proposal can end being voted on
 export async function getDAOProposalEndTime(proposalID, txOptions) {
     // Load contracts
-    const rocketDAOProposal = await RocketDAOProposal.deployed();
-    return Number(await rocketDAOProposal.getEnd(proposalID));
+    const lqgDAOProposal = await LQGDAOProposal.deployed();
+    return Number(await lqgDAOProposal.getEnd(proposalID));
 }
 
 // Get the block a proposal expires
 export async function getDAOProposalExpires(proposalID, txOptions) {
     // Load contracts
-    const rocketDAOProposal = await RocketDAOProposal.deployed();
-    return Number(await rocketDAOProposal.getExpires(proposalID));
+    const lqgDAOProposal = await LQGDAOProposal.deployed();
+    return Number(await lqgDAOProposal.getExpires(proposalID));
 }
 
 // Get the vote count for a proposal
 export async function getDAOProposalVotesFor(proposalID, txOptions) {
     // Load contracts
-    const rocketDAOProposal = await RocketDAOProposal.deployed();
-    return await rocketDAOProposal.getVotesFor(proposalID);
+    const lqgDAOProposal = await LQGDAOProposal.deployed();
+    return await lqgDAOProposal.getVotesFor(proposalID);
 }
 
 // Get the vote count against a proposal
 export async function getDAOProposalVotesAgainst(proposalID, txOptions) {
     // Load contracts
-    const rocketDAOProposal = await RocketDAOProposal.deployed();
-    return await rocketDAOProposal.getVotesAgainst(proposalID);
+    const lqgDAOProposal = await LQGDAOProposal.deployed();
+    return await lqgDAOProposal.getVotesAgainst(proposalID);
 }
 
 // Get the quroum for a proposal
 export async function getDAOProposalVotesRequired(proposalID, txOptions) {
     // Load contracts
-    const rocketDAOProposal = await RocketDAOProposal.deployed();
-    return await rocketDAOProposal.getVotesRequired(proposalID);
+    const lqgDAOProposal = await LQGDAOProposal.deployed();
+    return await lqgDAOProposal.getVotesRequired(proposalID);
 }

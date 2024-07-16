@@ -1,10 +1,10 @@
 import {
-    RocketDepositPool,
-    RocketDAOProtocolSettingsDeposit,
-    RocketMinipoolQueue,
-    RocketDAOProtocolSettingsMinipool,
-    RocketVault,
-    RocketMinipoolDelegate,
+    LQGDepositPool,
+    LQGDAOProtocolSettingsDeposit,
+    LQGMinipoolQueue,
+    LQGDAOProtocolSettingsMinipool,
+    LQGVault,
+    LQGMinipoolDelegate,
 } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 import { BigMin } from '../_helpers/bigmath';
@@ -16,17 +16,17 @@ const ethers = hre.ethers;
 export async function assignDepositsV2(txOptions) {
     // Load contracts
     const [
-        rocketDepositPool,
-        rocketDAOProtocolSettingsDeposit,
-        rocketMinipoolQueue,
-        rocketDAOProtocolSettingsMinipool,
-        rocketVault,
+        lqgDepositPool,
+        lqgDAOProtocolSettingsDeposit,
+        lqgMinipoolQueue,
+        lqgDAOProtocolSettingsMinipool,
+        lqgVault,
     ] = await Promise.all([
-        RocketDepositPool.deployed(),
-        RocketDAOProtocolSettingsDeposit.deployed(),
-        RocketMinipoolQueue.deployed(),
-        RocketDAOProtocolSettingsMinipool.deployed(),
-        RocketVault.deployed(),
+        LQGDepositPool.deployed(),
+        LQGDAOProtocolSettingsDeposit.deployed(),
+        LQGMinipoolQueue.deployed(),
+        LQGDAOProtocolSettingsMinipool.deployed(),
+        LQGVault.deployed(),
     ]);
 
     // Get parameters
@@ -38,12 +38,12 @@ export async function assignDepositsV2(txOptions) {
         fullMinipoolQueueLength, halfMinipoolQueueLength, emptyMinipoolQueueLength,
         fullDepositUserAmount, halfDepositUserAmount, emptyDepositUserAmount,
     ] = await Promise.all([
-        rocketVault.balanceOf("rocketDepositPool"),
-        rocketDAOProtocolSettingsDeposit.getMaximumDepositAssignments(),
-        rocketDAOProtocolSettingsDeposit.getMaximumDepositSocialisedAssignments(),
-        rocketMinipoolQueue.getLength(),
-        rocketMinipoolQueue.getLengthLegacy(1), rocketMinipoolQueue.getLengthLegacy(2), rocketMinipoolQueue.getLengthLegacy(3),
-        rocketDAOProtocolSettingsMinipool.getDepositUserAmount(1), rocketDAOProtocolSettingsMinipool.getDepositUserAmount(2), rocketDAOProtocolSettingsMinipool.getDepositUserAmount(3),
+        lqgVault.balanceOf("lqgDepositPool"),
+        lqgDAOProtocolSettingsDeposit.getMaximumDepositAssignments(),
+        lqgDAOProtocolSettingsDeposit.getMaximumDepositSocialisedAssignments(),
+        lqgMinipoolQueue.getLength(),
+        lqgMinipoolQueue.getLengthLegacy(1), lqgMinipoolQueue.getLengthLegacy(2), lqgMinipoolQueue.getLengthLegacy(3),
+        lqgDAOProtocolSettingsMinipool.getDepositUserAmount(1), lqgDAOProtocolSettingsMinipool.getDepositUserAmount(2), lqgDAOProtocolSettingsMinipool.getDepositUserAmount(3),
     ]);
 
     // Get queued minipool capacities
@@ -75,8 +75,8 @@ export async function assignDepositsV2(txOptions) {
         expectedEthAssigned = '31'.ether * expectedDepositAssignments;
 
         let indices = [...Array(Number(expectedDepositAssignments)).keys()];
-        let addressesInQueue = await Promise.all(indices.map(i => rocketMinipoolQueue.getMinipoolAt(i)));
-        let minipoolsInQueue = await Promise.all(addressesInQueue.map(a => RocketMinipoolDelegate.at(a)));
+        let addressesInQueue = await Promise.all(indices.map(i => lqgMinipoolQueue.getMinipoolAt(i)));
+        let minipoolsInQueue = await Promise.all(addressesInQueue.map(a => LQGMinipoolDelegate.at(a)));
         let topUpValues = await Promise.all(minipoolsInQueue.map(m => m.getNodeTopUpValue()))
         expectedNodeBalanceUsed = topUpValues.reduce((p, c) => p + c, expectedNodeBalanceUsed);
     }
@@ -84,9 +84,9 @@ export async function assignDepositsV2(txOptions) {
     // Get balances
     function getBalances() {
         return Promise.all([
-            rocketDepositPool.getBalance(),
-            rocketDepositPool.getNodeBalance(),
-            ethers.provider.getBalance(rocketVault.target),
+            lqgDepositPool.getBalance(),
+            lqgDepositPool.getNodeBalance(),
+            ethers.provider.getBalance(lqgVault.target),
         ]).then(
             ([depositPoolEth, depositPoolNodeEth, vaultEth]) =>
             ({depositPoolEth, depositPoolNodeEth, vaultEth})
@@ -96,8 +96,8 @@ export async function assignDepositsV2(txOptions) {
     // Get minipool queue details
     function getMinipoolQueueDetails() {
         return Promise.all([
-            rocketMinipoolQueue.getTotalLength(),
-            rocketMinipoolQueue.getTotalCapacity(),
+            lqgMinipoolQueue.getTotalLength(),
+            lqgMinipoolQueue.getTotalCapacity(),
         ]).then(
             ([totalLength, totalCapacity]) =>
             ({totalLength, totalCapacity})
@@ -111,7 +111,7 @@ export async function assignDepositsV2(txOptions) {
     ]);
 
     // Assign deposits
-    await rocketDepositPool.connect(txOptions.from).assignDeposits(txOptions);
+    await lqgDepositPool.connect(txOptions.from).assignDeposits(txOptions);
 
     // Get updated balances & minipool queue details
     let [balances2, queue2] = await Promise.all([

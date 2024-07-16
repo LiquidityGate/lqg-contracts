@@ -1,8 +1,8 @@
 import {
-    RocketMerkleDistributorMainnet,
-    RocketNodeManager,
-    RocketRewardsPool,
-    RocketTokenRPL,
+    LQGMerkleDistributorMainnet,
+    LQGNodeManager,
+    LQGRewardsPool,
+    LQGTokenRPL,
 } from '../_utils/artifacts';
 import { parseRewardsMap } from '../_utils/merkle-tree';
 import { assertBN } from '../_helpers/bn';
@@ -15,25 +15,25 @@ export async function claimRewards(nodeAddress, indices, rewards, txOptions) {
 
     // Load contracts
     const [
-        rocketRewardsPool,
-        rocketNodeManager,
-        rocketMerkleDistributorMainnet,
-        rocketTokenRPL,
+        lqgRewardsPool,
+        lqgNodeManager,
+        lqgMerkleDistributorMainnet,
+        lqgTokenRPL,
     ] = await Promise.all([
-        RocketRewardsPool.deployed(),
-        RocketNodeManager.deployed(),
-        RocketMerkleDistributorMainnet.deployed(),
-        RocketTokenRPL.deployed(),
+        LQGRewardsPool.deployed(),
+        LQGNodeManager.deployed(),
+        LQGMerkleDistributorMainnet.deployed(),
+        LQGTokenRPL.deployed(),
     ]);
 
     // Get node withdrawal address
-    let nodeWithdrawalAddress = await rocketNodeManager.getNodeWithdrawalAddress(nodeAddress);
+    let nodeWithdrawalAddress = await lqgNodeManager.getNodeWithdrawalAddress(nodeAddress);
 
     // Get balances
     function getBalances() {
         return Promise.all([
-            rocketRewardsPool.getClaimIntervalTimeStart(),
-            rocketTokenRPL.balanceOf(nodeWithdrawalAddress),
+            lqgRewardsPool.getClaimIntervalTimeStart(),
+            lqgTokenRPL.balanceOf(nodeWithdrawalAddress),
             ethers.provider.getBalance(nodeWithdrawalAddress),
         ]).then(
             ([claimIntervalTimeStart, nodeRpl, nodeEth]) =>
@@ -70,7 +70,7 @@ export async function claimRewards(nodeAddress, indices, rewards, txOptions) {
         totalAmountETH = totalAmountETH + proof.amountETH;
     }
 
-    const tx = await rocketMerkleDistributorMainnet.connect(txOptions.from).claim(nodeAddress, indices, amountsRPL, amountsETH, proofs, txOptions);
+    const tx = await lqgMerkleDistributorMainnet.connect(txOptions.from).claim(nodeAddress, indices, amountsRPL, amountsETH, proofs, txOptions);
     let gasUsed = 0n;
 
     if (ethers.getAddress(nodeWithdrawalAddress) === ethers.getAddress(txOptions.from.address)) {

@@ -2,7 +2,7 @@ pragma solidity >0.5.0 <0.9.0;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-interface RocketDAOProtocolSettingsNetworkInterface {
+interface LQGDAOProtocolSettingsNetworkInterface {
     function getNodeConsensusThreshold() external view returns (uint256);
     function getNodePenaltyThreshold() external view returns (uint256);
     function getPerPenaltyRate() external view returns (uint256);

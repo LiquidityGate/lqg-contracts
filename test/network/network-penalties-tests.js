@@ -2,7 +2,7 @@ import { before, describe, it } from 'mocha';
 import { printTitle } from '../_utils/formatting';
 import { shouldRevert } from '../_utils/testing';
 import { nodeStakeRPL, registerNode, setNodeTrusted } from '../_helpers/node';
-import { RocketDAONodeTrustedSettingsProposals, RocketMinipoolPenalty } from '../_utils/artifacts';
+import { LQGDAONodeTrustedSettingsProposals, LQGMinipoolPenalty } from '../_utils/artifacts';
 import { setDAONodeTrustedBootstrapSetting } from '../dao/scenario-dao-node-trusted-bootstrap';
 import { createMinipool, getMinipoolMinimumRPLStake } from '../_helpers/minipool';
 import { submitPenalty } from './scenario-submit-penalties';
@@ -15,7 +15,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketNetworkPenalties', () => {
+    describe('LQGNetworkPenalties', () => {
         let owner,
             node,
             trustedNode1,
@@ -56,13 +56,13 @@ export default function() {
             await setNodeTrusted(trustedNode3, 'saas_3', 'node@home.com', owner);
 
             // Set a small proposal cooldown
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsProposals, 'proposal.cooldown', proposalCooldown, { from: owner });
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsProposals, 'proposal.vote.blocks', proposalVoteBlocks, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsProposals, 'proposal.cooldown', proposalCooldown, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsProposals, 'proposal.vote.blocks', proposalVoteBlocks, { from: owner });
             // Set a small vote delay
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsProposals, 'proposal.vote.delay.blocks', 4, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsProposals, 'proposal.vote.delay.blocks', 4, { from: owner });
             // Set max penalty rate
-            let rocketMinipoolPenalty = await RocketMinipoolPenalty.deployed();
-            rocketMinipoolPenalty.setMaxPenaltyRate('1'.ether, { from: owner });
+            let lqgMinipoolPenalty = await LQGMinipoolPenalty.deployed();
+            lqgMinipoolPenalty.setMaxPenaltyRate('1'.ether, { from: owner });
 
             // Stake RPL to cover minipools
             let minipoolRplStake = await getMinipoolMinimumRPLStake();

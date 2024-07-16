@@ -2,16 +2,16 @@ pragma solidity 0.7.6;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-import "./RocketDAOProtocolSettings.sol";
-import "../../../../interface/dao/protocol/settings/RocketDAOProtocolSettingsNodeInterface.sol";
-import "../../../../interface/network/RocketNetworkSnapshotsInterface.sol";
+import "./LQGDAOProtocolSettings.sol";
+import "../../../../interface/dao/protocol/settings/LQGDAOProtocolSettingsNodeInterface.sol";
+import "../../../../interface/network/LQGNetworkSnapshotsInterface.sol";
 
 // Network auction settings
 
-contract RocketDAOProtocolSettingsNode is RocketDAOProtocolSettings, RocketDAOProtocolSettingsNodeInterface {
+contract LQGDAOProtocolSettingsNode is LQGDAOProtocolSettings, LQGDAOProtocolSettingsNodeInterface {
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketDAOProtocolSettings(_rocketStorageAddress, "node") {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGDAOProtocolSettings(_lqgStorageAddress, "node") {
         // Set version
         version = 4;
         // Initialize settings on deployment
@@ -33,8 +33,8 @@ contract RocketDAOProtocolSettingsNode is RocketDAOProtocolSettings, RocketDAOPr
         bytes32 settingKey = keccak256(bytes(_settingPath));
         if(settingKey == keccak256(bytes("node.voting.power.stake.maximum"))) {
             // Redirect the setting change to push a new value into the snapshot system instead
-            RocketNetworkSnapshotsInterface rocketNetworkSnapshots = RocketNetworkSnapshotsInterface(getContractAddress("rocketNetworkSnapshots"));
-            rocketNetworkSnapshots.push(settingKey, uint224(_value));
+            LQGNetworkSnapshotsInterface lqgNetworkSnapshots = LQGNetworkSnapshotsInterface(getContractAddress("lqgNetworkSnapshots"));
+            lqgNetworkSnapshots.push(settingKey, uint224(_value));
             return;
         }
         // Update setting now
@@ -74,7 +74,7 @@ contract RocketDAOProtocolSettingsNode is RocketDAOProtocolSettings, RocketDAOPr
     // Maximum staked RPL that applies to voting power per minipool as a fraction of assigned user ETH value
     function getMaximumStakeForVotingPower() override external view returns (uint256) {
         bytes32 settingKey = keccak256(bytes("node.voting.power.stake.maximum"));
-        RocketNetworkSnapshotsInterface rocketNetworkSnapshots = RocketNetworkSnapshotsInterface(getContractAddress("rocketNetworkSnapshots"));
-        return uint256(rocketNetworkSnapshots.latestValue(settingKey));
+        LQGNetworkSnapshotsInterface lqgNetworkSnapshots = LQGNetworkSnapshotsInterface(getContractAddress("lqgNetworkSnapshots"));
+        return uint256(lqgNetworkSnapshots.latestValue(settingKey));
     }
 }

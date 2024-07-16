@@ -1,7 +1,7 @@
 import { before, describe, it } from 'mocha';
 import { printTitle } from '../_utils/formatting';
 import { shouldRevert } from '../_utils/testing';
-import { RocketDAONodeTrustedSettingsMinipool, RocketDAOProtocolSettingsAuction } from '../_utils/artifacts';
+import { LQGDAONodeTrustedSettingsMinipool, LQGDAOProtocolSettingsAuction } from '../_utils/artifacts';
 import { auctionCreateLot, auctionPlaceBid, getLotPriceAtBlock, getLotStartBlock } from '../_helpers/auction';
 import { userDeposit } from '../_helpers/deposit';
 import { createMinipool, stakeMinipool } from '../_helpers/minipool';
@@ -23,7 +23,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketAuctionManager', () => {
+    describe('LQGAuctionManager', () => {
         let owner,
             node,
             trustedNode,
@@ -47,8 +47,8 @@ export default function() {
             ] = await ethers.getSigners();
 
             // Set settings
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsMinipool, 'minipool.scrub.period', scrubPeriod, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsAuction, 'auction.lot.duration', auctionDuration, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsMinipool, 'minipool.scrub.period', scrubPeriod, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsAuction, 'auction.lot.duration', auctionDuration, { from: owner });
 
             // Register node
             await registerNode({ from: node });
@@ -93,7 +93,7 @@ export default function() {
             await withdrawValidatorBalance(minipool, '0'.ether, node, true);
 
             // Disable lot creation
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsAuction, 'auction.lot.create.enabled', false, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsAuction, 'auction.lot.create.enabled', false, { from: owner });
 
             // Attempt to create lot
             await shouldRevert(createLot({
@@ -110,9 +110,9 @@ export default function() {
 
         it(printTitle('auction lot', 'has correct price at block'), async () => {
             // Set lot settings
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsAuction, 'auction.lot.duration', 100000, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsAuction, 'auction.price.start', '1'.ether, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsAuction, 'auction.price.reserve', '0.5'.ether, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsAuction, 'auction.lot.duration', 100000, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsAuction, 'auction.price.start', '1'.ether, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsAuction, 'auction.price.reserve', '0.5'.ether, { from: owner });
 
             // Set RPL price
             let block = await ethers.provider.getBlockNumber();
@@ -271,7 +271,7 @@ export default function() {
 
             it(printTitle('random address', 'cannot bid on a lot while bidding is disabled'), async () => {
                 // Disable bidding
-                await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsAuction, 'auction.lot.bidding.enabled', false, { from: owner });
+                await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsAuction, 'auction.lot.bidding.enabled', false, { from: owner });
 
                 // Attempt to place bid
                 await shouldRevert(placeBid(0, {

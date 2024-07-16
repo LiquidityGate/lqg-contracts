@@ -1,4 +1,4 @@
-import { RocketAuctionManager, RocketDAOProtocolSettingsAuction, RocketNetworkPrices } from '../_utils/artifacts';
+import { LQGAuctionManager, LQGDAOProtocolSettingsAuction, LQGNetworkPrices } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 import * as assert from 'assert';
 
@@ -7,13 +7,13 @@ export async function createLot(txOptions) {
 
     // Load contracts
     const [
-        rocketAuctionManager,
-        rocketAuctionSettings,
-        rocketNetworkPrices,
+        lqgAuctionManager,
+        lqgAuctionSettings,
+        lqgNetworkPrices,
     ] = await Promise.all([
-        RocketAuctionManager.deployed(),
-        RocketDAOProtocolSettingsAuction.deployed(),
-        RocketNetworkPrices.deployed(),
+        LQGAuctionManager.deployed(),
+        LQGDAOProtocolSettingsAuction.deployed(),
+        LQGNetworkPrices.deployed(),
     ]);
 
     // Get parameters
@@ -24,20 +24,20 @@ export async function createLot(txOptions) {
         reservePriceRatio,
         rplPrice,
     ] = await Promise.all([
-        rocketAuctionSettings.getLotMaximumEthValue(),
-        rocketAuctionSettings.getLotDuration(),
-        rocketAuctionSettings.getStartingPriceRatio(),
-        rocketAuctionSettings.getReservePriceRatio(),
-        rocketNetworkPrices.getRPLPrice(),
+        lqgAuctionSettings.getLotMaximumEthValue(),
+        lqgAuctionSettings.getLotDuration(),
+        lqgAuctionSettings.getStartingPriceRatio(),
+        lqgAuctionSettings.getReservePriceRatio(),
+        lqgNetworkPrices.getRPLPrice(),
     ]);
 
     // Get auction contract details
     function getContractDetails() {
         return Promise.all([
-            rocketAuctionManager.getTotalRPLBalance(),
-            rocketAuctionManager.getAllottedRPLBalance(),
-            rocketAuctionManager.getRemainingRPLBalance(),
-            rocketAuctionManager.getLotCount(),
+            lqgAuctionManager.getTotalRPLBalance(),
+            lqgAuctionManager.getAllottedRPLBalance(),
+            lqgAuctionManager.getRemainingRPLBalance(),
+            lqgAuctionManager.getLotCount(),
         ]).then(
             ([totalRplBalance, allottedRplBalance, remainingRplBalance, lotCount]) =>
                 ({ totalRplBalance, allottedRplBalance, remainingRplBalance, lotCount }),
@@ -47,16 +47,16 @@ export async function createLot(txOptions) {
     // Get lot details
     function getLotDetails(lotIndex) {
         return Promise.all([
-            rocketAuctionManager.getLotExists(lotIndex),
-            rocketAuctionManager.getLotStartBlock(lotIndex),
-            rocketAuctionManager.getLotEndBlock(lotIndex),
-            rocketAuctionManager.getLotStartPrice(lotIndex),
-            rocketAuctionManager.getLotReservePrice(lotIndex),
-            rocketAuctionManager.getLotTotalRPLAmount(lotIndex),
-            rocketAuctionManager.getLotCurrentPrice(lotIndex),
-            rocketAuctionManager.getLotClaimedRPLAmount(lotIndex),
-            rocketAuctionManager.getLotRemainingRPLAmount(lotIndex),
-            rocketAuctionManager.getLotIsCleared(lotIndex),
+            lqgAuctionManager.getLotExists(lotIndex),
+            lqgAuctionManager.getLotStartBlock(lotIndex),
+            lqgAuctionManager.getLotEndBlock(lotIndex),
+            lqgAuctionManager.getLotStartPrice(lotIndex),
+            lqgAuctionManager.getLotReservePrice(lotIndex),
+            lqgAuctionManager.getLotTotalRPLAmount(lotIndex),
+            lqgAuctionManager.getLotCurrentPrice(lotIndex),
+            lqgAuctionManager.getLotClaimedRPLAmount(lotIndex),
+            lqgAuctionManager.getLotRemainingRPLAmount(lotIndex),
+            lqgAuctionManager.getLotIsCleared(lotIndex),
         ]).then(
             ([exists, startBlock, endBlock, startPrice, reservePrice, totalRpl, currentPrice, claimedRpl, remainingRpl, isCleared]) =>
                 ({
@@ -78,7 +78,7 @@ export async function createLot(txOptions) {
     let details1 = await getContractDetails();
 
     // Create lot
-    await rocketAuctionManager.connect(txOptions.from).createLot(txOptions);
+    await lqgAuctionManager.connect(txOptions.from).createLot(txOptions);
 
     // Get updated contract details
     let [details2, lot] = await Promise.all([

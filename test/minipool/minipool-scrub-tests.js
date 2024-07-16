@@ -1,8 +1,8 @@
 import { before, describe, it } from 'mocha';
 import {
-    RocketDAONodeTrustedSettingsMinipool,
-    RocketDAOProtocolSettingsMinipool,
-    RocketDAOProtocolSettingsNetwork,
+    LQGDAONodeTrustedSettingsMinipool,
+    LQGDAOProtocolSettingsMinipool,
+    LQGDAOProtocolSettingsNetwork,
 } from '../_utils/artifacts';
 import { printTitle } from '../_utils/formatting';
 import { shouldRevert } from '../_utils/testing';
@@ -21,7 +21,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketMinipool', () => {
+    describe('LQGMinipool', () => {
         let owner,
             node,
             nodeWithdrawalAddress,
@@ -65,12 +65,12 @@ export default function() {
             await setNodeTrusted(trustedNode3, 'saas_3', 'node@home.com', owner);
 
             // Set settings
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsMinipool, 'minipool.launch.timeout', launchTimeout, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsMinipool, 'minipool.withdrawal.delay', withdrawalDelay, { from: owner });
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsMinipool, 'minipool.scrub.period', scrubPeriod, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsMinipool, 'minipool.launch.timeout', launchTimeout, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsMinipool, 'minipool.withdrawal.delay', withdrawalDelay, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsMinipool, 'minipool.scrub.period', scrubPeriod, { from: owner });
 
             // Set rETH collateralisation target to a value high enough it won't cause excess ETH to be funneled back into deposit pool and mess with our calcs
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.reth.collateral.target', '50'.ether, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.reth.collateral.target', '50'.ether, { from: owner });
 
             // Make user deposit to fund a prelaunch minipool
             let refundAmount = '16'.ether;
@@ -113,7 +113,7 @@ export default function() {
 
         it(printTitle('trusted node', 'can scrub a prelaunch minipool (with penalty)'), async () => {
             // Enabled penalty
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsMinipool, 'minipool.scrub.penalty.enabled', true, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsMinipool, 'minipool.scrub.penalty.enabled', true, { from: owner });
             // 2 out of 3 should dissolve the minipool
             await voteScrub(prelaunchMinipool, { from: trustedNode1 });
             await voteScrub(prelaunchMinipool, { from: trustedNode2 });
@@ -137,11 +137,11 @@ export default function() {
         //
 
         it(printTitle('guardian', 'can not set launch timeout lower than scrub period'), async () => {
-            await shouldRevert(setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsMinipool, 'minipool.launch.timeout', scrubPeriod - 1, { from: owner }), 'Set launch timeout lower than scrub period', 'Launch timeout must be greater than scrub period');
+            await shouldRevert(setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsMinipool, 'minipool.launch.timeout', scrubPeriod - 1, { from: owner }), 'Set launch timeout lower than scrub period', 'Launch timeout must be greater than scrub period');
         });
 
         it(printTitle('guardian', 'can not set scrub period higher than launch timeout'), async () => {
-            await shouldRevert(setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsMinipool, 'minipool.scrub.period', launchTimeout + 1, { from: owner }), 'Set scrub period higher than launch timeout', 'Scrub period must be less than launch timeout');
+            await shouldRevert(setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsMinipool, 'minipool.scrub.period', launchTimeout + 1, { from: owner }), 'Set scrub period higher than launch timeout', 'Scrub period must be less than launch timeout');
         });
 
         describe('With Scrubbed Minipool', () => {

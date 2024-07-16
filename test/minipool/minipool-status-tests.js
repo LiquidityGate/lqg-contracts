@@ -4,9 +4,9 @@ import { createMinipool, getMinipoolMinimumRPLStake, minipoolStates, stakeMinipo
 import { nodeStakeRPL, registerNode, setNodeTrusted } from '../_helpers/node';
 import { mintRPL } from '../_helpers/tokens';
 import {
-    RocketDAONodeTrustedProposals,
-    RocketDAONodeTrustedSettingsMinipool,
-    RocketDAONodeTrustedSettingsProposals,
+    LQGDAONodeTrustedProposals,
+    LQGDAONodeTrustedSettingsMinipool,
+    LQGDAONodeTrustedSettingsProposals,
 } from '../_utils/artifacts';
 import {
     daoNodeTrustedExecute,
@@ -24,7 +24,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketMinipoolStatus', () => {
+    describe('LQGMinipoolStatus', () => {
         let owner,
             node,
             trustedNode1,
@@ -102,11 +102,11 @@ export default function() {
             assertBN.equal(stakingStatus3, minipoolStates.Staking, 'Incorrect staking minipool status');
 
             // Set a small proposal cooldown
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsProposals, 'proposal.cooldown', proposalCooldown, { from: owner });
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsProposals, 'proposal.vote.blocks', proposalVoteBlocks, { from: owner });
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsMinipool, 'minipool.scrub.period', scrubPeriod, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsProposals, 'proposal.cooldown', proposalCooldown, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsProposals, 'proposal.vote.blocks', proposalVoteBlocks, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsMinipool, 'minipool.scrub.period', scrubPeriod, { from: owner });
             // Set a small vote delay
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsProposals, 'proposal.vote.delay.blocks', 4, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsProposals, 'proposal.vote.delay.blocks', 4, { from: owner });
 
         });
 
@@ -117,11 +117,11 @@ export default function() {
 
         async function trustedNode4LeaveDao() {
             // Get contracts
-            let rocketDAONodeTrustedProposals = await RocketDAONodeTrustedProposals.deployed();
+            let lqgDAONodeTrustedProposals = await LQGDAONodeTrustedProposals.deployed();
             // Wait enough time to do a new proposal
             await helpers.mine(proposalCooldown);
             // Encode the calldata for the proposal
-            let proposalCalldata = rocketDAONodeTrustedProposals.interface.encodeFunctionData('proposalLeave', [trustedNode4.address]);
+            let proposalCalldata = lqgDAONodeTrustedProposals.interface.encodeFunctionData('proposalLeave', [trustedNode4.address]);
             // Add the proposal
             let proposalId = await daoNodeTrustedPropose('hey guys, can I please leave the DAO?', proposalCalldata, {
                 from: trustedNode4,

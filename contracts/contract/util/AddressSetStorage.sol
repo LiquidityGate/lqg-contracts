@@ -2,19 +2,19 @@ pragma solidity 0.7.6;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-import "../RocketBase.sol";
+import "../LQGBase.sol";
 import "../../interface/util/AddressSetStorageInterface.sol";
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-// Address set storage helper for RocketStorage data (contains unique items; has reverse index lookups)
+// Address set storage helper for LQGStorage data (contains unique items; has reverse index lookups)
 
-contract AddressSetStorage is RocketBase, AddressSetStorageInterface {
+contract AddressSetStorage is LQGBase, AddressSetStorageInterface {
 
     using SafeMath for uint;
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         version = 1;
     }
 

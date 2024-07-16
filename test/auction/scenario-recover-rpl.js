@@ -1,17 +1,17 @@
-import { RocketAuctionManager } from '../_utils/artifacts';
+import { LQGAuctionManager } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 import * as assert from 'assert';
 
 // Recover unclaimed RPL from a lot
 export async function recoverUnclaimedRPL(lotIndex, txOptions) {
     // Load contracts
-    const rocketAuctionManager = await RocketAuctionManager.deployed();
+    const lqgAuctionManager = await LQGAuctionManager.deployed();
 
     // Get auction contract details
     function getContractDetails() {
         return Promise.all([
-            rocketAuctionManager.getAllottedRPLBalance(),
-            rocketAuctionManager.getRemainingRPLBalance(),
+            lqgAuctionManager.getAllottedRPLBalance(),
+            lqgAuctionManager.getRemainingRPLBalance(),
         ]).then(
             ([allottedRplBalance, remainingRplBalance]) =>
                 ({ allottedRplBalance, remainingRplBalance }),
@@ -21,8 +21,8 @@ export async function recoverUnclaimedRPL(lotIndex, txOptions) {
     // Get lot details
     function getLotDetails() {
         return Promise.all([
-            rocketAuctionManager.getLotRPLRecovered(lotIndex),
-            rocketAuctionManager.getLotRemainingRPLAmount(lotIndex),
+            lqgAuctionManager.getLotRPLRecovered(lotIndex),
+            lqgAuctionManager.getLotRemainingRPLAmount(lotIndex),
         ]).then(
             ([rplRecovered, remainingRplAmount]) =>
                 ({ rplRecovered, remainingRplAmount }),
@@ -36,7 +36,7 @@ export async function recoverUnclaimedRPL(lotIndex, txOptions) {
     ]);
 
     // Recover RPL
-    await rocketAuctionManager.connect(txOptions.from).recoverUnclaimedRPL(lotIndex, txOptions);
+    await lqgAuctionManager.connect(txOptions.from).recoverUnclaimedRPL(lotIndex, txOptions);
 
     // Get updated details
     let [details2, lot2] = await Promise.all([

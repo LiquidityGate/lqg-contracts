@@ -2,16 +2,16 @@ pragma solidity 0.7.6;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-import "../../RocketBase.sol";
-import "../../../interface/RocketVaultInterface.sol";
-import "../../../interface/dao/protocol/RocketDAOProtocolActionsInterface.sol";
+import "../../LQGBase.sol";
+import "../../../interface/LQGVaultInterface.sol";
+import "../../../interface/dao/protocol/LQGDAOProtocolActionsInterface.sol";
 import "../../../interface/util/IERC20Burnable.sol";
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 
-// The Rocket Pool Network DAO Actions - This is a placeholder for the network DAO to come
-contract RocketDAOProtocolActions is RocketBase, RocketDAOProtocolActionsInterface { 
+// The LQG Pool Network DAO Actions - This is a placeholder for the network DAO to come
+contract LQGDAOProtocolActions is LQGBase, LQGDAOProtocolActionsInterface { 
 
     using SafeMath for uint;
 
@@ -20,7 +20,7 @@ contract RocketDAOProtocolActions is RocketBase, RocketDAOProtocolActionsInterfa
 
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         // Version
         version = 1;
     }

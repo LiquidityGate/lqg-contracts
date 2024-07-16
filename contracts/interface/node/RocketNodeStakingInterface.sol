@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >0.5.0 <0.9.0;
 
-interface RocketNodeStakingInterface {
+interface LQGNodeStakingInterface {
     function getTotalRPLStake() external view returns (uint256);
     function getNodeRPLStake(address _nodeAddress) external view returns (uint256);
     function getNodeETHMatched(address _nodeAddress) external view returns (uint256);

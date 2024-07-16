@@ -2,14 +2,14 @@ pragma solidity 0.7.6;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-import "../RocketBase.sol";
-import "../../interface/dao/RocketDAOProposalInterface.sol";
+import "../LQGBase.sol";
+import "../../interface/dao/LQGDAOProposalInterface.sol";
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 
 // A DAO proposal
-contract RocketDAOProposal is RocketBase, RocketDAOProposalInterface {
+contract LQGDAOProposal is LQGBase, LQGDAOProposalInterface {
 
     using SafeMath for uint;
 
@@ -32,7 +32,7 @@ contract RocketDAOProposal is RocketBase, RocketDAOProposalInterface {
 
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         // Version
         version = 2;
     }

@@ -2,7 +2,7 @@ pragma solidity >0.5.0 <0.9.0;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-interface RocketClaimNodeInterface {
+interface LQGClaimNodeInterface {
     function getEnabled() external view returns (bool);
     function getClaimPossible(address _nodeAddress) external view returns (bool);
     function getClaimRewardsPerc(address _nodeAddress) external view returns (uint256);

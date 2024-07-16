@@ -4,7 +4,7 @@ pragma abicoder v2;
 
 import "../../../types/SettingType.sol";
 
-interface RocketDAOSecurityProposalsInterface {
+interface LQGDAOSecurityProposalsInterface {
     function propose(string memory _proposalMessage, bytes memory _payload) external returns (uint256);
     function vote(uint256 _proposalID, bool _support) external;
     function cancel(uint256 _proposalID) external;

@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.18;
 
-import "../../RocketBase.sol";
-import "../../../interface/dao/security/RocketDAOSecurityInterface.sol";
-import "../../../interface/dao/security/RocketDAOSecurityProposalsInterface.sol";
-import "../../../interface/rewards/claims/RocketClaimDAOInterface.sol";
-import "../../../interface/dao/RocketDAOProposalInterface.sol";
-import "../../../interface/node/RocketNodeManagerInterface.sol";
+import "../../LQGBase.sol";
+import "../../../interface/dao/security/LQGDAOSecurityInterface.sol";
+import "../../../interface/dao/security/LQGDAOSecurityProposalsInterface.sol";
+import "../../../interface/rewards/claims/LQGClaimDAOInterface.sol";
+import "../../../interface/dao/LQGDAOProposalInterface.sol";
+import "../../../interface/node/LQGNodeManagerInterface.sol";
 import "../../../types/SettingType.sol";
 
-import "../../../interface/dao/security/RocketDAOSecurityActionsInterface.sol";
-import "../../../interface/dao/protocol/settings/RocketDAOProtocolSettingsSecurityInterface.sol";
+import "../../../interface/dao/security/LQGDAOSecurityActionsInterface.sol";
+import "../../../interface/dao/protocol/settings/LQGDAOProtocolSettingsSecurityInterface.sol";
 
 /// @notice Proposal contract for the security council
-contract RocketDAOSecurityProposals is RocketBase, RocketDAOSecurityProposalsInterface {
+contract LQGDAOSecurityProposals is LQGBase, LQGDAOSecurityProposalsInterface {
 
     // The namespace for any data stored in the trusted node DAO (do not change)
     string constant internal daoNameSpace = "dao.security.";
@@ -23,8 +23,8 @@ contract RocketDAOSecurityProposals is RocketBase, RocketDAOSecurityProposalsInt
 
     // Only allow certain contracts to execute methods
     modifier onlyExecutingContracts() {
-        // Methods are either executed by bootstrapping methods in rocketDAONodeTrusted or by people executing passed proposals in rocketDAOProposal
-        require(msg.sender == getContractAddress("rocketDAOProtocol") || msg.sender == getContractAddress("rocketDAOProposal"), "Sender is not permitted to access executing methods");
+        // Methods are either executed by bootstrapping methods in lqgDAONodeTrusted or by people executing passed proposals in lqgDAOProposal
+        require(msg.sender == getContractAddress("lqgDAOProtocol") || msg.sender == getContractAddress("lqgDAOProposal"), "Sender is not permitted to access executing methods");
         _;
     }
 
@@ -42,29 +42,29 @@ contract RocketDAOSecurityProposals is RocketBase, RocketDAOSecurityProposalsInt
         _;
     }
 
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         version = 1;
     }
 
     /// @notice Creates a new proposal for this DAO
     /// @param _proposalMessage A short message explaining what this proposal does
     /// @param _payload An ABI encoded payload which is executed on the proposal contract upon execution of this proposal
-    function propose(string memory _proposalMessage, bytes memory _payload) override external onlySecurityMember() onlyLatestContract("rocketDAOSecurityProposals", address(this)) returns (uint256) {
+    function propose(string memory _proposalMessage, bytes memory _payload) override external onlySecurityMember() onlyLatestContract("lqgDAOSecurityProposals", address(this)) returns (uint256) {
         // Load contracts
-        RocketDAOProposalInterface daoProposal = RocketDAOProposalInterface(getContractAddress("rocketDAOProposal"));
-        RocketDAOSecurityInterface daoSecurity = RocketDAOSecurityInterface(getContractAddress("rocketDAOSecurity"));
-        RocketDAOProtocolSettingsSecurityInterface rocketDAOProtocolSettingsSecurity = RocketDAOProtocolSettingsSecurityInterface(getContractAddress("rocketDAOProtocolSettingsSecurity"));
+        LQGDAOProposalInterface daoProposal = LQGDAOProposalInterface(getContractAddress("lqgDAOProposal"));
+        LQGDAOSecurityInterface daoSecurity = LQGDAOSecurityInterface(getContractAddress("lqgDAOSecurity"));
+        LQGDAOProtocolSettingsSecurityInterface lqgDAOProtocolSettingsSecurity = LQGDAOProtocolSettingsSecurityInterface(getContractAddress("lqgDAOProtocolSettingsSecurity"));
         // Create the proposal
-        return daoProposal.add(msg.sender, "rocketDAOSecurityProposals", _proposalMessage, block.timestamp + 1, rocketDAOProtocolSettingsSecurity.getVoteTime(), rocketDAOProtocolSettingsSecurity.getExecuteTime(), daoSecurity.getMemberQuorumVotesRequired(), _payload);
+        return daoProposal.add(msg.sender, "lqgDAOSecurityProposals", _proposalMessage, block.timestamp + 1, lqgDAOProtocolSettingsSecurity.getVoteTime(), lqgDAOProtocolSettingsSecurity.getExecuteTime(), daoSecurity.getMemberQuorumVotesRequired(), _payload);
     }
 
     /// @notice Vote on a proposal
     /// @param _proposalID The ID of the proposal to vote on
     /// @param _support Whether the caller votes in favour or against the proposal
-    function vote(uint256 _proposalID, bool _support) override external onlySecurityMember() onlyLatestContract("rocketDAOSecurityProposals", address(this)) {
+    function vote(uint256 _proposalID, bool _support) override external onlySecurityMember() onlyLatestContract("lqgDAOSecurityProposals", address(this)) {
         // Load contracts
-        RocketDAOProposalInterface daoProposal = RocketDAOProposalInterface(getContractAddress("rocketDAOProposal"));
-        RocketDAOSecurityInterface daoSecurity = RocketDAOSecurityInterface(getContractAddress("rocketDAOSecurity"));
+        LQGDAOProposalInterface daoProposal = LQGDAOProposalInterface(getContractAddress("lqgDAOProposal"));
+        LQGDAOSecurityInterface daoSecurity = LQGDAOSecurityInterface(getContractAddress("lqgDAOSecurity"));
         // Did they join after this proposal was created? If so, they can't vote or it'll throw off the set proposalVotesRequired
         require(daoSecurity.getMemberJoinedTime(msg.sender) < daoProposal.getCreated(_proposalID), "Member cannot vote on proposal created before they became a member");
         // Vote now, one vote per trusted node member
@@ -73,18 +73,18 @@ contract RocketDAOSecurityProposals is RocketBase, RocketDAOSecurityProposalsInt
 
     /// @notice Cancel a proposal
     /// @param _proposalID The ID of the proposal to cancel
-    function cancel(uint256 _proposalID) override external onlySecurityMember() onlyLatestContract("rocketDAOSecurityProposals", address(this)) {
+    function cancel(uint256 _proposalID) override external onlySecurityMember() onlyLatestContract("lqgDAOSecurityProposals", address(this)) {
         // Load contracts
-        RocketDAOProposalInterface daoProposal = RocketDAOProposalInterface(getContractAddress("rocketDAOProposal"));
+        LQGDAOProposalInterface daoProposal = LQGDAOProposalInterface(getContractAddress("lqgDAOProposal"));
         // Cancel now, will succeed if it is the original proposer
         daoProposal.cancel(msg.sender, _proposalID);
     }
 
     /// @notice Execute a successful proposal
     /// @param _proposalID The ID of the proposal to execute
-    function execute(uint256 _proposalID) override external onlyLatestContract("rocketDAOSecurityProposals", address(this)) {
+    function execute(uint256 _proposalID) override external onlyLatestContract("lqgDAOSecurityProposals", address(this)) {
         // Load contracts
-        RocketDAOProposalInterface daoProposal = RocketDAOProposalInterface(getContractAddress("rocketDAOProposal"));
+        LQGDAOProposalInterface daoProposal = LQGDAOProposalInterface(getContractAddress("lqgDAOProposal"));
         // Execute now
         daoProposal.execute(_proposalID);
     }
@@ -120,40 +120,40 @@ contract RocketDAOSecurityProposals is RocketBase, RocketDAOSecurityProposalsInt
 
     /*** Proposal - Members **********************/
 
-    /// @dev Called by rocketDAOProtocolProposals to execute an invite in this namespace
+    /// @dev Called by lqgDAOProtocolProposals to execute an invite in this namespace
     /// @param _id A unique identifier for the new member
     /// @param _memberAddress The address of the new member
-    function proposalInvite(string calldata _id, address _memberAddress) override public onlyLatestContract("rocketDAOProtocolProposals", msg.sender) {
+    function proposalInvite(string calldata _id, address _memberAddress) override public onlyLatestContract("lqgDAOProtocolProposals", msg.sender) {
         // Their proposal executed, record the block
         setUint(keccak256(abi.encodePacked(daoNameSpace, "member.executed.time", "invited", _memberAddress)), block.timestamp);
         // Ok all good, lets get their invitation and member data setup
-        // They are initially only invited to join, so their membership isn't set as true until they accept it in RocketDAONodeTrustedActions
+        // They are initially only invited to join, so their membership isn't set as true until they accept it in LQGDAONodeTrustedActions
         _memberInit(_id, _memberAddress);
     }
 
-    /// @dev Called by rocketDAOProtocolProposals to execute a kick in this namespace
+    /// @dev Called by lqgDAOProtocolProposals to execute a kick in this namespace
     /// @param _memberAddress The address of the member to kick
-    function proposalKick(address _memberAddress) override public onlyLatestContract("rocketDAOProtocolProposals", msg.sender) {
+    function proposalKick(address _memberAddress) override public onlyLatestContract("lqgDAOProtocolProposals", msg.sender) {
         // Load contracts
-        RocketDAOSecurityActionsInterface daoActionsContract = RocketDAOSecurityActionsInterface(getContractAddress("rocketDAOSecurityActions"));
+        LQGDAOSecurityActionsInterface daoActionsContract = LQGDAOSecurityActionsInterface(getContractAddress("lqgDAOSecurityActions"));
         // Kick them now
         daoActionsContract.actionKick(_memberAddress);
     }
 
-    /// @dev Called by rocketDAOProtocolProposals to execute a kick of multiple members in this namespace
+    /// @dev Called by lqgDAOProtocolProposals to execute a kick of multiple members in this namespace
     /// @param _memberAddresses An array of addresses of the members to kick
-    function proposalKickMulti(address[] calldata _memberAddresses) override public onlyLatestContract("rocketDAOProtocolProposals", msg.sender) {
+    function proposalKickMulti(address[] calldata _memberAddresses) override public onlyLatestContract("lqgDAOProtocolProposals", msg.sender) {
         // Load contracts
-        RocketDAOSecurityActionsInterface daoActionsContract = RocketDAOSecurityActionsInterface(getContractAddress("rocketDAOSecurityActions"));
+        LQGDAOSecurityActionsInterface daoActionsContract = LQGDAOSecurityActionsInterface(getContractAddress("lqgDAOSecurityActions"));
         // Kick them now
         daoActionsContract.actionKickMulti(_memberAddresses);
     }
 
-    /// @dev Called by rocketDAOProtocolProposals to execute an member replacement in this namespace
+    /// @dev Called by lqgDAOProtocolProposals to execute an member replacement in this namespace
     /// @param _existingMemberAddress The address of the member to kick
     /// @param _newMemberId A unique identifier for the new member
     /// @param _newMemberAddress The address of the member to invite
-    function proposalReplace(address _existingMemberAddress, string calldata _newMemberId, address _newMemberAddress) override external onlyLatestContract("rocketDAOProtocolProposals", msg.sender) {
+    function proposalReplace(address _existingMemberAddress, string calldata _newMemberId, address _newMemberAddress) override external onlyLatestContract("lqgDAOProtocolProposals", msg.sender) {
         proposalKick(_existingMemberAddress);
         proposalInvite(_newMemberId, _newMemberAddress);
     }
@@ -165,7 +165,7 @@ contract RocketDAOSecurityProposals is RocketBase, RocketDAOSecurityProposalsInt
     /// @param _memberAddress The address of the new member
     function _memberInit(string memory _id, address _memberAddress) private {
         // Load contracts
-        RocketDAOSecurityInterface daoSecurity = RocketDAOSecurityInterface(getContractAddress("rocketDAOSecurity"));
+        LQGDAOSecurityInterface daoSecurity = LQGDAOSecurityInterface(getContractAddress("lqgDAOSecurity"));
         // Check current node status
         require(!daoSecurity.getMemberIsValid(_memberAddress), "This node is already part of the security council");
         // Verify the ID is min 3 chars

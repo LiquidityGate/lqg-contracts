@@ -1,4 +1,4 @@
-import { RocketTokenRPL, RocketVault } from '../_utils/artifacts';
+import { LQGTokenRPL, LQGVault } from '../_utils/artifacts';
 import { setRPLInflationIntervalRate, setRPLInflationStartTime } from '../dao/scenario-dao-protocol-bootstrap';
 import { assertBN } from '../_helpers/bn';
 
@@ -20,26 +20,26 @@ export async function rplClaimInflation(config, txOptions, tokenAmountToMatch = 
     }
 
     // Load contracts
-    const rocketTokenRPL = await RocketTokenRPL.deployed();
-    const rocketVault = await RocketVault.deployed();
+    const lqgTokenRPL = await LQGTokenRPL.deployed();
+    const lqgVault = await LQGVault.deployed();
 
     // Get the previously last inflation calculated block
-    const timeIntervalLastCalc = await rocketTokenRPL.getInflationCalcTime();
+    const timeIntervalLastCalc = await lqgTokenRPL.getInflationCalcTime();
 
     // Get data about the current inflation
     function getInflationData() {
         return Promise.all([
             helpers.time.latest(),
-            rocketTokenRPL.totalSupply(),
-            rocketTokenRPL.getInflationIntervalStartTime(),
-            rocketTokenRPL.getInflationIntervalsPassed(),
-            rocketTokenRPL.getInflationIntervalRate(),
-            rocketTokenRPL.getInflationCalcTime(),
-            rocketTokenRPL.getInflationIntervalTime(),
-            rocketTokenRPL.balanceOf(rocketVault.target),
-            rocketVault.balanceOfToken('rocketRewardsPool', rocketTokenRPL.target),
+            lqgTokenRPL.totalSupply(),
+            lqgTokenRPL.getInflationIntervalStartTime(),
+            lqgTokenRPL.getInflationIntervalsPassed(),
+            lqgTokenRPL.getInflationIntervalRate(),
+            lqgTokenRPL.getInflationCalcTime(),
+            lqgTokenRPL.getInflationIntervalTime(),
+            lqgTokenRPL.balanceOf(lqgVault.target),
+            lqgVault.balanceOfToken('lqgRewardsPool', lqgTokenRPL.target),
         ]).then(
-            ([currentTime, tokenTotalSupply, inflationStartTime, inflationIntervalsPassed, inflationIntervalRate, inflationCalcTime, intervalTime, rocketVaultBalanceRPL, rocketVaultInternalBalanceRPL]) =>
+            ([currentTime, tokenTotalSupply, inflationStartTime, inflationIntervalsPassed, inflationIntervalRate, inflationCalcTime, intervalTime, lqgVaultBalanceRPL, lqgVaultInternalBalanceRPL]) =>
                 ({
                     currentTime,
                     tokenTotalSupply,
@@ -48,8 +48,8 @@ export async function rplClaimInflation(config, txOptions, tokenAmountToMatch = 
                     inflationIntervalRate,
                     inflationCalcTime,
                     intervalTime,
-                    rocketVaultBalanceRPL,
-                    rocketVaultInternalBalanceRPL,
+                    lqgVaultBalanceRPL,
+                    lqgVaultInternalBalanceRPL,
                 }),
         );
     }
@@ -90,7 +90,7 @@ export async function rplClaimInflation(config, txOptions, tokenAmountToMatch = 
     }
 
     // Claim tokens now
-    await rocketTokenRPL.connect(txOptions.from).inflationMintTokens(txOptions);
+    await lqgTokenRPL.connect(txOptions.from).inflationMintTokens(txOptions);
 
     // Get inflation data
     let inflationData2 = await getInflationData();
@@ -100,8 +100,8 @@ export async function rplClaimInflation(config, txOptions, tokenAmountToMatch = 
 
     // Verify the minted amount is correct based on inflation rate etc
     assertBN.equal(expectedTokensMinted, totalSupplyEnd - totalSupplyStart, 'Incorrect amount of minted tokens expected');
-    // Verify the minted tokens are now stored in Rocket Vault on behalf of Rocket Rewards Pool
-    assertBN.equal(inflationData2.rocketVaultInternalBalanceRPL, inflationData2.rocketVaultBalanceRPL, 'Incorrect amount of tokens stored in Rocket Vault for Rocket Rewards Pool');
+    // Verify the minted tokens are now stored in LQG Vault on behalf of LQG Rewards Pool
+    assertBN.equal(inflationData2.lqgVaultInternalBalanceRPL, inflationData2.lqgVaultBalanceRPL, 'Incorrect amount of tokens stored in LQG Vault for LQG Rewards Pool');
     // Are we verifying an exact amount of tokens given as a required parameter on this pass?
     if (tokenAmountToMatch) {
         tokenAmountToMatch = BigInt(tokenAmountToMatch);

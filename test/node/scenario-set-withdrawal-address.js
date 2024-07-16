@@ -1,17 +1,17 @@
-import { RocketStorage } from '../../test/_utils/artifacts';
+import { LQGStorage } from '../../test/_utils/artifacts';
 import * as assert from 'assert';
 
 // Set a node's withdrawal address
 export async function setWithdrawalAddress(nodeAddress, withdrawalAddress, confirm, txOptions) {
     // Load contracts
-    const rocketStorage = await RocketStorage.deployed();
+    const lqgStorage = await LQGStorage.deployed();
 
     // Set withdrawal address
-    await rocketStorage.connect(txOptions.from).setWithdrawalAddress(nodeAddress, withdrawalAddress, confirm, txOptions);
+    await lqgStorage.connect(txOptions.from).setWithdrawalAddress(nodeAddress, withdrawalAddress, confirm, txOptions);
 
     // Get current & pending withdrawal addresses
-    let nodeWithdrawalAddress = await rocketStorage.getNodeWithdrawalAddress(nodeAddress);
-    let nodePendingWithdrawalAddress = await rocketStorage.getNodePendingWithdrawalAddress(nodeAddress);
+    let nodeWithdrawalAddress = await lqgStorage.getNodeWithdrawalAddress(nodeAddress);
+    let nodePendingWithdrawalAddress = await lqgStorage.getNodePendingWithdrawalAddress(nodeAddress);
 
     // Confirmed update check
     if (confirm) {
@@ -27,14 +27,14 @@ export async function setWithdrawalAddress(nodeAddress, withdrawalAddress, confi
 // Confirm a node's net withdrawal address
 export async function confirmWithdrawalAddress(nodeAddress, txOptions) {
     // Load contracts
-    const rocketStorage = await RocketStorage.deployed();
+    const lqgStorage = await LQGStorage.deployed();
 
     // Confirm withdrawal address
-    await rocketStorage.connect(txOptions.from).confirmWithdrawalAddress(nodeAddress, txOptions);
+    await lqgStorage.connect(txOptions.from).confirmWithdrawalAddress(nodeAddress, txOptions);
 
     // Get current & pending withdrawal addresses
-    let nodeWithdrawalAddress = await rocketStorage.getNodeWithdrawalAddress(nodeAddress);
-    let nodePendingWithdrawalAddress = await rocketStorage.getNodePendingWithdrawalAddress(nodeAddress);
+    let nodeWithdrawalAddress = await lqgStorage.getNodeWithdrawalAddress(nodeAddress);
+    let nodePendingWithdrawalAddress = await lqgStorage.getNodePendingWithdrawalAddress(nodeAddress);
 
     // Check
     assert.strictEqual(nodeWithdrawalAddress, txOptions.from.address, 'Incorrect updated withdrawal address');

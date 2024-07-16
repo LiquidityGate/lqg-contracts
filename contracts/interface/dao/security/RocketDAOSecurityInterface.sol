@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >0.5.0 <0.9.0;
 
-interface RocketDAOSecurityInterface {
+interface LQGDAOSecurityInterface {
     function getMemberQuorumVotesRequired() external view returns (uint256);
     function getMemberIsValid(address _nodeAddress) external view returns (bool);
     function getMemberAt(uint256 _index) external view returns (address);

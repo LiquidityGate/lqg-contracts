@@ -1,8 +1,8 @@
 import {
-    RocketMerkleDistributorMainnet,
-    RocketNodeManager, RocketNodeStaking,
-    RocketRewardsPool,
-    RocketTokenRPL,
+    LQGMerkleDistributorMainnet,
+    LQGNodeManager, LQGNodeStaking,
+    LQGRewardsPool,
+    LQGTokenRPL,
 } from '../_utils/artifacts';
 import { parseRewardsMap } from '../_utils/merkle-tree';
 import { assertBN } from '../_helpers/bn';
@@ -14,30 +14,30 @@ const ethers = hre.ethers;
 export async function claimAndStakeRewards(nodeAddress, indices, rewards, stakeAmount, txOptions) {
     // Load contracts
     const [
-        rocketRewardsPool,
-        rocketNodeManager,
-        rocketNodeStaking,
-        rocketMerkleDistributorMainnet,
-        rocketTokenRPL,
+        lqgRewardsPool,
+        lqgNodeManager,
+        lqgNodeStaking,
+        lqgMerkleDistributorMainnet,
+        lqgTokenRPL,
     ] = await Promise.all([
-        RocketRewardsPool.deployed(),
-        RocketNodeManager.deployed(),
-        RocketNodeStaking.deployed(),
-        RocketMerkleDistributorMainnet.deployed(),
-        RocketTokenRPL.deployed(),
+        LQGRewardsPool.deployed(),
+        LQGNodeManager.deployed(),
+        LQGNodeStaking.deployed(),
+        LQGMerkleDistributorMainnet.deployed(),
+        LQGTokenRPL.deployed(),
     ]);
 
     // Get node withdrawal address
-    let nodeWithdrawalAddress = await rocketNodeManager.getNodeWithdrawalAddress(nodeAddress);
+    let nodeWithdrawalAddress = await lqgNodeManager.getNodeWithdrawalAddress(nodeAddress);
 
     // Get balances
     function getBalances() {
         return Promise.all([
-            rocketRewardsPool.getClaimIntervalTimeStart(),
-            rocketTokenRPL.balanceOf(nodeWithdrawalAddress),
-            rocketNodeStaking.getNodeRPLStake(nodeAddress),
+            lqgRewardsPool.getClaimIntervalTimeStart(),
+            lqgTokenRPL.balanceOf(nodeWithdrawalAddress),
+            lqgNodeStaking.getNodeRPLStake(nodeAddress),
             ethers.provider.getBalance(nodeWithdrawalAddress),
-            rocketMerkleDistributorMainnet.getOutstandingEth(nodeWithdrawalAddress),
+            lqgMerkleDistributorMainnet.getOutstandingEth(nodeWithdrawalAddress),
         ]).then(
           ([claimIntervalTimeStart, nodeRpl, rplStake, nodeEth, outstandingEth]) =>
             ({claimIntervalTimeStart, nodeRpl, rplStake, nodeEth, outstandingEth})
@@ -75,7 +75,7 @@ export async function claimAndStakeRewards(nodeAddress, indices, rewards, stakeA
         totalAmountETH = totalAmountETH + proof.amountETH;
     }
 
-    const tx = await rocketMerkleDistributorMainnet.connect(txOptions.from).claimAndStake(nodeAddress, indices, amountsRPL, amountsETH, proofs, stakeAmount, txOptions);
+    const tx = await lqgMerkleDistributorMainnet.connect(txOptions.from).claimAndStake(nodeAddress, indices, amountsRPL, amountsETH, proofs, stakeAmount, txOptions);
     let gasUsed = 0n;
 
     if(nodeWithdrawalAddress.toLowerCase() === txOptions.from.address.toLowerCase()) {

@@ -4,9 +4,9 @@ import { shouldRevert } from '../_utils/testing';
 import { registerNode, setNodeTrusted } from '../_helpers/node';
 import { executeUpdateBalances, submitBalances } from './scenario-submit-balances';
 import {
-    RocketDAONodeTrustedProposals,
-    RocketDAONodeTrustedSettingsProposals,
-    RocketDAOProtocolSettingsNetwork,
+    LQGDAONodeTrustedProposals,
+    LQGDAONodeTrustedSettingsProposals,
+    LQGDAOProtocolSettingsNetwork,
 } from '../_utils/artifacts';
 import { setDAOProtocolBootstrapSetting } from '../dao/scenario-dao-protocol-bootstrap';
 import {
@@ -24,7 +24,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketNetworkBalances', () => {
+    describe('LQGNetworkBalances', () => {
         let owner,
             node,
             trustedNode1,
@@ -63,10 +63,10 @@ export default function() {
             await setNodeTrusted(trustedNode3, 'saas_3', 'node@home.com', owner);
 
             // Set a small proposal cooldown
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsProposals, 'proposal.cooldown', proposalCooldown, { from: owner });
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsProposals, 'proposal.vote.blocks', proposalVoteBlocks, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsProposals, 'proposal.cooldown', proposalCooldown, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsProposals, 'proposal.vote.blocks', proposalVoteBlocks, { from: owner });
             // Set a small vote delay
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsProposals, 'proposal.vote.delay.blocks', 4, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsProposals, 'proposal.vote.delay.blocks', 4, { from: owner });
 
         });
 
@@ -77,11 +77,11 @@ export default function() {
 
         async function trustedNode4LeaveDao() {
             // Get contracts
-            const rocketDAONodeTrustedProposals = await RocketDAONodeTrustedProposals.deployed();
+            const lqgDAONodeTrustedProposals = await LQGDAONodeTrustedProposals.deployed();
             // Wait enough time to do a new proposal
             await helpers.mine(proposalCooldown);
             // Encode the calldata for the proposal
-            let proposalCalldata = rocketDAONodeTrustedProposals.interface.encodeFunctionData('proposalLeave', [trustedNode4.address]);
+            let proposalCalldata = lqgDAONodeTrustedProposals.interface.encodeFunctionData('proposalLeave', [trustedNode4.address]);
             // Add the proposal
             let proposalId = await daoNodeTrustedPropose('hey guys, can I please leave the DAO?', proposalCalldata, {
                 from: trustedNode4,
@@ -143,7 +143,7 @@ export default function() {
             let rethSupply = '8'.ether;
 
             // Disable submissions
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.submit.balances.enabled', false, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.submit.balances.enabled', false, { from: owner });
 
             // Attempt to submit balances
             await shouldRevert(submitBalances(block, slotTimestamp, totalBalance, stakingBalance, rethSupply, {

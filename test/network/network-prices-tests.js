@@ -4,10 +4,10 @@ import { shouldRevert } from '../_utils/testing';
 import { registerNode, setNodeTrusted } from '../_helpers/node';
 import { executeUpdatePrices, submitPrices } from './scenario-submit-prices';
 import {
-    RocketDAONodeTrustedProposals,
-    RocketDAONodeTrustedSettingsProposals,
-    RocketDAOProtocolSettingsNetwork,
-    RocketNetworkPrices,
+    LQGDAONodeTrustedProposals,
+    LQGDAONodeTrustedSettingsProposals,
+    LQGDAOProtocolSettingsNetwork,
+    LQGNetworkPrices,
 } from '../_utils/artifacts';
 import { setDAOProtocolBootstrapSetting } from '../dao/scenario-dao-protocol-bootstrap';
 import { setDAONodeTrustedBootstrapSetting } from '../dao/scenario-dao-node-trusted-bootstrap';
@@ -25,7 +25,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketNetworkPrices', () => {
+    describe('LQGNetworkPrices', () => {
         let owner,
             node,
             trustedNode1,
@@ -64,10 +64,10 @@ export default function() {
             await setNodeTrusted(trustedNode3, 'saas_3', 'node@home.com', owner);
 
             // Set a small proposal cooldown
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsProposals, 'proposal.cooldown.time', proposalCooldown, { from: owner });
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsProposals, 'proposal.vote.time', proposalVoteTime, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsProposals, 'proposal.cooldown.time', proposalCooldown, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsProposals, 'proposal.vote.time', proposalVoteTime, { from: owner });
             // Set a small vote delay
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsProposals, 'proposal.vote.delay.blocks', 4, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsProposals, 'proposal.vote.delay.blocks', 4, { from: owner });
 
         });
 
@@ -78,11 +78,11 @@ export default function() {
 
         async function trustedNode4LeaveDao() {
             // Get contracts
-            let rocketDAONodeTrustedProposals = await RocketDAONodeTrustedProposals.deployed();
+            let lqgDAONodeTrustedProposals = await LQGDAONodeTrustedProposals.deployed();
             // Wait enough time to do a new proposal
             await helpers.time.increase(proposalCooldown);
             // Encode the calldata for the proposal
-            let proposalCalldata = rocketDAONodeTrustedProposals.interface.encodeFunctionData('proposalLeave', [trustedNode4.address]);
+            let proposalCalldata = lqgDAONodeTrustedProposals.interface.encodeFunctionData('proposalLeave', [trustedNode4.address]);
             // Add the proposal
             let proposalId = await daoNodeTrustedPropose('hey guys, can I please leave the DAO?', proposalCalldata, {
                 from: trustedNode4,
@@ -140,7 +140,7 @@ export default function() {
             let rplPrice = '0.02'.ether;
 
             // Disable submissions
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.submit.prices.enabled', false, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.submit.prices.enabled', false, { from: owner });
 
             // Attempt to submit prices
             await shouldRevert(submitPrices(block, slotTimestamp, rplPrice, {

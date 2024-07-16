@@ -2,13 +2,13 @@
 pragma solidity 0.8.18;
 pragma abicoder v2;
 
-import "../RocketBase.sol";
-import "../../interface/RocketVaultInterface.sol";
-import "../../interface/rewards/RocketRewardsPoolInterface.sol";
-import "../../interface/rewards/claims/RocketClaimDAOInterface.sol";
+import "../LQGBase.sol";
+import "../../interface/LQGVaultInterface.sol";
+import "../../interface/rewards/LQGRewardsPoolInterface.sol";
+import "../../interface/rewards/claims/LQGClaimDAOInterface.sol";
 
 /// @notice Recipient of pDAO RPL from inflation. Performs treasury spends and handles recurring payments.
-contract RocketClaimDAO is RocketBase, RocketClaimDAOInterface {
+contract LQGClaimDAO is LQGBase, LQGClaimDAOInterface {
 
     // Offsets into storage for contract details
     uint256 constant internal existsOffset = 0;
@@ -26,7 +26,7 @@ contract RocketClaimDAO is RocketBase, RocketClaimDAOInterface {
     event RPLTreasuryContractCreated(string indexed contractName, address indexed recipient, uint256 amountPerPeriod, uint256 startTime, uint256 periodLength, uint256 numPeriods);
     event RPLTreasuryContractUpdated(string indexed contractName, address indexed recipient, uint256 amountPerPeriod, uint256 periodLength, uint256 numPeriods);
 
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         version = 3;
     }
 
@@ -63,15 +63,15 @@ contract RocketClaimDAO is RocketBase, RocketClaimDAOInterface {
     /// @param _invoiceID A string used to identify this payment (not used internally)
     /// @param _recipientAddress The address to send the RPL spend to
     /// @param _amount The amount of RPL to send
-    function spend(string memory _invoiceID, address _recipientAddress, uint256 _amount) override external onlyLatestContract("rocketDAOProtocolProposals", msg.sender) onlyLatestContract("rocketClaimDAO", address(this)) {
+    function spend(string memory _invoiceID, address _recipientAddress, uint256 _amount) override external onlyLatestContract("lqgDAOProtocolProposals", msg.sender) onlyLatestContract("lqgClaimDAO", address(this)) {
         // Load contracts
-        RocketVaultInterface rocketVault = RocketVaultInterface(getContractAddress("rocketVault"));
+        LQGVaultInterface lqgVault = LQGVaultInterface(getContractAddress("lqgVault"));
         // Addresses
-        IERC20 rplToken = IERC20(getContractAddress("rocketTokenRPL"));
+        IERC20 rplToken = IERC20(getContractAddress("lqgTokenRPL"));
         // Some initial checks
-        require(_amount > 0 && _amount <= rocketVault.balanceOfToken("rocketClaimDAO", rplToken), "You cannot send 0 RPL or more than the DAO has in its account");
+        require(_amount > 0 && _amount <= lqgVault.balanceOfToken("lqgClaimDAO", rplToken), "You cannot send 0 RPL or more than the DAO has in its account");
         // Send now
-        rocketVault.withdrawToken(_recipientAddress, rplToken, _amount);
+        lqgVault.withdrawToken(_recipientAddress, rplToken, _amount);
         // Log it
         emit RPLTokensSentByDAOProtocol(_invoiceID, address(this), _recipientAddress, _amount, block.timestamp);
     }
@@ -83,7 +83,7 @@ contract RocketClaimDAO is RocketBase, RocketClaimDAOInterface {
     /// @param _periodLength The length (in seconds) of periods of this contract
     /// @param _startTime A unix timestamp of when payments begin
     /// @param _numPeriods The number of periods this contract pays out for
-    function newContract(string memory _contractName, address _recipientAddress, uint256 _amountPerPeriod, uint256 _periodLength, uint256 _startTime, uint256 _numPeriods) override external onlyLatestContract("rocketDAOProtocolProposals", msg.sender) onlyLatestContract("rocketClaimDAO", address(this)) {
+    function newContract(string memory _contractName, address _recipientAddress, uint256 _amountPerPeriod, uint256 _periodLength, uint256 _startTime, uint256 _numPeriods) override external onlyLatestContract("lqgDAOProtocolProposals", msg.sender) onlyLatestContract("lqgClaimDAO", address(this)) {
         uint256 contractKey = uint256(keccak256(abi.encodePacked("dao.protocol.treasury.contract", _contractName)));
         // Ensure contract name uniqueness
         require(getBool(bytes32(contractKey + existsOffset)) == false, "Contract already exists");
@@ -105,7 +105,7 @@ contract RocketClaimDAO is RocketBase, RocketClaimDAOInterface {
     /// @param _amountPerPeriod The amount of RPL that can be claimed each period
     /// @param _periodLength The length (in seconds) of periods of this contract
     /// @param _numPeriods The number of periods this contract pays out for
-    function updateContract(string memory _contractName, address _recipientAddress, uint256 _amountPerPeriod, uint256 _periodLength, uint256 _numPeriods) override external onlyLatestContract("rocketDAOProtocolProposals", msg.sender) onlyLatestContract("rocketClaimDAO", address(this)) {
+    function updateContract(string memory _contractName, address _recipientAddress, uint256 _amountPerPeriod, uint256 _periodLength, uint256 _numPeriods) override external onlyLatestContract("lqgDAOProtocolProposals", msg.sender) onlyLatestContract("lqgClaimDAO", address(this)) {
         uint256 contractKey = uint256(keccak256(abi.encodePacked("dao.protocol.treasury.contract", _contractName)));
         // Check it exists
         require(getBool(bytes32(contractKey + existsOffset)) == true, "Contract does not exist");
@@ -126,11 +126,11 @@ contract RocketClaimDAO is RocketBase, RocketClaimDAOInterface {
 
     /// @notice Can be called to withdraw any paid amounts of RPL to the supplied recipient
     /// @param _recipientAddress The recipient address to claim for
-    function withdrawBalance(address _recipientAddress) override public onlyLatestContract("rocketClaimDAO", address(this)) {
+    function withdrawBalance(address _recipientAddress) override public onlyLatestContract("lqgClaimDAO", address(this)) {
         // Load contracts
-        RocketVaultInterface rocketVault = RocketVaultInterface(getContractAddress("rocketVault"));
+        LQGVaultInterface lqgVault = LQGVaultInterface(getContractAddress("lqgVault"));
         // Addresses
-        IERC20 rplToken = IERC20(getContractAddress("rocketTokenRPL"));
+        IERC20 rplToken = IERC20(getContractAddress("lqgTokenRPL"));
         // Get pending balance
         bytes32 balanceKey = keccak256(abi.encodePacked("dao.protocol.treasury.balance", _recipientAddress));
         uint256 amount = getUint(balanceKey);
@@ -138,16 +138,16 @@ contract RocketClaimDAO is RocketBase, RocketClaimDAOInterface {
         setUint(balanceKey, 0);
         // Some initial checks
         require(amount > 0, "No balance to withdraw");
-        require(amount <= rocketVault.balanceOfToken("rocketClaimDAO", rplToken), "Insufficient treasury balance for withdrawal");
+        require(amount <= lqgVault.balanceOfToken("lqgClaimDAO", rplToken), "Insufficient treasury balance for withdrawal");
         // Send now
-        rocketVault.withdrawToken(_recipientAddress, rplToken, amount);
+        lqgVault.withdrawToken(_recipientAddress, rplToken, amount);
         // Log it
         emit RPLTreasuryContractClaimed(_recipientAddress, amount, block.timestamp);
     }
 
     /// @notice Executes payout on the given contracts
     /// @param _contractNames An array of contract names to execute a payout on
-    function payOutContracts(string[] calldata _contractNames) override external onlyLatestContract("rocketClaimDAO", address(this)) {
+    function payOutContracts(string[] calldata _contractNames) override external onlyLatestContract("lqgClaimDAO", address(this)) {
         uint256 contractNamesLength = _contractNames.length;
         for (uint256 i = 0; i < contractNamesLength; ++i) {
             payOutContract(_contractNames[i]);
@@ -156,7 +156,7 @@ contract RocketClaimDAO is RocketBase, RocketClaimDAOInterface {
 
     /// @notice Executes a payout on given contracts and withdraws the resulting balance to the recipient
     /// @param _contractNames An array of contract names to execute a payout and withdraw on
-    function payOutContractsAndWithdraw(string[] calldata _contractNames) override external onlyLatestContract("rocketClaimDAO", address(this)) {
+    function payOutContractsAndWithdraw(string[] calldata _contractNames) override external onlyLatestContract("lqgClaimDAO", address(this)) {
         uint256 contractNamesLength = _contractNames.length;
         for (uint256 i = 0; i < contractNamesLength; ++i) {
             // Payout contract

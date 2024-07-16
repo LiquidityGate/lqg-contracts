@@ -4,7 +4,7 @@ pragma solidity >0.5.0 <0.9.0;
 
 import "../../types/MinipoolDeposit.sol";
 
-interface RocketMinipoolFactoryInterface {
+interface LQGMinipoolFactoryInterface {
     function getExpectedAddress(address _nodeAddress, uint256 _salt) external view returns (address);
     function deployContract(address _nodeAddress, uint256 _salt) external returns (address);
 }

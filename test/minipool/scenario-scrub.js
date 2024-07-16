@@ -1,8 +1,8 @@
 import {
-    RocketDAONodeTrusted,
-    RocketDAONodeTrustedSettingsMinipool,
-    RocketMinipoolManager,
-    RocketNodeStaking,
+    LQGDAONodeTrusted,
+    LQGDAONodeTrustedSettingsMinipool,
+    LQGMinipoolManager,
+    LQGNodeStaking,
 } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 import { minipoolStates } from '../_helpers/minipool';
@@ -16,8 +16,8 @@ export async function voteScrub(minipool, txOptions) {
     const nodeAddress = await minipool.getNodeAddress();
 
     // Get contracts
-    const rocketNodeStaking = await RocketNodeStaking.deployed();
-    const rocketDAONodeTrustedSettingsMinipool = await RocketDAONodeTrustedSettingsMinipool.deployed();
+    const lqgNodeStaking = await LQGNodeStaking.deployed();
+    const lqgDAONodeTrustedSettingsMinipool = await LQGDAONodeTrustedSettingsMinipool.deployed();
 
     // Get minipool details
     function getMinipoolDetails() {
@@ -26,8 +26,8 @@ export async function voteScrub(minipool, txOptions) {
             minipool.getUserDepositBalance(),
             ethers.provider.getBalance(minipool.target),
             minipool.getTotalScrubVotes(),
-            rocketNodeStaking.getNodeRPLStake(nodeAddress),
-            rocketDAONodeTrustedSettingsMinipool.getScrubPenaltyEnabled(),
+            lqgNodeStaking.getNodeRPLStake(nodeAddress),
+            lqgDAONodeTrustedSettingsMinipool.getScrubPenaltyEnabled(),
             minipool.getVacant(),
         ]).then(
             ([status, userDepositBalance, minipoolBalance, votes, nodeRPLStake, penaltyEnabled, vacant]) =>
@@ -53,8 +53,8 @@ export async function voteScrub(minipool, txOptions) {
     let details2 = await getMinipoolDetails();
 
     // Get member count
-    const rocketDAONodeTrusted = await RocketDAONodeTrusted.deployed();
-    const memberCount = await rocketDAONodeTrusted.getMemberCount();
+    const lqgDAONodeTrusted = await LQGDAONodeTrusted.deployed();
+    const memberCount = await lqgDAONodeTrusted.getMemberCount();
     const quorum = memberCount / 2n;
 
     // Check state
@@ -77,9 +77,9 @@ export async function voteScrub(minipool, txOptions) {
             const minipoolBalanceDiff = details2.minipoolBalance - details1.minipoolBalance;
             assertBN.equal(minipoolBalanceDiff, 0n, 'User balance is incorrect');
             // Expect pubkey -> minipool mapping to be removed
-            const rocketMinipoolManager = await RocketMinipoolManager.deployed();
-            const actualPubKey = await rocketMinipoolManager.getMinipoolPubkey(minipool.target);
-            const reverseAddress = await rocketMinipoolManager.getMinipoolByPubkey(actualPubKey);
+            const lqgMinipoolManager = await LQGMinipoolManager.deployed();
+            const actualPubKey = await lqgMinipoolManager.getMinipoolPubkey(minipool.target);
+            const reverseAddress = await lqgMinipoolManager.getMinipoolByPubkey(actualPubKey);
             assert.equal(reverseAddress, '0x0000000000000000000000000000000000000000');
         }
     } else {

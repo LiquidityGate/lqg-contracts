@@ -2,20 +2,20 @@ pragma solidity 0.7.6;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-import "../../RocketBase.sol";
-import "../../../interface/RocketVaultInterface.sol";
-import "../../../interface/dao/node/RocketDAONodeTrustedInterface.sol";
-import "../../../interface/dao/node/RocketDAONodeTrustedProposalsInterface.sol";
-import "../../../interface/dao/node/RocketDAONodeTrustedActionsInterface.sol";
-import "../../../interface/dao/node/settings/RocketDAONodeTrustedSettingsMembersInterface.sol";
-import "../../../interface/dao/RocketDAOProposalInterface.sol";
+import "../../LQGBase.sol";
+import "../../../interface/LQGVaultInterface.sol";
+import "../../../interface/dao/node/LQGDAONodeTrustedInterface.sol";
+import "../../../interface/dao/node/LQGDAONodeTrustedProposalsInterface.sol";
+import "../../../interface/dao/node/LQGDAONodeTrustedActionsInterface.sol";
+import "../../../interface/dao/node/settings/LQGDAONodeTrustedSettingsMembersInterface.sol";
+import "../../../interface/dao/LQGDAOProposalInterface.sol";
 import "../../../interface/util/AddressSetStorageInterface.sol";
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 
 // The Trusted Node DAO 
-contract RocketDAONodeTrusted is RocketBase, RocketDAONodeTrustedInterface {
+contract LQGDAONodeTrusted is LQGBase, LQGDAONodeTrustedInterface {
 
     using SafeMath for uint;
 
@@ -40,7 +40,7 @@ contract RocketDAONodeTrusted is RocketBase, RocketDAONodeTrustedInterface {
     
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         // Version
         version = 1;
     }
@@ -61,9 +61,9 @@ contract RocketDAONodeTrusted is RocketBase, RocketDAONodeTrustedInterface {
     // Return the amount of member votes need for a proposal to pass
     function getMemberQuorumVotesRequired() override external view returns (uint256) {
         // Load contracts
-        RocketDAONodeTrustedSettingsMembersInterface rocketDAONodeTrustedSettingsMembers = RocketDAONodeTrustedSettingsMembersInterface(getContractAddress("rocketDAONodeTrustedSettingsMembers"));
+        LQGDAONodeTrustedSettingsMembersInterface lqgDAONodeTrustedSettingsMembers = LQGDAONodeTrustedSettingsMembersInterface(getContractAddress("lqgDAONodeTrustedSettingsMembers"));
         // Calculate and return votes required
-        return getMemberCount().mul(rocketDAONodeTrustedSettingsMembers.getQuorum());
+        return getMemberCount().mul(lqgDAONodeTrustedSettingsMembers.getQuorum());
     }
 
 
@@ -133,11 +133,11 @@ contract RocketDAONodeTrusted is RocketBase, RocketDAONodeTrustedInterface {
     }
 
     // Increment/decrement a member's unbonded validator count
-    // Only accepts calls from the RocketMinipoolManager contract
-    function incrementMemberUnbondedValidatorCount(address _nodeAddress) override external onlyLatestContract("rocketDAONodeTrusted", address(this)) onlyLatestContract("rocketMinipoolManager", msg.sender) {
+    // Only accepts calls from the LQGMinipoolManager contract
+    function incrementMemberUnbondedValidatorCount(address _nodeAddress) override external onlyLatestContract("lqgDAONodeTrusted", address(this)) onlyLatestContract("lqgMinipoolManager", msg.sender) {
         addUint(keccak256(abi.encodePacked(daoNameSpace, "member.validator.unbonded.count", _nodeAddress)), 1);
     }
-    function decrementMemberUnbondedValidatorCount(address _nodeAddress) override external onlyLatestContract("rocketDAONodeTrusted", address(this)) onlyRegisteredMinipool(msg.sender) {
+    function decrementMemberUnbondedValidatorCount(address _nodeAddress) override external onlyLatestContract("lqgDAONodeTrusted", address(this)) onlyRegisteredMinipool(msg.sender) {
         subUint(keccak256(abi.encodePacked(daoNameSpace, "member.validator.unbonded.count", _nodeAddress)), 1);
     }
 
@@ -146,33 +146,33 @@ contract RocketDAONodeTrusted is RocketBase, RocketDAONodeTrustedInterface {
 
     
     // Bootstrap mode - In bootstrap mode, guardian can add members at will
-    function bootstrapMember(string memory _id, string memory _url, address _nodeAddress) override external onlyGuardian onlyBootstrapMode onlyRegisteredNode(_nodeAddress) onlyLatestContract("rocketDAONodeTrusted", address(this)) {
+    function bootstrapMember(string memory _id, string memory _url, address _nodeAddress) override external onlyGuardian onlyBootstrapMode onlyRegisteredNode(_nodeAddress) onlyLatestContract("lqgDAONodeTrusted", address(this)) {
         // Ok good to go, lets add them
-        RocketDAONodeTrustedProposalsInterface(getContractAddress("rocketDAONodeTrustedProposals")).proposalInvite(_id, _url, _nodeAddress);
+        LQGDAONodeTrustedProposalsInterface(getContractAddress("lqgDAONodeTrustedProposals")).proposalInvite(_id, _url, _nodeAddress);
     }
 
 
     // Bootstrap mode - Uint Setting
-    function bootstrapSettingUint(string memory _settingContractName, string memory _settingPath, uint256 _value) override external onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAONodeTrusted", address(this)) {
+    function bootstrapSettingUint(string memory _settingContractName, string memory _settingPath, uint256 _value) override external onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAONodeTrusted", address(this)) {
         // Ok good to go, lets update the settings 
-        RocketDAONodeTrustedProposalsInterface(getContractAddress("rocketDAONodeTrustedProposals")).proposalSettingUint(_settingContractName, _settingPath, _value);
+        LQGDAONodeTrustedProposalsInterface(getContractAddress("lqgDAONodeTrustedProposals")).proposalSettingUint(_settingContractName, _settingPath, _value);
     }
 
     // Bootstrap mode - Bool Setting
-    function bootstrapSettingBool(string memory _settingContractName, string memory _settingPath, bool _value) override external onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAONodeTrusted", address(this)) {
+    function bootstrapSettingBool(string memory _settingContractName, string memory _settingPath, bool _value) override external onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAONodeTrusted", address(this)) {
         // Ok good to go, lets update the settings 
-        RocketDAONodeTrustedProposalsInterface(getContractAddress("rocketDAONodeTrustedProposals")).proposalSettingBool(_settingContractName, _settingPath, _value);
+        LQGDAONodeTrustedProposalsInterface(getContractAddress("lqgDAONodeTrustedProposals")).proposalSettingBool(_settingContractName, _settingPath, _value);
     }
 
 
     // Bootstrap mode - Upgrade contracts or their ABI
-    function bootstrapUpgrade(string memory _type, string memory _name, string memory _contractAbi, address _contractAddress) override external onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAONodeTrusted", address(this)) {
+    function bootstrapUpgrade(string memory _type, string memory _name, string memory _contractAbi, address _contractAddress) override external onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAONodeTrusted", address(this)) {
         // Ok good to go, lets update the settings 
-        RocketDAONodeTrustedProposalsInterface(getContractAddress("rocketDAONodeTrustedProposals")).proposalUpgrade(_type, _name, _contractAbi, _contractAddress);
+        LQGDAONodeTrustedProposalsInterface(getContractAddress("lqgDAONodeTrustedProposals")).proposalUpgrade(_type, _name, _contractAbi, _contractAddress);
     }
 
     // Bootstrap mode - Disable RP Access (only RP can call this to hand over full control to the DAO)
-    function bootstrapDisable(bool _confirmDisableBootstrapMode) override external onlyGuardian onlyBootstrapMode onlyLatestContract("rocketDAONodeTrusted", address(this)) {
+    function bootstrapDisable(bool _confirmDisableBootstrapMode) override external onlyGuardian onlyBootstrapMode onlyLatestContract("lqgDAONodeTrusted", address(this)) {
         require(_confirmDisableBootstrapMode == true, "You must confirm disabling bootstrap mode, it can only be done once!");
         setBool(keccak256(abi.encodePacked(daoNameSpace, "bootstrapmode.disabled")), true); 
     }
@@ -182,11 +182,11 @@ contract RocketDAONodeTrusted is RocketBase, RocketDAONodeTrustedInterface {
         
     // In an explicable black swan scenario where the DAO loses more than the min membership required (3), this method can be used by a regular node operator to join the DAO
     // Must have their ID, URL, current RPL bond amount available and must be called by their current registered node account
-    function memberJoinRequired(string memory _id, string memory _url) override external onlyLowMemberMode onlyRegisteredNode(msg.sender) onlyLatestContract("rocketDAONodeTrusted", address(this)) {
+    function memberJoinRequired(string memory _id, string memory _url) override external onlyLowMemberMode onlyRegisteredNode(msg.sender) onlyLatestContract("lqgDAONodeTrusted", address(this)) {
         // Ok good to go, lets update the settings 
-        RocketDAONodeTrustedProposalsInterface(getContractAddress("rocketDAONodeTrustedProposals")).proposalInvite(_id, _url, msg.sender);
+        LQGDAONodeTrustedProposalsInterface(getContractAddress("lqgDAONodeTrustedProposals")).proposalInvite(_id, _url, msg.sender);
         // Get the to automatically join as a member (by a regular proposal, they would have to manually accept, but this is no ordinary situation)
-        RocketDAONodeTrustedActionsInterface(getContractAddress("rocketDAONodeTrustedActions")).actionJoinRequired(msg.sender);
+        LQGDAONodeTrustedActionsInterface(getContractAddress("lqgDAONodeTrustedActions")).actionJoinRequired(msg.sender);
     }
 
 }

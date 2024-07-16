@@ -1,4 +1,4 @@
-import { RocketAuctionManager, RocketTokenRPL, RocketVault } from '../_utils/artifacts';
+import { LQGAuctionManager, LQGTokenRPL, LQGVault } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 
 // Claim RPL from a lot
@@ -6,20 +6,20 @@ export async function claimBid(lotIndex, txOptions) {
 
     // Load contracts
     const [
-        rocketAuctionManager,
-        rocketTokenRPL,
-        rocketVault,
+        lqgAuctionManager,
+        lqgTokenRPL,
+        lqgVault,
     ] = await Promise.all([
-        RocketAuctionManager.deployed(),
-        RocketTokenRPL.deployed(),
-        RocketVault.deployed(),
+        LQGAuctionManager.deployed(),
+        LQGTokenRPL.deployed(),
+        LQGVault.deployed(),
     ]);
 
     // Get auction contract details
     function getContractDetails() {
         return Promise.all([
-            rocketAuctionManager.getAllottedRPLBalance(),
-            rocketAuctionManager.getRemainingRPLBalance(),
+            lqgAuctionManager.getAllottedRPLBalance(),
+            lqgAuctionManager.getRemainingRPLBalance(),
         ]).then(
             ([allottedRplBalance, remainingRplBalance]) =>
                 ({ allottedRplBalance, remainingRplBalance }),
@@ -29,8 +29,8 @@ export async function claimBid(lotIndex, txOptions) {
     // Get lot details
     function getLotDetails(bidderAddress) {
         return Promise.all([
-            rocketAuctionManager.getLotAddressBidAmount(lotIndex, bidderAddress),
-            rocketAuctionManager.getLotCurrentPrice(lotIndex),
+            lqgAuctionManager.getLotAddressBidAmount(lotIndex, bidderAddress),
+            lqgAuctionManager.getLotCurrentPrice(lotIndex),
         ]).then(
             ([addressBidAmount, currentPrice]) =>
                 ({ addressBidAmount, currentPrice }),
@@ -40,9 +40,9 @@ export async function claimBid(lotIndex, txOptions) {
     // Get balances
     function getBalances(bidderAddress) {
         return Promise.all([
-            rocketTokenRPL.balanceOf(bidderAddress),
-            rocketTokenRPL.balanceOf(rocketVault.target),
-            rocketVault.balanceOfToken('rocketAuctionManager', rocketTokenRPL.target),
+            lqgTokenRPL.balanceOf(bidderAddress),
+            lqgTokenRPL.balanceOf(lqgVault.target),
+            lqgVault.balanceOfToken('lqgAuctionManager', lqgTokenRPL.target),
         ]).then(
             ([bidderRpl, vaultRpl, contractRpl]) =>
                 ({ bidderRpl, vaultRpl, contractRpl }),
@@ -57,7 +57,7 @@ export async function claimBid(lotIndex, txOptions) {
     ]);
 
     // Claim RPL
-    await rocketAuctionManager.connect(txOptions.from).claimBid(lotIndex, txOptions);
+    await lqgAuctionManager.connect(txOptions.from).claimBid(lotIndex, txOptions);
 
     // Get updated details & balances
     let [details2, lot2, balances2] = await Promise.all([

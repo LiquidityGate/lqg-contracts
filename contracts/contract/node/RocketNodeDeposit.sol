@@ -1,29 +1,29 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.18;
 
-import "../RocketBase.sol";
-import "../../interface/deposit/RocketDepositPoolInterface.sol";
-import "../../interface/minipool/RocketMinipoolInterface.sol";
-import "../../interface/minipool/RocketMinipoolManagerInterface.sol";
-import "../../interface/minipool/RocketMinipoolQueueInterface.sol";
-import "../../interface/network/RocketNetworkFeesInterface.sol";
-import "../../interface/node/RocketNodeDepositInterface.sol";
-import "../../interface/dao/protocol/settings/RocketDAOProtocolSettingsDepositInterface.sol";
-import "../../interface/dao/protocol/settings/RocketDAOProtocolSettingsMinipoolInterface.sol";
-import "../../interface/dao/protocol/settings/RocketDAOProtocolSettingsNodeInterface.sol";
-import "../../interface/dao/protocol/settings/RocketDAOProtocolSettingsNetworkInterface.sol";
-import "../../interface/dao/node/RocketDAONodeTrustedInterface.sol";
-import "../../interface/dao/node/settings/RocketDAONodeTrustedSettingsMembersInterface.sol";
+import "../LQGBase.sol";
+import "../../interface/deposit/LQGDepositPoolInterface.sol";
+import "../../interface/minipool/LQGMinipoolInterface.sol";
+import "../../interface/minipool/LQGMinipoolManagerInterface.sol";
+import "../../interface/minipool/LQGMinipoolQueueInterface.sol";
+import "../../interface/network/LQGNetworkFeesInterface.sol";
+import "../../interface/node/LQGNodeDepositInterface.sol";
+import "../../interface/dao/protocol/settings/LQGDAOProtocolSettingsDepositInterface.sol";
+import "../../interface/dao/protocol/settings/LQGDAOProtocolSettingsMinipoolInterface.sol";
+import "../../interface/dao/protocol/settings/LQGDAOProtocolSettingsNodeInterface.sol";
+import "../../interface/dao/protocol/settings/LQGDAOProtocolSettingsNetworkInterface.sol";
+import "../../interface/dao/node/LQGDAONodeTrustedInterface.sol";
+import "../../interface/dao/node/settings/LQGDAONodeTrustedSettingsMembersInterface.sol";
 import "../../types/MinipoolDeposit.sol";
-import "../../interface/node/RocketNodeManagerInterface.sol";
-import "../../interface/RocketVaultInterface.sol";
-import "../../interface/node/RocketNodeStakingInterface.sol";
-import "../network/RocketNetworkSnapshots.sol";
-import "../../interface/RocketVaultWithdrawerInterface.sol";
-import "../../interface/network/RocketNetworkVotingInterface.sol";
+import "../../interface/node/LQGNodeManagerInterface.sol";
+import "../../interface/LQGVaultInterface.sol";
+import "../../interface/node/LQGNodeStakingInterface.sol";
+import "../network/LQGNetworkSnapshots.sol";
+import "../../interface/LQGVaultWithdrawerInterface.sol";
+import "../../interface/network/LQGNetworkVotingInterface.sol";
 
 /// @notice Handles node deposits and minipool creation
-contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaultWithdrawerInterface {
+contract LQGNodeDeposit is LQGBase, LQGNodeDepositInterface, LQGVaultWithdrawerInterface {
 
     // Events
     event DepositReceived(address indexed from, uint256 amount, uint256 time);
@@ -32,12 +32,12 @@ contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaul
 
     function receiveVaultWithdrawalETH() external payable {}
 
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         version = 4;
     }
 
     /// @dev Accept incoming ETH from the deposit pool
-    receive() external payable onlyLatestContract("rocketDepositPool", msg.sender) {}
+    receive() external payable onlyLatestContract("lqgDepositPool", msg.sender) {}
 
     /// @notice Returns a node operator's credit balance in wei
     function getNodeDepositCredit(address _nodeOperator) override public view returns (uint256) {
@@ -61,8 +61,8 @@ contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaul
 
     /// @notice Returns the amount of ETH credit currently usable by a given node operator
     function getNodeUsableCredit(address _nodeAddress) override public view returns (uint256) {
-        RocketDepositPoolInterface rocketDepositPool = RocketDepositPoolInterface(getContractAddress("rocketDepositPool"));
-        uint256 depositPoolBalance = rocketDepositPool.getBalance();
+        LQGDepositPoolInterface lqgDepositPool = LQGDepositPoolInterface(getContractAddress("lqgDepositPool"));
+        uint256 depositPoolBalance = lqgDepositPool.getBalance();
         uint256 usableCredit = getNodeDepositCredit(_nodeAddress);
         if (usableCredit > depositPoolBalance) {
             usableCredit = depositPoolBalance;
@@ -71,7 +71,7 @@ contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaul
     }
 
     /// @dev Increases a node operators deposit credit balance
-    function increaseDepositCreditBalance(address _nodeAddress, uint256 _amount) override external onlyLatestContract("rocketNodeDeposit", address(this)) onlyRegisteredNode(_nodeAddress) {
+    function increaseDepositCreditBalance(address _nodeAddress, uint256 _amount) override external onlyLatestContract("lqgNodeDeposit", address(this)) onlyRegisteredNode(_nodeAddress) {
         // Accept calls from network contracts or registered minipools
         require(getBool(keccak256(abi.encodePacked("minipool.exists", msg.sender))) ||
             getBool(keccak256(abi.encodePacked("contract.exists", msg.sender))),
@@ -82,13 +82,13 @@ contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaul
 
     /// @notice Deposits ETH for the given node operator
     /// @param _nodeAddress The address of the node operator to deposit ETH for
-    function depositEthFor(address _nodeAddress) override external payable onlyLatestContract("rocketNodeDeposit", address(this)) onlyRegisteredNode(_nodeAddress) {
+    function depositEthFor(address _nodeAddress) override external payable onlyLatestContract("lqgNodeDeposit", address(this)) onlyRegisteredNode(_nodeAddress) {
         // Sanity check caller is not node itself
         require(msg.sender != _nodeAddress, "Cannot deposit ETH for self");
         // Send the ETH to vault
         uint256 amount = msg.value;
-        RocketVaultInterface rocketVault = RocketVaultInterface(getContractAddress("rocketVault"));
-        rocketVault.depositEther{value: amount}();
+        LQGVaultInterface lqgVault = LQGVaultInterface(getContractAddress("lqgVault"));
+        lqgVault.depositEther{value: amount}();
         // Increment balance
         addUint(keccak256(abi.encodePacked("node.eth.balance", _nodeAddress)), amount);
         // Log it
@@ -98,17 +98,17 @@ contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaul
     /// @notice Withdraws ETH from a node operator's balance. Must be called from withdrawal address.
     /// @param _nodeAddress Address of the node operator to withdraw from
     /// @param _amount Amount of ETH to withdraw
-    function withdrawEth(address _nodeAddress, uint256 _amount) external onlyLatestContract("rocketNodeDeposit", address(this)) onlyRegisteredNode(_nodeAddress) {
+    function withdrawEth(address _nodeAddress, uint256 _amount) external onlyLatestContract("lqgNodeDeposit", address(this)) onlyRegisteredNode(_nodeAddress) {
         // Check valid caller
-        address withdrawalAddress = rocketStorage.getNodeWithdrawalAddress(_nodeAddress);
+        address withdrawalAddress = lqgStorage.getNodeWithdrawalAddress(_nodeAddress);
         require(msg.sender == withdrawalAddress, "Only withdrawal address can withdraw ETH");
         // Check balance and update
         uint256 balance = getNodeEthBalance(_nodeAddress);
         require(balance >= _amount, "Insufficient balance");
         setUint(keccak256(abi.encodePacked("node.eth.balance", _nodeAddress)), balance - _amount);
         // Withdraw the funds
-        RocketVaultInterface rocketVault = RocketVaultInterface(getContractAddress("rocketVault"));
-        rocketVault.withdrawEther(_amount);
+        LQGVaultInterface lqgVault = LQGVaultInterface(getContractAddress("lqgVault"));
+        lqgVault.withdrawEther(_amount);
         // Send funds to withdrawalAddress
         (bool success, ) = withdrawalAddress.call{value: _amount}("");
         require(success, "Failed to withdraw ETH");
@@ -124,7 +124,7 @@ contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaul
     /// @param _depositDataRoot The hash tree root of the deposit data (passed onto the deposit contract on pre stake)
     /// @param _salt Salt used to deterministically construct the minipool's address
     /// @param _expectedMinipoolAddress The expected deterministic minipool address. Will revert if it doesn't match
-    function deposit(uint256 _bondAmount, uint256 _minimumNodeFee, bytes calldata _validatorPubkey, bytes calldata _validatorSignature, bytes32 _depositDataRoot, uint256 _salt, address _expectedMinipoolAddress) override external payable onlyLatestContract("rocketNodeDeposit", address(this)) onlyRegisteredNode(msg.sender) {
+    function deposit(uint256 _bondAmount, uint256 _minimumNodeFee, bytes calldata _validatorPubkey, bytes calldata _validatorSignature, bytes32 _depositDataRoot, uint256 _salt, address _expectedMinipoolAddress) override external payable onlyLatestContract("lqgNodeDeposit", address(this)) onlyRegisteredNode(msg.sender) {
         // Check amount
         require(msg.value == _bondAmount, "Invalid value");
         // Process the deposit
@@ -140,7 +140,7 @@ contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaul
     /// @param _depositDataRoot The hash tree root of the deposit data (passed onto the deposit contract on pre stake)
     /// @param _salt Salt used to deterministically construct the minipool's address
     /// @param _expectedMinipoolAddress The expected deterministic minipool address. Will revert if it doesn't match
-    function depositWithCredit(uint256 _bondAmount, uint256 _minimumNodeFee, bytes calldata _validatorPubkey, bytes calldata _validatorSignature, bytes32 _depositDataRoot, uint256 _salt, address _expectedMinipoolAddress) override external payable onlyLatestContract("rocketNodeDeposit", address(this)) onlyRegisteredNode(msg.sender) {
+    function depositWithCredit(uint256 _bondAmount, uint256 _minimumNodeFee, bytes calldata _validatorPubkey, bytes calldata _validatorSignature, bytes32 _depositDataRoot, uint256 _salt, address _expectedMinipoolAddress) override external payable onlyLatestContract("lqgNodeDeposit", address(this)) onlyRegisteredNode(msg.sender) {
         // Sanity check
         require(msg.value <= _bondAmount, "Excessive value for requested bond");
         {
@@ -161,8 +161,8 @@ contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaul
             if (balanceToUse > 0) {
                 subUint(keccak256(abi.encodePacked("node.eth.balance", msg.sender)), balanceToUse);
                 // Withdraw the funds
-                RocketVaultInterface rocketVault = RocketVaultInterface(getContractAddress("rocketVault"));
-                rocketVault.withdrawEther(balanceToUse);
+                LQGVaultInterface lqgVault = LQGVaultInterface(getContractAddress("lqgVault"));
+                lqgVault.withdrawEther(balanceToUse);
             }
             if (creditToUse > 0) {
                 subUint(keccak256(abi.encodePacked("node.deposit.credit.balance", msg.sender)), creditToUse);
@@ -197,16 +197,16 @@ contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaul
         uint256 launchAmount;
         uint256 preLaunchValue;
         {
-            RocketDAOProtocolSettingsMinipoolInterface rocketDAOProtocolSettingsMinipool = RocketDAOProtocolSettingsMinipoolInterface(getContractAddress("rocketDAOProtocolSettingsMinipool"));
-            launchAmount = rocketDAOProtocolSettingsMinipool.getLaunchBalance();
-            preLaunchValue = rocketDAOProtocolSettingsMinipool.getPreLaunchValue();
+            LQGDAOProtocolSettingsMinipoolInterface lqgDAOProtocolSettingsMinipool = LQGDAOProtocolSettingsMinipoolInterface(getContractAddress("lqgDAOProtocolSettingsMinipool"));
+            launchAmount = lqgDAOProtocolSettingsMinipool.getLaunchBalance();
+            preLaunchValue = lqgDAOProtocolSettingsMinipool.getPreLaunchValue();
         }
         // Emit deposit received event
         emit DepositReceived(msg.sender, msg.value, block.timestamp);
         // Increase ETH matched (used to calculate RPL collateral requirements)
         _increaseEthMatched(msg.sender, launchAmount - _bondAmount);
         // Create the minipool
-        RocketMinipoolInterface minipool = createMinipool(_salt, _expectedMinipoolAddress);
+        LQGMinipoolInterface minipool = createMinipool(_salt, _expectedMinipoolAddress);
         // Process node deposit
         _processNodeDeposit(preLaunchValue, _bondAmount);
         // Perform the pre deposit
@@ -220,20 +220,20 @@ contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaul
     /// @dev Processes a node deposit with the deposit pool. If user has not supplied full bond amount with the transaction
     ///      the shortfall will be taken from their credit. Any excess ETH after prelaunch value is sent to minipool is
     //       then deposited into the deposit pool
-    /// @param _preLaunchValue The prelaunch value (result of call to `RocketDAOProtocolSettingsMinipool.getPreLaunchValue()`
+    /// @param _preLaunchValue The prelaunch value (result of call to `LQGDAOProtocolSettingsMinipool.getPreLaunchValue()`
     /// @param _bondAmount The bond amount for this deposit
     function _processNodeDeposit(uint256 _preLaunchValue, uint256 _bondAmount) private {
         // Get contracts
-        RocketDepositPoolInterface rocketDepositPool = RocketDepositPoolInterface(getContractAddress("rocketDepositPool"));
+        LQGDepositPoolInterface lqgDepositPool = LQGDepositPoolInterface(getContractAddress("lqgDepositPool"));
         // Retrieve ETH from deposit pool if required
         uint256 shortFall = 0;
         if (address(this).balance < _preLaunchValue) {
             shortFall = _preLaunchValue - address(this).balance;
-            rocketDepositPool.nodeCreditWithdrawal(shortFall);
+            lqgDepositPool.nodeCreditWithdrawal(shortFall);
         }
         uint256 remaining = address(this).balance - _preLaunchValue;
         // Deposit the left over value into the deposit pool
-        rocketDepositPool.nodeDeposit{value: remaining}(_bondAmount - _preLaunchValue);
+        lqgDepositPool.nodeDeposit{value: remaining}(_bondAmount - _preLaunchValue);
     }
 
     /// @notice Creates a "vacant" minipool which a node operator can use to migrate a validator with a BLS withdrawal credential
@@ -243,15 +243,15 @@ contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaul
     /// @param _salt Salt used to deterministically construct the minipool's address
     /// @param _expectedMinipoolAddress The expected deterministic minipool address. Will revert if it doesn't match
     /// @param _currentBalance The current balance of the validator on the beaconchain (will be checked by oDAO and scrubbed if not correct)
-    function createVacantMinipool(uint256 _bondAmount, uint256 _minimumNodeFee, bytes calldata _validatorPubkey, uint256 _salt, address _expectedMinipoolAddress, uint256 _currentBalance) override external onlyLatestContract("rocketNodeDeposit", address(this)) onlyRegisteredNode(msg.sender) {
+    function createVacantMinipool(uint256 _bondAmount, uint256 _minimumNodeFee, bytes calldata _validatorPubkey, uint256 _salt, address _expectedMinipoolAddress, uint256 _currentBalance) override external onlyLatestContract("lqgNodeDeposit", address(this)) onlyRegisteredNode(msg.sender) {
         // Check pre-conditions
         checkVacantMinipoolsEnabled();
         checkDistributorInitialised();
         checkNodeFee(_minimumNodeFee);
         require(isValidDepositAmount(_bondAmount), "Invalid deposit amount");
         // Increase ETH matched (used to calculate RPL collateral requirements)
-        RocketDAOProtocolSettingsMinipoolInterface rocketDAOProtocolSettingsMinipool = RocketDAOProtocolSettingsMinipoolInterface(getContractAddress("rocketDAOProtocolSettingsMinipool"));
-        uint256 launchAmount = rocketDAOProtocolSettingsMinipool.getLaunchBalance();
+        LQGDAOProtocolSettingsMinipoolInterface lqgDAOProtocolSettingsMinipool = LQGDAOProtocolSettingsMinipoolInterface(getContractAddress("lqgDAOProtocolSettingsMinipool"));
+        uint256 launchAmount = lqgDAOProtocolSettingsMinipool.getLaunchBalance();
         _increaseEthMatched(msg.sender, launchAmount - _bondAmount);
         // Create the minipool
         _createVacantMinipool(_salt, _validatorPubkey, _bondAmount, _expectedMinipoolAddress, _currentBalance);
@@ -261,10 +261,10 @@ contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaul
     /// @param _nodeAddress The node operator's address to increase the ETH matched for
     /// @param _amount The amount to increase the ETH matched
     /// @dev Will revert if the new ETH matched amount exceeds the node operators limit
-    function increaseEthMatched(address _nodeAddress, uint256 _amount) override external onlyLatestContract("rocketNodeDeposit", address(this)) onlyLatestNetworkContract() {
+    function increaseEthMatched(address _nodeAddress, uint256 _amount) override external onlyLatestContract("lqgNodeDeposit", address(this)) onlyLatestNetworkContract() {
         // Try to distribute any existing rewards at the previous collateral rate
-        RocketMinipoolManagerInterface rocketMinipoolManager = RocketMinipoolManagerInterface(getContractAddress("rocketMinipoolManager"));
-        rocketMinipoolManager.tryDistribute(_nodeAddress);
+        LQGMinipoolManagerInterface lqgMinipoolManager = LQGMinipoolManagerInterface(getContractAddress("lqgMinipoolManager"));
+        lqgMinipoolManager.tryDistribute(_nodeAddress);
         // Increase ETH matched
         _increaseEthMatched(_nodeAddress, _amount);
     }
@@ -273,48 +273,48 @@ contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaul
     ///      collateralisation requirements of the network
     function _increaseEthMatched(address _nodeAddress, uint256 _amount) private {
         // Check amount doesn't exceed limits
-        RocketNodeStakingInterface rocketNodeStaking = RocketNodeStakingInterface(getContractAddress("rocketNodeStaking"));
-        RocketNetworkSnapshots rocketNetworkSnapshots = RocketNetworkSnapshots(getContractAddress("rocketNetworkSnapshots"));
-        uint256 ethMatched = rocketNodeStaking.getNodeETHMatched(_nodeAddress) + _amount;
+        LQGNodeStakingInterface lqgNodeStaking = LQGNodeStakingInterface(getContractAddress("lqgNodeStaking"));
+        LQGNetworkSnapshots lqgNetworkSnapshots = LQGNetworkSnapshots(getContractAddress("lqgNetworkSnapshots"));
+        uint256 ethMatched = lqgNodeStaking.getNodeETHMatched(_nodeAddress) + _amount;
         require(
-            ethMatched <= rocketNodeStaking.getNodeETHMatchedLimit(_nodeAddress),
+            ethMatched <= lqgNodeStaking.getNodeETHMatchedLimit(_nodeAddress),
             "ETH matched after deposit exceeds limit based on node RPL stake"
         );
         // Push the change to snapshot manager
         bytes32 key = keccak256(abi.encodePacked("eth.matched.node.amount", _nodeAddress));
-        rocketNetworkSnapshots.push(key, uint224(ethMatched));
+        lqgNetworkSnapshots.push(key, uint224(ethMatched));
     }
 
     /// @dev Adds a minipool to the queue
     function enqueueMinipool(address _minipoolAddress) private {
         // Add minipool to queue
-        RocketMinipoolQueueInterface(getContractAddress("rocketMinipoolQueue")).enqueueMinipool(_minipoolAddress);
+        LQGMinipoolQueueInterface(getContractAddress("lqgMinipoolQueue")).enqueueMinipool(_minipoolAddress);
     }
 
     /// @dev Initialises node's voting power if not already done
     function checkVotingInitialised() private {
         // Ensure voting has been initialised for this node
-        RocketNetworkVotingInterface rocketNetworkVoting = RocketNetworkVotingInterface(getContractAddress("rocketNetworkVoting"));
-        rocketNetworkVoting.initialiseVotingFor(msg.sender);
+        LQGNetworkVotingInterface lqgNetworkVoting = LQGNetworkVotingInterface(getContractAddress("lqgNetworkVoting"));
+        lqgNetworkVoting.initialiseVotingFor(msg.sender);
     }
 
     /// @dev Reverts if node operator has not initialised their fee distributor
     function checkDistributorInitialised() private view {
         // Check node has initialised their fee distributor
-        RocketNodeManagerInterface rocketNodeManager = RocketNodeManagerInterface(getContractAddress("rocketNodeManager"));
-        require(rocketNodeManager.getFeeDistributorInitialised(msg.sender), "Fee distributor not initialised");
+        LQGNodeManagerInterface lqgNodeManager = LQGNodeManagerInterface(getContractAddress("lqgNodeManager"));
+        require(lqgNodeManager.getFeeDistributorInitialised(msg.sender), "Fee distributor not initialised");
     }
 
     /// @dev Creates a minipool and returns an instance of it
     /// @param _salt The salt used to determine the minipools address
     /// @param _expectedMinipoolAddress The expected minipool address. Reverts if not correct
-    function createMinipool(uint256 _salt, address _expectedMinipoolAddress) private returns (RocketMinipoolInterface) {
+    function createMinipool(uint256 _salt, address _expectedMinipoolAddress) private returns (LQGMinipoolInterface) {
         // Load contracts
-        RocketMinipoolManagerInterface rocketMinipoolManager = RocketMinipoolManagerInterface(getContractAddress("rocketMinipoolManager"));
+        LQGMinipoolManagerInterface lqgMinipoolManager = LQGMinipoolManagerInterface(getContractAddress("lqgMinipoolManager"));
         // Check minipool doesn't exist or previously exist
-        require(!rocketMinipoolManager.getMinipoolExists(_expectedMinipoolAddress) && !rocketMinipoolManager.getMinipoolDestroyed(_expectedMinipoolAddress), "Minipool already exists or was previously destroyed");
+        require(!lqgMinipoolManager.getMinipoolExists(_expectedMinipoolAddress) && !lqgMinipoolManager.getMinipoolDestroyed(_expectedMinipoolAddress), "Minipool already exists or was previously destroyed");
         // Create minipool
-        RocketMinipoolInterface minipool = rocketMinipoolManager.createMinipool(msg.sender, _salt);
+        LQGMinipoolInterface minipool = lqgMinipoolManager.createMinipool(msg.sender, _salt);
         // Ensure minipool address matches expected
         require(address(minipool) == _expectedMinipoolAddress, "Unexpected minipool address");
         // Return
@@ -327,13 +327,13 @@ contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaul
     /// @param _bondAmount ETH value the node operator is putting up as capital for this minipool
     /// @param _expectedMinipoolAddress The expected minipool address. Reverts if not correct
     /// @param _currentBalance The current balance of the validator on the beaconchain (will be checked by oDAO and scrubbed if not correct)
-    function _createVacantMinipool(uint256 _salt, bytes calldata _validatorPubkey, uint256 _bondAmount, address _expectedMinipoolAddress, uint256 _currentBalance) private returns (RocketMinipoolInterface) {
+    function _createVacantMinipool(uint256 _salt, bytes calldata _validatorPubkey, uint256 _bondAmount, address _expectedMinipoolAddress, uint256 _currentBalance) private returns (LQGMinipoolInterface) {
         // Load contracts
-        RocketMinipoolManagerInterface rocketMinipoolManager = RocketMinipoolManagerInterface(getContractAddress("rocketMinipoolManager"));
+        LQGMinipoolManagerInterface lqgMinipoolManager = LQGMinipoolManagerInterface(getContractAddress("lqgMinipoolManager"));
         // Check minipool doesn't exist or previously exist
-        require(!rocketMinipoolManager.getMinipoolExists(_expectedMinipoolAddress) && !rocketMinipoolManager.getMinipoolDestroyed(_expectedMinipoolAddress), "Minipool already exists or was previously destroyed");
+        require(!lqgMinipoolManager.getMinipoolExists(_expectedMinipoolAddress) && !lqgMinipoolManager.getMinipoolDestroyed(_expectedMinipoolAddress), "Minipool already exists or was previously destroyed");
         // Create minipool
-        RocketMinipoolInterface minipool = rocketMinipoolManager.createVacantMinipool(msg.sender, _salt, _validatorPubkey, _bondAmount, _currentBalance);
+        LQGMinipoolInterface minipool = lqgMinipoolManager.createVacantMinipool(msg.sender, _salt, _validatorPubkey, _bondAmount, _currentBalance);
         // Ensure minipool address matches expected
         require(address(minipool) == _expectedMinipoolAddress, "Unexpected minipool address");
         // Return
@@ -344,31 +344,31 @@ contract RocketNodeDeposit is RocketBase, RocketNodeDepositInterface, RocketVaul
     /// @param _minimumNodeFee The minimum node fee required to not revert
     function checkNodeFee(uint256 _minimumNodeFee) private view {
         // Load contracts
-        RocketNetworkFeesInterface rocketNetworkFees = RocketNetworkFeesInterface(getContractAddress("rocketNetworkFees"));
+        LQGNetworkFeesInterface lqgNetworkFees = LQGNetworkFeesInterface(getContractAddress("lqgNetworkFees"));
         // Check current node fee
-        uint256 nodeFee = rocketNetworkFees.getNodeFee();
+        uint256 nodeFee = lqgNetworkFees.getNodeFee();
         require(nodeFee >= _minimumNodeFee, "Minimum node fee exceeds current network node fee");
     }
 
     /// @dev Reverts if deposits are not enabled
     function checkDepositsEnabled() private view {
         // Get contracts
-        RocketDAOProtocolSettingsNodeInterface rocketDAOProtocolSettingsNode = RocketDAOProtocolSettingsNodeInterface(getContractAddress("rocketDAOProtocolSettingsNode"));
+        LQGDAOProtocolSettingsNodeInterface lqgDAOProtocolSettingsNode = LQGDAOProtocolSettingsNodeInterface(getContractAddress("lqgDAOProtocolSettingsNode"));
         // Check node settings
-        require(rocketDAOProtocolSettingsNode.getDepositEnabled(), "Node deposits are currently disabled");
+        require(lqgDAOProtocolSettingsNode.getDepositEnabled(), "Node deposits are currently disabled");
     }
 
     /// @dev Reverts if vacant minipools are not enabled
     function checkVacantMinipoolsEnabled() private view {
         // Get contracts
-        RocketDAOProtocolSettingsNodeInterface rocketDAOProtocolSettingsNode = RocketDAOProtocolSettingsNodeInterface(getContractAddress("rocketDAOProtocolSettingsNode"));
+        LQGDAOProtocolSettingsNodeInterface lqgDAOProtocolSettingsNode = LQGDAOProtocolSettingsNodeInterface(getContractAddress("lqgDAOProtocolSettingsNode"));
         // Check node settings
-        require(rocketDAOProtocolSettingsNode.getVacantMinipoolsEnabled(), "Vacant minipools are currently disabled");
+        require(lqgDAOProtocolSettingsNode.getVacantMinipoolsEnabled(), "Vacant minipools are currently disabled");
     }
 
     /// @dev Executes an assignDeposits call on the deposit pool
     function assignDeposits() private {
-        RocketDepositPoolInterface rocketDepositPool = RocketDepositPoolInterface(getContractAddress("rocketDepositPool"));
-        rocketDepositPool.maybeAssignDeposits();
+        LQGDepositPoolInterface lqgDepositPool = LQGDepositPoolInterface(getContractAddress("lqgDepositPool"));
+        lqgDepositPool.maybeAssignDeposits();
     }
 }

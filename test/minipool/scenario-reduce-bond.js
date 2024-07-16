@@ -1,20 +1,20 @@
 import {
-    RocketMinipoolBondReducer,
-    RocketMinipoolManager,
-    RocketNodeDeposit,
-    RocketNodeStaking,
+    LQGMinipoolBondReducer,
+    LQGMinipoolManager,
+    LQGNodeDeposit,
+    LQGNodeStaking,
 } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 
 // Reduce bonding amount of a minipool
 export async function reduceBond(minipool, txOptions = null) {
-    const rocketNodeDeposit = await RocketNodeDeposit.deployed();
-    const rocketNodeStaking = await RocketNodeStaking.deployed();
-    const rocketMinipoolBondReducer = await RocketMinipoolBondReducer.deployed();
-    const rocketMinipoolManager = await RocketMinipoolManager.deployed();
+    const lqgNodeDeposit = await LQGNodeDeposit.deployed();
+    const lqgNodeStaking = await LQGNodeStaking.deployed();
+    const lqgMinipoolBondReducer = await LQGMinipoolBondReducer.deployed();
+    const lqgMinipoolManager = await LQGMinipoolManager.deployed();
     const node = await minipool.getNodeAddress();
 
-    const newBond = await rocketMinipoolBondReducer.getReduceBondValue(minipool.target);
+    const newBond = await lqgMinipoolBondReducer.getReduceBondValue(minipool.target);
     const prevBond = await minipool.getNodeDepositBalance();
 
     // Get minipool balances
@@ -22,8 +22,8 @@ export async function reduceBond(minipool, txOptions = null) {
         return Promise.all([
             minipool.getNodeDepositBalance(),
             minipool.getUserDepositBalance(),
-            rocketNodeDeposit.getNodeDepositCredit(node),
-            rocketNodeStaking.getNodeETHMatched(node),
+            lqgNodeDeposit.getNodeDepositCredit(node),
+            lqgNodeStaking.getNodeETHMatched(node),
         ]).then(
             ([nodeDepositBalance, userDepositBalance, nodeDepositCredit, ethMatched]) =>
                 ({ nodeDepositBalance, userDepositBalance, nodeDepositCredit, ethMatched }),
@@ -33,9 +33,9 @@ export async function reduceBond(minipool, txOptions = null) {
     // Get node details
     function getNodeDetails() {
         return Promise.all([
-            rocketMinipoolManager.getNodeStakingMinipoolCountBySize(node, prevBond),
-            rocketMinipoolManager.getNodeStakingMinipoolCountBySize(node, newBond),
-            rocketMinipoolManager.getNodeStakingMinipoolCount(node),
+            lqgMinipoolManager.getNodeStakingMinipoolCountBySize(node, prevBond),
+            lqgMinipoolManager.getNodeStakingMinipoolCountBySize(node, newBond),
+            lqgMinipoolManager.getNodeStakingMinipoolCount(node),
         ]).then(
             ([prevBondCount, newBondCount, totalCount]) =>
                 ({ prevBondCount, newBondCount, totalCount }),
@@ -43,7 +43,7 @@ export async function reduceBond(minipool, txOptions = null) {
     }
 
     // Get new bond amount
-    const amount = await rocketMinipoolBondReducer.getReduceBondValue(minipool.target);
+    const amount = await lqgMinipoolBondReducer.getReduceBondValue(minipool.target);
 
     // Record balances before and after calling reduce bond function
     const balances1 = await getMinipoolBalances();

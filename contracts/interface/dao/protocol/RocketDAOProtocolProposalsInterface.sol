@@ -4,7 +4,7 @@ pragma abicoder v2;
 
 import "../../../types/SettingType.sol";
 
-interface RocketDAOProtocolProposalsInterface {
+interface LQGDAOProtocolProposalsInterface {
     function proposalSettingMulti(string[] memory _settingContractNames, string[] memory _settingPaths, SettingType[] memory _types, bytes[] memory _data) external;
     function proposalSettingUint(string memory _settingContractName, string memory _settingPath, uint256 _value) external;
     function proposalSettingBool(string memory _settingContractName, string memory _settingPath, bool _value) external;

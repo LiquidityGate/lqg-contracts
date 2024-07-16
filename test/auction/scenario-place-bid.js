@@ -1,4 +1,4 @@
-import { RocketAuctionManager, RocketVault } from '../_utils/artifacts';
+import { LQGAuctionManager, LQGVault } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 
 const hre = require('hardhat');
@@ -9,11 +9,11 @@ export async function placeBid(lotIndex, txOptions) {
 
     // Load contracts
     const [
-        rocketAuctionManager,
-        rocketVault,
+        lqgAuctionManager,
+        lqgVault,
     ] = await Promise.all([
-        RocketAuctionManager.deployed(),
-        RocketVault.deployed(),
+        LQGAuctionManager.deployed(),
+        LQGVault.deployed(),
     ]);
 
     // Calculation base value
@@ -22,13 +22,13 @@ export async function placeBid(lotIndex, txOptions) {
     // Get lot details
     function getLotDetails(bidderAddress) {
         return Promise.all([
-            rocketAuctionManager.getLotTotalRPLAmount(lotIndex),
-            rocketAuctionManager.getLotTotalBidAmount(lotIndex),
-            rocketAuctionManager.getLotAddressBidAmount(lotIndex, bidderAddress),
-            rocketAuctionManager.getLotPriceByTotalBids(lotIndex),
-            rocketAuctionManager.getLotCurrentPrice(lotIndex),
-            rocketAuctionManager.getLotClaimedRPLAmount(lotIndex),
-            rocketAuctionManager.getLotRemainingRPLAmount(lotIndex),
+            lqgAuctionManager.getLotTotalRPLAmount(lotIndex),
+            lqgAuctionManager.getLotTotalBidAmount(lotIndex),
+            lqgAuctionManager.getLotAddressBidAmount(lotIndex, bidderAddress),
+            lqgAuctionManager.getLotPriceByTotalBids(lotIndex),
+            lqgAuctionManager.getLotCurrentPrice(lotIndex),
+            lqgAuctionManager.getLotClaimedRPLAmount(lotIndex),
+            lqgAuctionManager.getLotRemainingRPLAmount(lotIndex),
         ]).then(
             ([totalRplAmount, totalBidAmount, addressBidAmount, priceByTotalBids, currentPrice, claimedRplAmount, remainingRplAmount]) =>
                 ({
@@ -47,8 +47,8 @@ export async function placeBid(lotIndex, txOptions) {
     function getBalances(bidderAddress) {
         return Promise.all([
             ethers.provider.getBalance(bidderAddress),
-            ethers.provider.getBalance(rocketVault.target),
-            rocketVault.balanceOf('rocketDepositPool'),
+            ethers.provider.getBalance(lqgVault.target),
+            lqgVault.balanceOf('lqgDepositPool'),
         ]).then(
             ([bidderEth, vaultEth, depositPoolEth]) =>
                 ({ bidderEth, vaultEth, depositPoolEth }),
@@ -58,7 +58,7 @@ export async function placeBid(lotIndex, txOptions) {
     // Get lot price at block
     function getLotPriceAtBlock() {
         return ethers.provider.getBlock('latest')
-            .then(block => rocketAuctionManager.getLotPriceAtBlock(lotIndex, block.number));
+            .then(block => lqgAuctionManager.getLotPriceAtBlock(lotIndex, block.number));
     }
 
     // Get initial lot details & balances
@@ -72,7 +72,7 @@ export async function placeBid(lotIndex, txOptions) {
     txOptions.gasPrice = gasPrice;
 
     // Place bid
-    let tx = await rocketAuctionManager.connect(txOptions.from).placeBid(lotIndex, txOptions);
+    let tx = await lqgAuctionManager.connect(txOptions.from).placeBid(lotIndex, txOptions);
     let txReceipt = await tx.wait();
     let txFee = gasPrice * txReceipt.gasUsed;
 

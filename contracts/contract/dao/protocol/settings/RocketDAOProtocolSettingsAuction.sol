@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.18;
 
-import "./RocketDAOProtocolSettings.sol";
-import "../../../../interface/dao/protocol/settings/RocketDAOProtocolSettingsAuctionInterface.sol";
+import "./LQGDAOProtocolSettings.sol";
+import "../../../../interface/dao/protocol/settings/LQGDAOProtocolSettingsAuctionInterface.sol";
 
 /// @notice Network auction settings
-contract RocketDAOProtocolSettingsAuction is RocketDAOProtocolSettings, RocketDAOProtocolSettingsAuctionInterface {
+contract LQGDAOProtocolSettingsAuction is LQGDAOProtocolSettings, LQGDAOProtocolSettingsAuctionInterface {
 
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketDAOProtocolSettings(_rocketStorageAddress, "auction") {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGDAOProtocolSettings(_lqgStorageAddress, "auction") {
         version = 3;
         // Initialise settings on deployment
         if(!getBool(keccak256(abi.encodePacked(settingNameSpace, "deployed")))) {

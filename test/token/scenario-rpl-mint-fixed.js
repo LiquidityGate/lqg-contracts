@@ -1,16 +1,16 @@
-import { RocketTokenDummyRPL } from '../_utils/artifacts';
+import { LQGTokenDummyRPL } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 
 // Mint RPL from the dummy RPL contract to simulate a user having existing fixed supply RPL
 export async function mintDummyRPL(to, amount, txOptions) {
     // Load contracts
-    const rocketTokenDummyRPL = await RocketTokenDummyRPL.deployed();
+    const lqgTokenDummyRPL = await LQGTokenDummyRPL.deployed();
 
     // Get balances
     function getBalances() {
         return Promise.all([
-            rocketTokenDummyRPL.totalSupply(),
-            rocketTokenDummyRPL.balanceOf(to),
+            lqgTokenDummyRPL.totalSupply(),
+            lqgTokenDummyRPL.balanceOf(to),
         ]).then(
             ([tokenSupply, userTokenBalance]) =>
                 ({ tokenSupply, userTokenBalance }),
@@ -21,7 +21,7 @@ export async function mintDummyRPL(to, amount, txOptions) {
     let balances1 = await getBalances();
 
     // Mint tokens
-    await rocketTokenDummyRPL.connect(txOptions.from).mint(to, amount, txOptions);
+    await lqgTokenDummyRPL.connect(txOptions.from).mint(to, amount, txOptions);
 
     // Get updated balances
     let balances2 = await getBalances();

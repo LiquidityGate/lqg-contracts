@@ -3,14 +3,14 @@ pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-import "./RocketNodeDistributorStorageLayout.sol";
-import "../../interface/RocketStorageInterface.sol";
-import "../../interface/node/RocketNodeManagerInterface.sol";
-import "../../interface/node/RocketNodeDistributorInterface.sol";
-import "../../interface/node/RocketNodeStakingInterface.sol";
+import "./LQGNodeDistributorStorageLayout.sol";
+import "../../interface/LQGStorageInterface.sol";
+import "../../interface/node/LQGNodeManagerInterface.sol";
+import "../../interface/node/LQGNodeDistributorInterface.sol";
+import "../../interface/node/LQGNodeStakingInterface.sol";
 
-/// @dev Contains the logic for RocketNodeDistributors
-contract RocketNodeDistributorDelegate is RocketNodeDistributorStorageLayout, RocketNodeDistributorInterface {
+/// @dev Contains the logic for LQGNodeDistributors
+contract LQGNodeDistributorDelegate is LQGNodeDistributorStorageLayout, LQGNodeDistributorInterface {
     // Import libraries
     using SafeMath for uint256;
 
@@ -25,9 +25,9 @@ contract RocketNodeDistributorDelegate is RocketNodeDistributorStorageLayout, Ro
     uint256 private constant ENTERED = 2;
 
     // Precomputed constants
-    bytes32 immutable rocketNodeManagerKey;
-    bytes32 immutable rocketNodeStakingKey;
-    bytes32 immutable rocketTokenRETHKey;
+    bytes32 immutable lqgNodeManagerKey;
+    bytes32 immutable lqgNodeStakingKey;
+    bytes32 immutable lqgTokenRETHKey;
 
     modifier nonReentrant() {
         require(lock != ENTERED, "Reentrant call");
@@ -38,11 +38,11 @@ contract RocketNodeDistributorDelegate is RocketNodeDistributorStorageLayout, Ro
 
     constructor() {
         // Precompute storage keys
-        rocketNodeManagerKey = keccak256(abi.encodePacked("contract.address", "rocketNodeManager"));
-        rocketNodeStakingKey = keccak256(abi.encodePacked("contract.address", "rocketNodeStaking"));
-        rocketTokenRETHKey = keccak256(abi.encodePacked("contract.address", "rocketTokenRETH"));
+        lqgNodeManagerKey = keccak256(abi.encodePacked("contract.address", "lqgNodeManager"));
+        lqgNodeStakingKey = keccak256(abi.encodePacked("contract.address", "lqgNodeStaking"));
+        lqgTokenRETHKey = keccak256(abi.encodePacked("contract.address", "lqgTokenRETH"));
         // These values must be set by proxy contract as this contract should only be delegatecalled
-        rocketStorage = RocketStorageInterface(address(0));
+        lqgStorage = LQGStorageInterface(address(0));
         nodeAddress = address(0);
         lock = NOT_ENTERED;
     }
@@ -50,12 +50,12 @@ contract RocketNodeDistributorDelegate is RocketNodeDistributorStorageLayout, Ro
     /// @notice Returns the portion of the contract's balance that belongs to the node operator
     function getNodeShare() override public view returns (uint256) {
         // Get contracts
-        RocketNodeManagerInterface rocketNodeManager = RocketNodeManagerInterface(rocketStorage.getAddress(rocketNodeManagerKey));
-        RocketNodeStakingInterface rocketNodeStaking = RocketNodeStakingInterface(rocketStorage.getAddress(rocketNodeStakingKey));
+        LQGNodeManagerInterface lqgNodeManager = LQGNodeManagerInterface(lqgStorage.getAddress(lqgNodeManagerKey));
+        LQGNodeStakingInterface lqgNodeStaking = LQGNodeStakingInterface(lqgStorage.getAddress(lqgNodeStakingKey));
         // Get withdrawal address and the node's average node fee
-        uint256 averageNodeFee = rocketNodeManager.getAverageNodeFee(nodeAddress);
+        uint256 averageNodeFee = lqgNodeManager.getAverageNodeFee(nodeAddress);
         // Get node ETH collateral ratio
-        uint256 collateralRatio = rocketNodeStaking.getNodeETHCollateralisationRatio(nodeAddress);
+        uint256 collateralRatio = lqgNodeStaking.getNodeETHCollateralisationRatio(nodeAddress);
         // Calculate reward split
         uint256 nodeBalance = address(this).balance.mul(calcBase).div(collateralRatio);
         uint256 userBalance = address(this).balance.sub(nodeBalance);
@@ -72,13 +72,13 @@ contract RocketNodeDistributorDelegate is RocketNodeDistributorStorageLayout, Ro
         // Calculate node share
         uint256 nodeShare = getNodeShare();
         // Transfer node share
-        address withdrawalAddress = rocketStorage.getNodeWithdrawalAddress(nodeAddress);
+        address withdrawalAddress = lqgStorage.getNodeWithdrawalAddress(nodeAddress);
         (bool success,) = withdrawalAddress.call{value : nodeShare}("");
         require(success);
         // Transfer user share
         uint256 userShare = address(this).balance;
-        address rocketTokenRETH = rocketStorage.getAddress(rocketTokenRETHKey);
-        payable(rocketTokenRETH).transfer(userShare);
+        address lqgTokenRETH = lqgStorage.getAddress(lqgTokenRETHKey);
+        payable(lqgTokenRETH).transfer(userShare);
         // Emit event
         emit FeesDistributed(nodeAddress, userShare, nodeShare, block.timestamp);
     }

@@ -4,7 +4,7 @@ pragma solidity >0.5.0 <0.9.0;
 
 import "../../../../types/MinipoolDeposit.sol";
 
-interface RocketDAOProtocolSettingsMinipoolInterface {
+interface LQGDAOProtocolSettingsMinipoolInterface {
     function getLaunchBalance() external view returns (uint256);
     function getPreLaunchValue() external pure returns (uint256);
     function getDepositUserAmount(MinipoolDeposit _depositType) external view returns (uint256);

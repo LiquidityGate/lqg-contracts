@@ -2,19 +2,19 @@ pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-import "../RocketBase.sol";
-import "../../interface/network/RocketNetworkSnapshotsInterface.sol";
+import "../LQGBase.sol";
+import "../../interface/network/LQGNetworkSnapshotsInterface.sol";
 
 // THIS CONTRACT IS NOT DEPLOYED TO MAINNET
 
 // Helper contract used to insert arbitrary snapshots in for testing
-contract SnapshotTest is RocketBase {
+contract SnapshotTest is LQGBase {
 
-    RocketNetworkSnapshotsInterface snapshots;
+    LQGNetworkSnapshotsInterface snapshots;
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
-        snapshots = RocketNetworkSnapshotsInterface(getContractAddress("rocketNetworkSnapshots"));
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
+        snapshots = LQGNetworkSnapshotsInterface(getContractAddress("lqgNetworkSnapshots"));
     }
 
     function push(string calldata _key, uint224 _value) external {

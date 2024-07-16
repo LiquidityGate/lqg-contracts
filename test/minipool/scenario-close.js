@@ -1,4 +1,4 @@
-import { RocketNodeManager, RocketNodeStaking } from '../_utils/artifacts';
+import { LQGNodeManager, LQGNodeStaking } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 
 const hre = require('hardhat');
@@ -7,17 +7,17 @@ const ethers = hre.ethers;
 // Close a minipool
 export async function close(minipool, txOptions) {
     // Load contracts
-    const rocketNodeManager = await RocketNodeManager.deployed();
-    const rocketNodeStaking = await RocketNodeStaking.deployed();
+    const lqgNodeManager = await LQGNodeManager.deployed();
+    const lqgNodeStaking = await LQGNodeStaking.deployed();
 
     // Get parameters
     let nodeAddress = await minipool.getNodeAddress();
-    let nodeWithdrawalAddress = await rocketNodeManager.getNodeWithdrawalAddress(nodeAddress);
+    let nodeWithdrawalAddress = await lqgNodeManager.getNodeWithdrawalAddress(nodeAddress);
 
     // Get initial node balance & minipool balances
     let [nodeBalance1, ethMatched1, minipoolBalance, userDepositBalance] = await Promise.all([
         ethers.provider.getBalance(nodeWithdrawalAddress),
-        rocketNodeStaking.getNodeETHMatched(txOptions.from),
+        lqgNodeStaking.getNodeETHMatched(txOptions.from),
         ethers.provider.getBalance(minipool.target),
         minipool.getUserDepositBalance(),
     ]);
@@ -34,7 +34,7 @@ export async function close(minipool, txOptions) {
     // Get updated node balance & minipool contract code
     let [nodeBalance2, ethMatched2] = await Promise.all([
         ethers.provider.getBalance(nodeWithdrawalAddress),
-        rocketNodeStaking.getNodeETHMatched(txOptions.from),
+        lqgNodeStaking.getNodeETHMatched(txOptions.from),
     ]);
 
     // Check balances

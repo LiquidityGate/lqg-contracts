@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.18;
 
-import "./RocketDAOProtocolSettings.sol";
-import "../../../../interface/dao/protocol/settings/RocketDAOProtocolSettingsMinipoolInterface.sol";
-import "../../../../interface/dao/node/settings/RocketDAONodeTrustedSettingsMinipoolInterface.sol";
+import "./LQGDAOProtocolSettings.sol";
+import "../../../../interface/dao/protocol/settings/LQGDAOProtocolSettingsMinipoolInterface.sol";
+import "../../../../interface/dao/node/settings/LQGDAONodeTrustedSettingsMinipoolInterface.sol";
 import "../../../../types/MinipoolDeposit.sol";
 
 /// @notice Network minipool settings
-contract RocketDAOProtocolSettingsMinipool is RocketDAOProtocolSettings, RocketDAOProtocolSettingsMinipoolInterface {
+contract LQGDAOProtocolSettingsMinipool is LQGDAOProtocolSettings, LQGDAOProtocolSettingsMinipoolInterface {
 
     uint256 constant internal minipoolUserDistributeWindowStart = 90 days;
 
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketDAOProtocolSettings(_rocketStorageAddress, "minipool") {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGDAOProtocolSettings(_lqgStorageAddress, "minipool") {
         version = 3;
         // Initialize settings on deployment
         if(!getBool(keccak256(abi.encodePacked(settingNameSpace, "deployed")))) {
@@ -34,8 +34,8 @@ contract RocketDAOProtocolSettingsMinipool is RocketDAOProtocolSettings, RocketD
         if(getBool(keccak256(abi.encodePacked(settingNameSpace, "deployed")))) {
             bytes32 settingKey = keccak256(abi.encodePacked(_settingPath));
             if(settingKey == keccak256(abi.encodePacked("minipool.launch.timeout"))) {
-                RocketDAONodeTrustedSettingsMinipoolInterface rocketDAONodeTrustedSettingsMinipool = RocketDAONodeTrustedSettingsMinipoolInterface(getContractAddress("rocketDAONodeTrustedSettingsMinipool"));
-                require(_value >= (rocketDAONodeTrustedSettingsMinipool.getScrubPeriod() + 1 hours), "Launch timeout must be greater than scrub period");
+                LQGDAONodeTrustedSettingsMinipoolInterface lqgDAONodeTrustedSettingsMinipool = LQGDAONodeTrustedSettingsMinipoolInterface(getContractAddress("lqgDAONodeTrustedSettingsMinipool"));
+                require(_value >= (lqgDAONodeTrustedSettingsMinipool.getScrubPeriod() + 1 hours), "Launch timeout must be greater than scrub period");
                 // >= 12 hours (RPIP-33)
                 require(_value >= 12 hours, "Launch timeout must be greater than 12 hours");
             } 

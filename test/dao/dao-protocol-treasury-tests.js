@@ -5,7 +5,7 @@ import {
 } from './scenario-dao-protocol-bootstrap';
 import { payOutContracts, withdrawBalance } from './scenario-dao-protocol-treasury';
 import { shouldRevert } from '../_utils/testing';
-import { RocketTokenRPL, RocketVault } from '../_utils/artifacts';
+import { LQGTokenRPL, LQGVault } from '../_utils/artifacts';
 import { mintRPL } from '../_helpers/tokens';
 import { assertBN } from '../_helpers/bn';
 import { globalSnapShot } from '../_utils/snapshotting';
@@ -15,7 +15,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketDAOProtocol', () => {
+    describe('LQGDAOProtocol', () => {
         let owner, recipient1, recipient2, random;
 
         const oneDay = 60 * 60 * 24;
@@ -29,10 +29,10 @@ export default function() {
 
         async function fundTreasury(amount) {
             await mintRPL(owner, owner, amount);
-            const rocketVault = await RocketVault.deployed();
-            const rocketTokenRPL = await RocketTokenRPL.deployed();
-            await rocketTokenRPL.approve(rocketVault.target, amount, {from: owner});
-            await rocketVault.depositToken("rocketClaimDAO", rocketTokenRPL.target, amount);
+            const lqgVault = await LQGVault.deployed();
+            const lqgTokenRPL = await LQGTokenRPL.deployed();
+            await lqgTokenRPL.approve(lqgVault.target, amount, {from: owner});
+            await lqgVault.depositToken("lqgClaimDAO", lqgTokenRPL.target, amount);
         }
 
         //

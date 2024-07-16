@@ -4,19 +4,19 @@ pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-import "./RocketDAONodeTrustedSettings.sol";
-import "../../../../interface/dao/node/settings/RocketDAONodeTrustedSettingsRewardsInterface.sol";
-import "../../../../interface/dao/protocol/settings/RocketDAOProtocolSettingsRewardsInterface.sol";
+import "./LQGDAONodeTrustedSettings.sol";
+import "../../../../interface/dao/node/settings/LQGDAONodeTrustedSettingsRewardsInterface.sol";
+import "../../../../interface/dao/protocol/settings/LQGDAOProtocolSettingsRewardsInterface.sol";
 
 
 // The Trusted Node DAO Rewards settings
 
-contract RocketDAONodeTrustedSettingsRewards is RocketDAONodeTrustedSettings, RocketDAONodeTrustedSettingsRewardsInterface {
+contract LQGDAONodeTrustedSettingsRewards is LQGDAONodeTrustedSettings, LQGDAONodeTrustedSettingsRewardsInterface {
 
     using SafeMath for uint;
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketDAONodeTrustedSettings(_rocketStorageAddress, "rewards") {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGDAONodeTrustedSettings(_lqgStorageAddress, "rewards") {
         // Set version
         version = 2;
         // Initialize settings on deployment

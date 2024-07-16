@@ -6,10 +6,10 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 
-/// @title Dummy Rocket Pool Token (RPL) contract (do not deploy to mainnet)
-/// @author Jake Pospischil <jake@rocketpool.net>
+/// @title Dummy LQG Pool Token (RPL) contract (do not deploy to mainnet)
+/// @author Jake Pospischil <jake@lqgpool.net>
 
-contract RocketTokenDummyRPL is ERC20, Ownable {
+contract LQGTokenDummyRPL is ERC20, Ownable {
 
 
     /**** Properties ***********/
@@ -32,10 +32,10 @@ contract RocketTokenDummyRPL is ERC20, Ownable {
     /**** Methods ***********/
 
     // Construct with our token details
-    constructor(address _rocketStorageAddress) ERC20("Rocket Pool Dummy RPL", "DRPL") {}
+    constructor(address _lqgStorageAddress) ERC20("LQG Pool Dummy RPL", "DRPL") {}
 
 
-    // @dev Mint the Rocket Pool Tokens (RPL)
+    // @dev Mint the LQG Pool Tokens (RPL)
     // @param _to The address that will receive the minted tokens.
     // @param _amount The amount of tokens to mint.
     // @return A boolean that indicates if the operation was successful.

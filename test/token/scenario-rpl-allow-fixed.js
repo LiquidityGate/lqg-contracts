@@ -1,15 +1,15 @@
-import { RocketTokenDummyRPL } from '../_utils/artifacts';
+import { LQGTokenDummyRPL } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 
 // Allow RPL from the fixed contract to be spent
 export async function allowDummyRPL(to, amount, txOptions) {
     // Load contracts
-    const rocketTokenDummyRPL = await RocketTokenDummyRPL.deployed();
+    const lqgTokenDummyRPL = await LQGTokenDummyRPL.deployed();
 
     // Get balances
     function getBalances() {
         return Promise.all([
-            rocketTokenDummyRPL.allowance(txOptions.from.address, to),
+            lqgTokenDummyRPL.allowance(txOptions.from.address, to),
         ]).then(
             ([tokenAllowance]) =>
                 ({ tokenAllowance }),
@@ -20,7 +20,7 @@ export async function allowDummyRPL(to, amount, txOptions) {
     let balances1 = await getBalances();
 
     // Mint tokens
-    await rocketTokenDummyRPL.connect(txOptions.from).approve(to, amount, txOptions);
+    await lqgTokenDummyRPL.connect(txOptions.from).approve(to, amount, txOptions);
 
     // Get updated balances
     let balances2 = await getBalances();

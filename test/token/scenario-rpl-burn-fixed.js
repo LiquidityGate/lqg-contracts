@@ -1,20 +1,20 @@
-import { RocketTokenDummyRPL, RocketTokenRPL } from '../_utils/artifacts';
+import { LQGTokenDummyRPL, LQGTokenRPL } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 
 // Burn current fixed supply RPL for new RPL
 export async function burnFixedRPL(amount, txOptions) {
     // Load contracts
-    const rocketTokenRPL = await RocketTokenRPL.deployed();
-    const rocketTokenDummyRPL = await RocketTokenDummyRPL.deployed();
+    const lqgTokenRPL = await LQGTokenRPL.deployed();
+    const lqgTokenDummyRPL = await LQGTokenDummyRPL.deployed();
 
     // Get balances
     function getBalances() {
         return Promise.all([
-            rocketTokenDummyRPL.balanceOf(txOptions.from),
-            rocketTokenRPL.totalSupply(),
-            rocketTokenRPL.balanceOf(txOptions.from),
-            rocketTokenDummyRPL.balanceOf(rocketTokenRPL.target),
-            rocketTokenRPL.balanceOf(rocketTokenRPL.target),
+            lqgTokenDummyRPL.balanceOf(txOptions.from),
+            lqgTokenRPL.totalSupply(),
+            lqgTokenRPL.balanceOf(txOptions.from),
+            lqgTokenDummyRPL.balanceOf(lqgTokenRPL.target),
+            lqgTokenRPL.balanceOf(lqgTokenRPL.target),
         ]).then(
             ([rplFixedUserBalance, rplTokenSupply, rplUserBalance, rplContractBalanceOfFixedSupply, rplContractBalanceOfSelf]) =>
                 ({
@@ -31,7 +31,7 @@ export async function burnFixedRPL(amount, txOptions) {
     let balances1 = await getBalances();
 
     // Burn tokens & get tx fee
-    await rocketTokenRPL.connect(txOptions.from).swapTokens(amount, txOptions);
+    await lqgTokenRPL.connect(txOptions.from).swapTokens(amount, txOptions);
 
     // Get updated balances
     let balances2 = await getBalances();

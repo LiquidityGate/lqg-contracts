@@ -1,4 +1,4 @@
-const { RocketNodeManager, RocketMinipoolManager, RocketMinipoolDelegate } = require('../../test/_utils/artifacts');
+const { LQGNodeManager, LQGMinipoolManager, LQGMinipoolDelegate } = require('../../test/_utils/artifacts');
 const { assertBN } = require('./bn');
 const assert = require('assert');
 
@@ -12,12 +12,12 @@ async function checkInvariants() {
 }
 
 async function getNodeAddresses() {
-    const rocketNodeManager = await RocketNodeManager.deployed();
-    return await rocketNodeManager.getNodeAddresses(0, 1000);
+    const lqgNodeManager = await LQGNodeManager.deployed();
+    return await lqgNodeManager.getNodeAddresses(0, 1000);
 }
 
 async function getMinipoolDetails(address) {
-    const minipool = await RocketMinipoolDelegate.at(address);
+    const minipool = await LQGMinipoolDelegate.at(address);
 
     const [status, finalised, nodeFee, userDepositBalance, nodeDepositBalance] = await Promise.all([
         minipool.getStatus(),
@@ -37,27 +37,27 @@ async function getMinipoolDetails(address) {
 }
 
 async function getMinipoolsByNode(nodeAddress) {
-    const rocketMinipoolManager = await RocketMinipoolManager.deployed();
-    const count = await rocketMinipoolManager.getNodeMinipoolCount(nodeAddress);
+    const lqgMinipoolManager = await LQGMinipoolManager.deployed();
+    const count = await lqgMinipoolManager.getNodeMinipoolCount(nodeAddress);
     const minipools = [];
     for (let i = 0; i < count; i++) {
-        const address = await rocketMinipoolManager.getNodeMinipoolAt(nodeAddress, i);
+        const address = await lqgMinipoolManager.getNodeMinipoolAt(nodeAddress, i);
         minipools.push(await getMinipoolDetails(address));
     }
     return minipools;
 }
 
 async function checkNodeInvariants(nodeAddress, minipools) {
-    const rocketMinipoolManager = await RocketMinipoolManager.deployed();
-    const rocketNodeManager = await RocketNodeManager.deployed();
+    const lqgMinipoolManager = await LQGMinipoolManager.deployed();
+    const lqgNodeManager = await LQGNodeManager.deployed();
     const depositSizes = ['8'.ether, '16'.ether];
     // Filter "staking" minipools
     const stakingMinipools = minipools.filter(minipool => minipool.status === '2' && minipool.finalised === false);
     // Check overall counts
     const [expectedActive, expectedFinalised, expectedStaking] = await Promise.all([
-        rocketMinipoolManager.getNodeActiveMinipoolCount(nodeAddress),
-        rocketMinipoolManager.getNodeFinalisedMinipoolCount(nodeAddress),
-        rocketMinipoolManager.getNodeStakingMinipoolCount(nodeAddress),
+        lqgMinipoolManager.getNodeActiveMinipoolCount(nodeAddress),
+        lqgMinipoolManager.getNodeFinalisedMinipoolCount(nodeAddress),
+        lqgMinipoolManager.getNodeStakingMinipoolCount(nodeAddress),
     ]);
     const actualActive = minipools.filter(minipool => minipool.finalised !== true).length;
     const actualFinalised = minipools.length - actualActive;
@@ -66,7 +66,7 @@ async function checkNodeInvariants(nodeAddress, minipools) {
     assert.equal(actualFinalised, Number(expectedFinalised), 'Finalised minipool count invariant broken');
     assert.equal(actualStaking, Number(expectedStaking), 'Staking minipool count invariant broken');
     // Check deposit size counts
-    const countBySize = await Promise.all(depositSizes.map(depositSize => rocketMinipoolManager.getNodeStakingMinipoolCountBySize(nodeAddress, depositSize)));
+    const countBySize = await Promise.all(depositSizes.map(depositSize => lqgMinipoolManager.getNodeStakingMinipoolCountBySize(nodeAddress, depositSize)));
     for (let i = 0; i < depositSizes.length; i++) {
         const depositSize = depositSizes[i];
         const actualCount = Number(countBySize[i]);
@@ -78,7 +78,7 @@ async function checkNodeInvariants(nodeAddress, minipools) {
         stakingMinipools.map(minipool => minipool.nodeFee),
         stakingMinipools.map(minipool => minipool.userDepositBalance),
     );
-    const actualFee = await rocketNodeManager.getAverageNodeFee(nodeAddress);
+    const actualFee = await lqgNodeManager.getAverageNodeFee(nodeAddress);
     assertBN.equal(actualFee, expectedFee, 'Average node fee invariant broken');
 }
 

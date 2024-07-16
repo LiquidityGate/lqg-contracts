@@ -2,7 +2,7 @@ pragma solidity >0.5.0 <0.9.0;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-interface RocketAuctionManagerInterface {
+interface LQGAuctionManagerInterface {
     function getTotalRPLBalance() external view returns (uint256);
     function getAllottedRPLBalance() external view returns (uint256);
     function getRemainingRPLBalance() external view returns (uint256);

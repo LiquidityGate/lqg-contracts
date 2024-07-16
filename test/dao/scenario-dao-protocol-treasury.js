@@ -1,17 +1,17 @@
-import { RocketClaimDAO, RocketTokenRPL } from '../_utils/artifacts';
+import { LQGClaimDAO, LQGTokenRPL } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 
 const helpers = require('@nomicfoundation/hardhat-network-helpers');
 
 export async function payOutContracts(_contractNames, txOptions) {
     // Load contracts
-    const rocketClaimDAO = await RocketClaimDAO.deployed();
+    const lqgClaimDAO = await LQGClaimDAO.deployed();
 
     // Calculate expected payouts
     let contracts = [];
     let expectedPayouts = {};
     for (const name of _contractNames) {
-        contracts.push(await rocketClaimDAO.getContract(name));
+        contracts.push(await lqgClaimDAO.getContract(name));
     }
 
     const currentTime = await helpers.time.latest();
@@ -41,14 +41,14 @@ export async function payOutContracts(_contractNames, txOptions) {
     async function getBalances() {
         let balances = {};
         for (const address in expectedPayouts) {
-            balances[address] = await rocketClaimDAO.getBalance(address);
+            balances[address] = await lqgClaimDAO.getBalance(address);
         }
         return balances;
     }
 
     // Record balances before, execute, record balances after
     const balancesBefore = await getBalances();
-    await rocketClaimDAO.connect(txOptions.from).payOutContracts(_contractNames, txOptions);
+    await lqgClaimDAO.connect(txOptions.from).payOutContracts(_contractNames, txOptions);
     const balancesAfter = await getBalances();
 
     // Check balance deltas
@@ -60,19 +60,19 @@ export async function payOutContracts(_contractNames, txOptions) {
 
 export async function withdrawBalance(recipient, txOptions) {
     // Load contracts
-    const rocketClaimDAO = await RocketClaimDAO.deployed();
-    const rocketTokenRPL = await RocketTokenRPL.deployed();
+    const lqgClaimDAO = await LQGClaimDAO.deployed();
+    const lqgTokenRPL = await LQGTokenRPL.deployed();
 
     // Get balance before withdrawal
-    const balanceBefore = await rocketClaimDAO.getBalance(recipient);
-    const tokenBalanceBefore = await rocketTokenRPL.balanceOf(recipient);
+    const balanceBefore = await lqgClaimDAO.getBalance(recipient);
+    const tokenBalanceBefore = await lqgTokenRPL.balanceOf(recipient);
 
     // Withdraw
-    await rocketClaimDAO.connect(txOptions.from).withdrawBalance(recipient, txOptions);
+    await lqgClaimDAO.connect(txOptions.from).withdrawBalance(recipient, txOptions);
 
     // Check change in balances
-    const balanceAfter = await rocketClaimDAO.getBalance(recipient);
-    const tokenBalanceAfter = await rocketTokenRPL.balanceOf(recipient);
+    const balanceAfter = await lqgClaimDAO.getBalance(recipient);
+    const tokenBalanceAfter = await lqgTokenRPL.balanceOf(recipient);
 
     assertBN.equal(balanceAfter, 0n, 'Balance did not zero');
     assertBN.equal(tokenBalanceAfter - tokenBalanceBefore, balanceBefore, 'Unexpected change in RPL balance');

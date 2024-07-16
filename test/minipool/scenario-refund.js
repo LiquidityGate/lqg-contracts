@@ -1,4 +1,4 @@
-import { RocketNodeManager } from '../_utils/artifacts';
+import { LQGNodeManager } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 
 const hre = require('hardhat');
@@ -7,11 +7,11 @@ const ethers = hre.ethers;
 // Refund refinanced node balance from a minipool
 export async function refund(minipool, txOptions) {
     // Load contracts
-    const rocketNodeManager = await RocketNodeManager.deployed();
+    const lqgNodeManager = await LQGNodeManager.deployed();
 
     // Get parameters
     let nodeAddress = await minipool.getNodeAddress();
-    let nodeWithdrawalAddress = await rocketNodeManager.getNodeWithdrawalAddress(nodeAddress);
+    let nodeWithdrawalAddress = await lqgNodeManager.getNodeWithdrawalAddress(nodeAddress);
 
     // Get balances
     function getBalances() {

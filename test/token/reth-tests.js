@@ -16,10 +16,10 @@ import {
 import { burnReth } from './scenario-reth-burn';
 import { transferReth } from './scenario-reth-transfer';
 import {
-    RocketDAONodeTrustedSettingsMinipool,
-    RocketDAOProtocolSettingsMinipool,
-    RocketDAOProtocolSettingsNetwork,
-    RocketTokenRETH,
+    LQGDAONodeTrustedSettingsMinipool,
+    LQGDAOProtocolSettingsMinipool,
+    LQGDAOProtocolSettingsNetwork,
+    LQGTokenRETH,
 } from '../_utils/artifacts';
 import { setDAOProtocolBootstrapSetting } from '../dao/scenario-dao-protocol-bootstrap';
 import { beginUserDistribute, withdrawValidatorBalance } from '../minipool/scenario-withdraw-validator-balance';
@@ -33,7 +33,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketTokenRETH', () => {
+    describe('LQGTokenRETH', () => {
         let owner,
             node,
             nodeWithdrawalAddress,
@@ -82,11 +82,11 @@ export default function() {
             await setNodeTrusted(trustedNode, 'saas_1', 'node@home.com', owner);
 
             // Set settings
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.reth.collateral.target', '1'.ether, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.submit.prices.frequency', submitPricesFrequency, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.reth.deposit.delay', depositDeplay, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsMinipool, 'minipool.user.distribute.window.start', userDistributeStartTime, { from: owner });
-            await setDAONodeTrustedBootstrapSetting(RocketDAONodeTrustedSettingsMinipool, 'minipool.scrub.period', scrubPeriod, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.reth.collateral.target', '1'.ether, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.submit.prices.frequency', submitPricesFrequency, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.reth.deposit.delay', depositDeplay, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsMinipool, 'minipool.user.distribute.window.start', userDistributeStartTime, { from: owner });
+            await setDAONodeTrustedBootstrapSetting(LQGDAONodeTrustedSettingsMinipool, 'minipool.scrub.period', scrubPeriod, { from: owner });
 
             // Stake RPL to cover minipools
             let rplStake = await getMinipoolMinimumRPLStake();
@@ -250,10 +250,10 @@ export default function() {
 
         it(printTitle('random', 'can deposit excess collateral into the deposit pool'), async () => {
             // Get rETH contract
-            const rocketTokenRETH = await RocketTokenRETH.deployed();
+            const lqgTokenRETH = await LQGTokenRETH.deployed();
             // Send enough ETH to rETH contract to exceed target collateralisation rate
             await random.sendTransaction({
-                to: rocketTokenRETH.target,
+                to: lqgTokenRETH.target,
                 value: '32'.ether,
             });
             // Call the deposit excess function

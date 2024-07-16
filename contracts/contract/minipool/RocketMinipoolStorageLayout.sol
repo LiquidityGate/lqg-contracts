@@ -2,19 +2,19 @@ pragma solidity 0.7.6;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-import "../../interface/RocketStorageInterface.sol";
+import "../../interface/LQGStorageInterface.sol";
 import "../../types/MinipoolDeposit.sol";
 import "../../types/MinipoolStatus.sol";
 
-// The RocketMinipool contract storage layout, shared by RocketMinipoolDelegate
+// The LQGMinipool contract storage layout, shared by LQGMinipoolDelegate
 
 // ******************************************************
 // Note: This contract MUST NOT BE UPDATED after launch.
 // All deployed minipool contracts must maintain a
-// Consistent storage layout with RocketMinipoolDelegate.
+// Consistent storage layout with LQGMinipoolDelegate.
 // ******************************************************
 
-abstract contract RocketMinipoolStorageLayout {
+abstract contract LQGMinipoolStorageLayout {
     // Storage state enum
     enum StorageState {
         Undefined,
@@ -22,8 +22,8 @@ abstract contract RocketMinipoolStorageLayout {
         Initialised
     }
 
-	// Main Rocket Pool storage contract
-    RocketStorageInterface internal rocketStorage = RocketStorageInterface(0);
+	// Main LQG Pool storage contract
+    LQGStorageInterface internal lqgStorage = LQGStorageInterface(0);
 
     // Status
     MinipoolStatus internal status;
@@ -48,14 +48,14 @@ abstract contract RocketMinipoolStorageLayout {
 
     // Upgrade options
     bool internal useLatestDelegate = false;
-    address internal rocketMinipoolDelegate;
-    address internal rocketMinipoolDelegatePrev;
+    address internal lqgMinipoolDelegate;
+    address internal lqgMinipoolDelegatePrev;
 
     // Local copy of RETH address
-    address internal rocketTokenRETH;
+    address internal lqgTokenRETH;
 
     // Local copy of penalty contract
-    address internal rocketMinipoolPenalty;
+    address internal lqgMinipoolPenalty;
 
     // Used to prevent direct access to delegate and prevent calling initialise more than once
     StorageState internal storageState = StorageState.Undefined;

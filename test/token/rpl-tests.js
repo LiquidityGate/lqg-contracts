@@ -6,7 +6,7 @@ import { burnFixedRPL } from './scenario-rpl-burn-fixed';
 import { allowDummyRPL } from './scenario-rpl-allow-fixed';
 import { rplClaimInflation, rplSetInflationConfig } from './scenario-rpl-inflation';
 import { setRPLInflationIntervalRate, setRPLInflationStartTime } from '../dao/scenario-dao-protocol-bootstrap';
-import { RocketTokenRPL } from '../_utils/artifacts';
+import { LQGTokenRPL } from '../_utils/artifacts';
 import { assertBN } from '../_helpers/bn';
 import { globalSnapShot } from '../_utils/snapshotting';
 
@@ -15,7 +15,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketTokenRPL', () => {
+    describe('LQGTokenRPL', () => {
         let owner, userOne;
 
         // One day in seconds
@@ -38,9 +38,9 @@ export default function() {
 
         it(printTitle('userOne', 'burn all their current fixed supply RPL for new RPL'), async () => {
             // Load contracts
-            const rocketTokenRPL = await RocketTokenRPL.deployed();
+            const lqgTokenRPL = await LQGTokenRPL.deployed();
             // Give allowance for all to be sent
-            await allowDummyRPL(rocketTokenRPL.target, userOneRPLBalance, {
+            await allowDummyRPL(lqgTokenRPL.target, userOneRPLBalance, {
                 from: userOne,
             });
             // Burn existing fixed supply RPL for new RPL
@@ -51,11 +51,11 @@ export default function() {
 
         it(printTitle('userOne', 'burn less fixed supply RPL than they\'ve given an allowance for'), async () => {
             // Load contracts
-            const rocketTokenRPL = await RocketTokenRPL.deployed();
+            const lqgTokenRPL = await LQGTokenRPL.deployed();
             // The allowance
             let allowance = userOneRPLBalance / 2n;
             // Give allowance for half to be spent
-            await allowDummyRPL(rocketTokenRPL.target, allowance, {
+            await allowDummyRPL(lqgTokenRPL.target, allowance, {
                 from: userOne,
             });
             // Burn existing fixed supply RPL for new RPL
@@ -66,11 +66,11 @@ export default function() {
 
         it(printTitle('userOne', 'fails to burn more fixed supply RPL than they\'ve given an allowance for'), async () => {
             // Load contracts
-            const rocketTokenRPL = await RocketTokenRPL.deployed();
+            const lqgTokenRPL = await LQGTokenRPL.deployed();
             // The allowance
             let allowance = userOneRPLBalance - '0.000001'.ether;
             // Give allowance for all to be sent
-            await allowDummyRPL(rocketTokenRPL.target, allowance, {
+            await allowDummyRPL(lqgTokenRPL.target, allowance, {
                 from: userOne,
             });
             // Burn existing fixed supply RPL for new RPL
@@ -81,9 +81,9 @@ export default function() {
 
         it(printTitle('userOne', 'fails to burn more fixed supply RPL than they have'), async () => {
             // Load contracts
-            const rocketTokenRPL = await RocketTokenRPL.deployed();
+            const lqgTokenRPL = await LQGTokenRPL.deployed();
             // Give allowance for all to be sent
-            await allowDummyRPL(rocketTokenRPL.target, userOneRPLBalance, {
+            await allowDummyRPL(lqgTokenRPL.target, userOneRPLBalance, {
                 from: userOne,
             });
             // Burn existing fixed supply RPL for new RPL

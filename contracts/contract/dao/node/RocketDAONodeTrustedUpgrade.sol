@@ -2,13 +2,13 @@ pragma solidity 0.7.6;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-import "../../RocketBase.sol";
-import "../../../interface/dao/node/RocketDAONodeTrustedUpgradeInterface.sol";
+import "../../LQGBase.sol";
+import "../../../interface/dao/node/LQGDAONodeTrustedUpgradeInterface.sol";
 import "../../../interface/util/IERC20.sol";
 
 // Handles network contract upgrades
 
-contract RocketDAONodeTrustedUpgrade is RocketBase, RocketDAONodeTrustedUpgradeInterface {
+contract LQGDAONodeTrustedUpgrade is LQGBase, LQGDAONodeTrustedUpgradeInterface {
 
     // Events
     event ContractUpgraded(bytes32 indexed name, address indexed oldAddress, address indexed newAddress, uint256 time);
@@ -17,13 +17,13 @@ contract RocketDAONodeTrustedUpgrade is RocketBase, RocketDAONodeTrustedUpgradeI
     event ABIAdded(bytes32 indexed name, uint256 time);
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         version = 1;
     }
 
     // Main accessor for performing an upgrade, be it a contract or abi for a contract
     // Will require > 50% of trusted DAO members to run when bootstrap mode is disabled
-    function upgrade(string memory _type, string memory _name, string memory _contractAbi, address _contractAddress) override external onlyLatestContract("rocketDAONodeTrustedProposals", msg.sender) {
+    function upgrade(string memory _type, string memory _name, string memory _contractAbi, address _contractAddress) override external onlyLatestContract("lqgDAONodeTrustedProposals", msg.sender) {
         // What action are we performing?
         bytes32 typeHash = keccak256(abi.encodePacked(_type));
         // Lets do it!
@@ -40,12 +40,12 @@ contract RocketDAONodeTrustedUpgrade is RocketBase, RocketDAONodeTrustedUpgradeI
     function _upgradeContract(string memory _name, address _contractAddress, string memory _contractAbi) internal {
         // Check contract being upgraded
         bytes32 nameHash = keccak256(abi.encodePacked(_name));
-        require(nameHash != keccak256(abi.encodePacked("rocketVault")),               "Cannot upgrade the vault");
-        require(nameHash != keccak256(abi.encodePacked("rocketTokenRETH")),           "Cannot upgrade token contracts");
-        require(nameHash != keccak256(abi.encodePacked("rocketTokenRPL")),            "Cannot upgrade token contracts");
-        require(nameHash != keccak256(abi.encodePacked("rocketTokenRPLFixedSupply")), "Cannot upgrade token contracts");
+        require(nameHash != keccak256(abi.encodePacked("lqgVault")),               "Cannot upgrade the vault");
+        require(nameHash != keccak256(abi.encodePacked("lqgTokenRETH")),           "Cannot upgrade token contracts");
+        require(nameHash != keccak256(abi.encodePacked("lqgTokenRPL")),            "Cannot upgrade token contracts");
+        require(nameHash != keccak256(abi.encodePacked("lqgTokenRPLFixedSupply")), "Cannot upgrade token contracts");
         require(nameHash != keccak256(abi.encodePacked("casperDeposit")),             "Cannot upgrade the casper deposit contract");
-        require(nameHash != keccak256(abi.encodePacked("rocketMinipoolPenalty")),      "Cannot upgrade minipool penalty contract");
+        require(nameHash != keccak256(abi.encodePacked("lqgMinipoolPenalty")),      "Cannot upgrade minipool penalty contract");
         // Get old contract address & check contract exists
         address oldContractAddress = getAddress(keccak256(abi.encodePacked("contract.address", _name)));
         require(oldContractAddress != address(0x0), "Contract does not exist");

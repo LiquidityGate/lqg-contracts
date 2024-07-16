@@ -4,16 +4,16 @@ pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-import "../RocketBase.sol";
-import "../../interface/auction/RocketAuctionManagerInterface.sol";
-import "../../interface/deposit/RocketDepositPoolInterface.sol";
-import "../../interface/network/RocketNetworkPricesInterface.sol";
-import "../../interface/dao/protocol/settings/RocketDAOProtocolSettingsAuctionInterface.sol";
-import "../../interface/RocketVaultInterface.sol";
+import "../LQGBase.sol";
+import "../../interface/auction/LQGAuctionManagerInterface.sol";
+import "../../interface/deposit/LQGDepositPoolInterface.sol";
+import "../../interface/network/LQGNetworkPricesInterface.sol";
+import "../../interface/dao/protocol/settings/LQGDAOProtocolSettingsAuctionInterface.sol";
+import "../../interface/LQGVaultInterface.sol";
 
 // Facilitates RPL liquidation auctions
 
-contract RocketAuctionManager is RocketBase, RocketAuctionManagerInterface {
+contract LQGAuctionManager is LQGBase, LQGAuctionManagerInterface {
 
     // Libs
     using SafeMath for uint;
@@ -25,14 +25,14 @@ contract RocketAuctionManager is RocketBase, RocketAuctionManagerInterface {
     event RPLRecovered(uint256 indexed lotIndex, address indexed by, uint256 rplAmount, uint256 time);
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         version = 1;
     }
 
     // Get the total RPL balance of the contract
     function getTotalRPLBalance() override public view returns (uint256) {
-        RocketVaultInterface rocketVault = RocketVaultInterface(getContractAddress("rocketVault"));
-        return rocketVault.balanceOfToken("rocketAuctionManager", IERC20(getContractAddress("rocketTokenRPL")));
+        LQGVaultInterface lqgVault = LQGVaultInterface(getContractAddress("lqgVault"));
+        return lqgVault.balanceOfToken("lqgAuctionManager", IERC20(getContractAddress("lqgTokenRPL")));
     }
 
     // Get/set the allotted RPL balance of the contract
@@ -164,27 +164,27 @@ contract RocketAuctionManager is RocketBase, RocketAuctionManagerInterface {
     }
 
     // Create a new lot for auction
-    function createLot() override external onlyLatestContract("rocketAuctionManager", address(this)) {
+    function createLot() override external onlyLatestContract("lqgAuctionManager", address(this)) {
         // Load contracts
-        RocketDAOProtocolSettingsAuctionInterface rocketAuctionSettings = RocketDAOProtocolSettingsAuctionInterface(getContractAddress("rocketDAOProtocolSettingsAuction"));
-        RocketNetworkPricesInterface rocketNetworkPrices = RocketNetworkPricesInterface(getContractAddress("rocketNetworkPrices"));
+        LQGDAOProtocolSettingsAuctionInterface lqgAuctionSettings = LQGDAOProtocolSettingsAuctionInterface(getContractAddress("lqgDAOProtocolSettingsAuction"));
+        LQGNetworkPricesInterface lqgNetworkPrices = LQGNetworkPricesInterface(getContractAddress("lqgNetworkPrices"));
         // Get remaining RPL balance & RPL price
         uint256 remainingRplBalance = getRemainingRPLBalance();
-        uint256 rplPrice = rocketNetworkPrices.getRPLPrice();
+        uint256 rplPrice = lqgNetworkPrices.getRPLPrice();
         // Check lot can be created
-        require(rocketAuctionSettings.getCreateLotEnabled(), "Creating lots is currently disabled");
-        require(remainingRplBalance >= calcBase.mul(rocketAuctionSettings.getLotMinimumEthValue()).div(rplPrice), "Insufficient RPL balance to create new lot");
+        require(lqgAuctionSettings.getCreateLotEnabled(), "Creating lots is currently disabled");
+        require(remainingRplBalance >= calcBase.mul(lqgAuctionSettings.getLotMinimumEthValue()).div(rplPrice), "Insufficient RPL balance to create new lot");
         // Calculate lot RPL amount
         uint256 lotRplAmount = remainingRplBalance;
-        uint256 maximumLotRplAmount = calcBase.mul(rocketAuctionSettings.getLotMaximumEthValue()).div(rplPrice);
+        uint256 maximumLotRplAmount = calcBase.mul(lqgAuctionSettings.getLotMaximumEthValue()).div(rplPrice);
         if (lotRplAmount > maximumLotRplAmount) { lotRplAmount = maximumLotRplAmount; }
         // Create lot
         uint256 lotIndex = getLotCount();
         setBool(keccak256(abi.encodePacked("auction.lot.exists", lotIndex)), true);
         setUint(keccak256(abi.encodePacked("auction.lot.block.start", lotIndex)), block.number);
-        setUint(keccak256(abi.encodePacked("auction.lot.block.end", lotIndex)), block.number.add(rocketAuctionSettings.getLotDuration()));
-        setUint(keccak256(abi.encodePacked("auction.lot.price.start", lotIndex)), rplPrice.mul(rocketAuctionSettings.getStartingPriceRatio()).div(calcBase));
-        setUint(keccak256(abi.encodePacked("auction.lot.price.reserve", lotIndex)), rplPrice.mul(rocketAuctionSettings.getReservePriceRatio()).div(calcBase));
+        setUint(keccak256(abi.encodePacked("auction.lot.block.end", lotIndex)), block.number.add(lqgAuctionSettings.getLotDuration()));
+        setUint(keccak256(abi.encodePacked("auction.lot.price.start", lotIndex)), rplPrice.mul(lqgAuctionSettings.getStartingPriceRatio()).div(calcBase));
+        setUint(keccak256(abi.encodePacked("auction.lot.price.reserve", lotIndex)), rplPrice.mul(lqgAuctionSettings.getReservePriceRatio()).div(calcBase));
         setUint(keccak256(abi.encodePacked("auction.lot.rpl.total", lotIndex)), lotRplAmount);
         // Increment lot count & increase allotted RPL balance
         setLotCount(lotIndex.add(1));
@@ -194,16 +194,16 @@ contract RocketAuctionManager is RocketBase, RocketAuctionManagerInterface {
     }
 
     // Bid on a lot
-    function placeBid(uint256 _lotIndex) override external payable onlyLatestContract("rocketAuctionManager", address(this)) {
+    function placeBid(uint256 _lotIndex) override external payable onlyLatestContract("lqgAuctionManager", address(this)) {
         // Load contracts
-        RocketDAOProtocolSettingsAuctionInterface rocketAuctionSettings = RocketDAOProtocolSettingsAuctionInterface(getContractAddress("rocketDAOProtocolSettingsAuction"));
-        RocketDepositPoolInterface rocketDepositPool = RocketDepositPoolInterface(getContractAddress("rocketDepositPool"));
+        LQGDAOProtocolSettingsAuctionInterface lqgAuctionSettings = LQGDAOProtocolSettingsAuctionInterface(getContractAddress("lqgDAOProtocolSettingsAuction"));
+        LQGDepositPoolInterface lqgDepositPool = LQGDepositPoolInterface(getContractAddress("lqgDepositPool"));
         // Check bid amount
         require(msg.value > 0, "Invalid bid amount");
         // Check lot exists
         require(getLotExists(_lotIndex), "Lot does not exist");
         // Check lot can be bid on
-        require(rocketAuctionSettings.getBidOnLotEnabled(), "Bidding on lots is currently disabled");
+        require(lqgAuctionSettings.getBidOnLotEnabled(), "Bidding on lots is currently disabled");
         require(block.number < getLotEndBlock(_lotIndex), "Lot bidding period has concluded");
         // Check lot has RPL remaining
         uint256 remainingRplAmount = getLotRemainingRPLAmount(_lotIndex);
@@ -216,7 +216,7 @@ contract RocketAuctionManager is RocketBase, RocketAuctionManagerInterface {
         increaseLotTotalBidAmount(_lotIndex, bidAmount);
         increaseLotAddressBidAmount(_lotIndex, msg.sender, bidAmount);
         // Transfer bid amount to deposit pool
-        rocketDepositPool.recycleLiquidatedStake{value: bidAmount}();
+        lqgDepositPool.recycleLiquidatedStake{value: bidAmount}();
         // Refund excess ETH to sender
         if (msg.value > bidAmount) { msg.sender.transfer(msg.value.sub(bidAmount)); }
         // Emit bid placed event
@@ -224,7 +224,7 @@ contract RocketAuctionManager is RocketBase, RocketAuctionManagerInterface {
     }
 
     // Claim RPL from a lot
-    function claimBid(uint256 _lotIndex) override external onlyLatestContract("rocketAuctionManager", address(this)) {
+    function claimBid(uint256 _lotIndex) override external onlyLatestContract("lqgAuctionManager", address(this)) {
         // Check lot exists
         require(getLotExists(_lotIndex), "Lot does not exist");
         // Get lot price info
@@ -247,8 +247,8 @@ contract RocketAuctionManager is RocketBase, RocketAuctionManagerInterface {
             rplAmount = allottedAmount;
         }
         // Transfer RPL to bidder
-        RocketVaultInterface rocketVault = RocketVaultInterface(getContractAddress("rocketVault"));
-        rocketVault.withdrawToken(msg.sender, IERC20(getContractAddress("rocketTokenRPL")), rplAmount);
+        LQGVaultInterface lqgVault = LQGVaultInterface(getContractAddress("lqgVault"));
+        lqgVault.withdrawToken(msg.sender, IERC20(getContractAddress("lqgTokenRPL")), rplAmount);
         // Decrease allotted RPL balance & update address bid amount
         decreaseAllottedRPLBalance(rplAmount);
         setLotAddressBidAmount(_lotIndex, msg.sender, 0);
@@ -257,7 +257,7 @@ contract RocketAuctionManager is RocketBase, RocketAuctionManagerInterface {
     }
 
     // Recover unclaimed RPL from a lot
-    function recoverUnclaimedRPL(uint256 _lotIndex) override external onlyLatestContract("rocketAuctionManager", address(this)) {
+    function recoverUnclaimedRPL(uint256 _lotIndex) override external onlyLatestContract("lqgAuctionManager", address(this)) {
         // Check lot exists and has not already had RPL recovered
         require(getLotExists(_lotIndex), "Lot does not exist");
         require(!getLotRPLRecovered(_lotIndex), "Unclaimed RPL has already been recovered from the lot");

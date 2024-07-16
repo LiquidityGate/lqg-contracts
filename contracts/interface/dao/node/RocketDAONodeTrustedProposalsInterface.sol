@@ -2,7 +2,7 @@ pragma solidity >0.5.0 <0.9.0;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-interface RocketDAONodeTrustedProposalsInterface {
+interface LQGDAONodeTrustedProposalsInterface {
     function propose(string memory _proposalMessage, bytes memory _payload) external returns (uint256);
     function vote(uint256 _proposalID, bool _support) external;
     function cancel(uint256 _proposalID) external;

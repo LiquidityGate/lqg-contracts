@@ -1,8 +1,8 @@
 import {
-    RocketDepositPool,
-    RocketMinipoolPenalty,
-    RocketNodeManager,
-    RocketTokenRETH
+    LQGDepositPool,
+    LQGMinipoolPenalty,
+    LQGNodeManager,
+    LQGTokenRETH
 } from '../_utils/artifacts'
 import { assertBN } from '../_helpers/bn';
 
@@ -12,18 +12,18 @@ const ethers = hre.ethers;
 export async function withdrawValidatorBalance(minipool, withdrawalBalance, from) {
     // Load contracts
     const [
-        rocketDepositPool,
-        rocketTokenRETH,
-        rocketNodeManager
+        lqgDepositPool,
+        lqgTokenRETH,
+        lqgNodeManager
     ] = await Promise.all([
-        RocketDepositPool.deployed(),
-        RocketTokenRETH.deployed(),
-        RocketNodeManager.deployed(),
+        LQGDepositPool.deployed(),
+        LQGTokenRETH.deployed(),
+        LQGNodeManager.deployed(),
     ]);
 
     // Get node parameters
     let nodeAddress = await minipool.getNodeAddress();
-    let nodeWithdrawalAddress = await rocketNodeManager.getNodeWithdrawalAddress(nodeAddress);
+    let nodeWithdrawalAddress = await lqgNodeManager.getNodeWithdrawalAddress(nodeAddress);
 
     // Get parameters
     let [
@@ -35,8 +35,8 @@ export async function withdrawValidatorBalance(minipool, withdrawalBalance, from
     // Get balances
     function getBalances() {
         return Promise.all([
-            ethers.provider.getBalance(rocketTokenRETH.target),
-            rocketDepositPool.getBalance(),
+            ethers.provider.getBalance(lqgTokenRETH.target),
+            lqgDepositPool.getBalance(),
             ethers.provider.getBalance(nodeWithdrawalAddress),
             ethers.provider.getBalance(minipool.target),
         ]).then(
@@ -104,8 +104,8 @@ export async function withdrawValidatorBalance(minipool, withdrawalBalance, from
     let depositPoolChange = balances2.depositPoolEth - balances1.depositPoolEth;
 
     // Get penalty rate for this minipool
-    const rocketMinipoolPenalty = await RocketMinipoolPenalty.deployed();
-    const penaltyRate = await rocketMinipoolPenalty.getPenaltyRate(minipool.target);
+    const lqgMinipoolPenalty = await LQGMinipoolPenalty.deployed();
+    const penaltyRate = await lqgMinipoolPenalty.getPenaltyRate(minipool.target);
 
     // Calculate rewards
     let depositBalance = '32'.ether;

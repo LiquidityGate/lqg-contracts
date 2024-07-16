@@ -1,10 +1,10 @@
 import {
-    RocketDAONodeTrusted,
-    RocketDAONodeTrustedActions,
-    RocketDAONodeTrustedProposals,
-    RocketDAOProposal,
-    RocketTokenRPL,
-    RocketVault,
+    LQGDAONodeTrusted,
+    LQGDAONodeTrustedActions,
+    LQGDAONodeTrustedProposals,
+    LQGDAOProposal,
+    LQGTokenRPL,
+    LQGVault,
 } from '../_utils/artifacts';
 import { getDAOProposalState, proposalStates } from './scenario-dao-proposal';
 import { assertBN } from '../_helpers/bn';
@@ -13,35 +13,35 @@ import * as assert from 'assert';
 // Returns true if the address is a DAO member
 export async function getDAOMemberIsValid(_nodeAddress, txOptions) {
     // Load contracts
-    const rocketDAONodeTrusted = await RocketDAONodeTrusted.deployed();
-    return await rocketDAONodeTrusted.getMemberIsValid(_nodeAddress);
+    const lqgDAONodeTrusted = await LQGDAONodeTrusted.deployed();
+    return await lqgDAONodeTrusted.getMemberIsValid(_nodeAddress);
 }
 
 // Get the total members
 export async function getDAONodeMemberCount(txOptions) {
     // Load contracts
-    const rocketDAONodeTrusted = await RocketDAONodeTrusted.deployed();
-    return await rocketDAONodeTrusted.getMemberCount();
+    const lqgDAONodeTrusted = await LQGDAONodeTrusted.deployed();
+    return await lqgDAONodeTrusted.getMemberCount();
 }
 
 // Get the number of votes needed for a proposal to pass
 export async function getDAONodeProposalQuorumVotesRequired(proposalID, txOptions) {
     // Load contracts
-    const rocketDAONodeTrusted = await RocketDAONodeTrusted.deployed();
-    return await rocketDAONodeTrusted.getProposalQuorumVotesRequired();
+    const lqgDAONodeTrusted = await LQGDAONodeTrusted.deployed();
+    return await lqgDAONodeTrusted.getProposalQuorumVotesRequired();
 }
 
 // Create a proposal for this DAO
 export async function daoNodeTrustedPropose(_proposalMessage, _payload, txOptions) {
 
     // Load contracts
-    const rocketDAOProposal = await RocketDAOProposal.deployed();
-    const rocketDAONodeTrustedProposals = await RocketDAONodeTrustedProposals.deployed();
+    const lqgDAOProposal = await LQGDAOProposal.deployed();
+    const lqgDAONodeTrustedProposals = await LQGDAONodeTrustedProposals.deployed();
 
     // Get data about the tx
     function getTxData() {
         return Promise.all([
-            rocketDAOProposal.getTotal(),
+            lqgDAOProposal.getTotal(),
         ]).then(
             ([proposalTotal]) =>
                 ({ proposalTotal }),
@@ -52,7 +52,7 @@ export async function daoNodeTrustedPropose(_proposalMessage, _payload, txOption
     let ds1 = await getTxData();
 
     // Add a new proposal
-    await rocketDAONodeTrustedProposals.connect(txOptions.from).propose(_proposalMessage, _payload, txOptions);
+    await lqgDAONodeTrustedProposals.connect(txOptions.from).propose(_proposalMessage, _payload, txOptions);
 
     // Capture data
     let ds2 = await getTxData();
@@ -71,16 +71,16 @@ export async function daoNodeTrustedPropose(_proposalMessage, _payload, txOption
 // Vote on a proposal for this DAO
 export async function daoNodeTrustedVote(_proposalID, _vote, txOptions) {
     // Load contracts
-    const rocketDAOProposal = await RocketDAOProposal.deployed();
-    const rocketDAONodeTrustedProposals = await RocketDAONodeTrustedProposals.deployed();
+    const lqgDAOProposal = await LQGDAOProposal.deployed();
+    const lqgDAONodeTrustedProposals = await LQGDAONodeTrustedProposals.deployed();
 
     // Get data about the tx
     function getTxData() {
         return Promise.all([
-            rocketDAOProposal.getTotal(),
-            rocketDAOProposal.getState(_proposalID),
-            rocketDAOProposal.getVotesFor(_proposalID),
-            rocketDAOProposal.getVotesRequired(_proposalID),
+            lqgDAOProposal.getTotal(),
+            lqgDAOProposal.getState(_proposalID),
+            lqgDAOProposal.getVotesFor(_proposalID),
+            lqgDAOProposal.getVotesRequired(_proposalID),
         ]).then(
             ([proposalTotal, proposalState, proposalVotesFor, proposalVotesRequired]) =>
                 ({ proposalTotal, proposalState, proposalVotesFor, proposalVotesRequired }),
@@ -88,7 +88,7 @@ export async function daoNodeTrustedVote(_proposalID, _vote, txOptions) {
     }
 
     // Add a new proposal
-    await rocketDAONodeTrustedProposals.connect(txOptions.from).vote(_proposalID, _vote, txOptions);
+    await lqgDAONodeTrustedProposals.connect(txOptions.from).vote(_proposalID, _vote, txOptions);
 
     // Capture data
     let ds2 = await getTxData();
@@ -105,10 +105,10 @@ export async function daoNodeTrustedVote(_proposalID, _vote, txOptions) {
 // Cancel a proposal for this DAO
 export async function daoNodeTrustedCancel(_proposalID, txOptions) {
     // Load contracts
-    const rocketDAONodeTrustedProposals = await RocketDAONodeTrustedProposals.deployed();
+    const lqgDAONodeTrustedProposals = await LQGDAONodeTrustedProposals.deployed();
 
     // Add a new proposal
-    await rocketDAONodeTrustedProposals.connect(txOptions.from).cancel(_proposalID, txOptions);
+    await lqgDAONodeTrustedProposals.connect(txOptions.from).cancel(_proposalID, txOptions);
 
     // Get the current state
     let state = Number(await getDAOProposalState(_proposalID));
@@ -120,13 +120,13 @@ export async function daoNodeTrustedCancel(_proposalID, txOptions) {
 // Execute a successful proposal
 export async function daoNodeTrustedExecute(_proposalID, txOptions) {
     // Load contracts
-    const rocketDAOProposal = await RocketDAOProposal.deployed();
-    const rocketDAONodeTrustedProposals = await RocketDAONodeTrustedProposals.deployed();
+    const lqgDAOProposal = await LQGDAOProposal.deployed();
+    const lqgDAONodeTrustedProposals = await LQGDAONodeTrustedProposals.deployed();
 
     // Get data about the tx
     function getTxData() {
         return Promise.all([
-            rocketDAOProposal.getState(_proposalID),
+            lqgDAOProposal.getState(_proposalID),
         ]).then(
             ([proposalState]) =>
                 ({ proposalState }),
@@ -134,7 +134,7 @@ export async function daoNodeTrustedExecute(_proposalID, txOptions) {
     }
 
     // Execute a proposal
-    await rocketDAONodeTrustedProposals.connect(txOptions.from).execute(_proposalID, txOptions);
+    await lqgDAONodeTrustedProposals.connect(txOptions.from).execute(_proposalID, txOptions);
 
     // Capture data
     let ds2 = await getTxData();
@@ -146,17 +146,17 @@ export async function daoNodeTrustedExecute(_proposalID, txOptions) {
 // Join the DAO after a successful invite proposal has passed
 export async function daoNodeTrustedMemberJoin(txOptions) {
     // Load contracts
-    const rocketDAONodeTrusted = await RocketDAONodeTrusted.deployed();
-    const rocketDAONodeTrustedActions = await RocketDAONodeTrustedActions.deployed();
-    const rocketVault = await RocketVault.deployed();
-    const rocketTokenRPL = await RocketTokenRPL.deployed();
+    const lqgDAONodeTrusted = await LQGDAONodeTrusted.deployed();
+    const lqgDAONodeTrustedActions = await LQGDAONodeTrustedActions.deployed();
+    const lqgVault = await LQGVault.deployed();
+    const lqgTokenRPL = await LQGTokenRPL.deployed();
 
     // Get data about the tx
     function getTxData() {
         return Promise.all([
-            rocketDAONodeTrusted.getMemberCount(),
-            rocketTokenRPL.balanceOf(txOptions.from),
-            rocketVault.balanceOfToken('rocketDAONodeTrustedActions', rocketTokenRPL.target),
+            lqgDAONodeTrusted.getMemberCount(),
+            lqgTokenRPL.balanceOf(txOptions.from),
+            lqgVault.balanceOfToken('lqgDAONodeTrustedActions', lqgTokenRPL.target),
         ]).then(
             ([memberTotal, rplBalanceBond, rplBalanceVault]) =>
                 ({ memberTotal, rplBalanceBond, rplBalanceVault }),
@@ -167,30 +167,30 @@ export async function daoNodeTrustedMemberJoin(txOptions) {
     let ds1 = await getTxData();
 
     // Add a new proposal
-    await rocketDAONodeTrustedActions.connect(txOptions.from).actionJoin(txOptions);
+    await lqgDAONodeTrustedActions.connect(txOptions.from).actionJoin(txOptions);
 
     // Capture data
     let ds2 = await getTxData();
 
     // Check member count has increased
     assertBN.equal(ds2.memberTotal, ds1.memberTotal + 1n, 'Member count has not increased');
-    assertBN.equal(ds2.rplBalanceVault, ds1.rplBalanceVault + ds1.rplBalanceBond, 'RocketVault address does not contain the correct RPL bond amount');
+    assertBN.equal(ds2.rplBalanceVault, ds1.rplBalanceVault + ds1.rplBalanceBond, 'LQGVault address does not contain the correct RPL bond amount');
 }
 
 // Leave the DAO after a successful leave proposal has passed
 export async function daoNodeTrustedMemberLeave(_rplRefundAddress, txOptions) {
     // Load contracts
-    const rocketDAONodeTrusted = await RocketDAONodeTrusted.deployed();
-    const rocketDAONodeTrustedActions = await RocketDAONodeTrustedActions.deployed();
-    const rocketVault = await RocketVault.deployed();
-    const rocketTokenRPL = await RocketTokenRPL.deployed();
+    const lqgDAONodeTrusted = await LQGDAONodeTrusted.deployed();
+    const lqgDAONodeTrustedActions = await LQGDAONodeTrustedActions.deployed();
+    const lqgVault = await LQGVault.deployed();
+    const lqgTokenRPL = await LQGTokenRPL.deployed();
 
     // Get data about the tx
     function getTxData() {
         return Promise.all([
-            rocketDAONodeTrusted.getMemberCount(),
-            rocketTokenRPL.balanceOf(_rplRefundAddress),
-            rocketVault.balanceOfToken('rocketDAONodeTrustedActions', rocketTokenRPL.target),
+            lqgDAONodeTrusted.getMemberCount(),
+            lqgTokenRPL.balanceOf(_rplRefundAddress),
+            lqgVault.balanceOfToken('lqgDAONodeTrustedActions', lqgTokenRPL.target),
         ]).then(
             ([memberTotal, rplBalanceRefund, rplBalanceVault]) =>
                 ({ memberTotal, rplBalanceRefund, rplBalanceVault }),
@@ -201,7 +201,7 @@ export async function daoNodeTrustedMemberLeave(_rplRefundAddress, txOptions) {
     let ds1 = await getTxData();
 
     // Add a new proposal
-    await rocketDAONodeTrustedActions.connect(txOptions.from).actionLeave(_rplRefundAddress, txOptions);
+    await lqgDAONodeTrustedActions.connect(txOptions.from).actionLeave(_rplRefundAddress, txOptions);
 
     // Capture data
     let ds2 = await getTxData();
@@ -214,14 +214,14 @@ export async function daoNodeTrustedMemberLeave(_rplRefundAddress, txOptions) {
 // Challenger a members node to respond and signal it is still alive
 export async function daoNodeTrustedMemberChallengeMake(_nodeAddress, txOptions) {
     // Load contracts
-    const rocketDAONodeTrusted = await RocketDAONodeTrusted.deployed();
-    const rocketDAONodeTrustedActions = await RocketDAONodeTrustedActions.deployed();
+    const lqgDAONodeTrusted = await LQGDAONodeTrusted.deployed();
+    const lqgDAONodeTrustedActions = await LQGDAONodeTrustedActions.deployed();
 
     // Get data about the tx
     function getTxData() {
         return Promise.all([
-            rocketDAONodeTrusted.getMemberIsValid(_nodeAddress),
-            rocketDAONodeTrusted.getMemberIsChallenged(_nodeAddress),
+            lqgDAONodeTrusted.getMemberIsValid(_nodeAddress),
+            lqgDAONodeTrusted.getMemberIsChallenged(_nodeAddress),
         ]).then(
             ([currentMemberStatus, memberChallengedStatus]) =>
                 ({ currentMemberStatus, memberChallengedStatus }),
@@ -232,7 +232,7 @@ export async function daoNodeTrustedMemberChallengeMake(_nodeAddress, txOptions)
     let ds1 = await getTxData();
 
     // Add a new proposal
-    await rocketDAONodeTrustedActions.connect(txOptions.from).actionChallengeMake(_nodeAddress, txOptions);
+    await lqgDAONodeTrustedActions.connect(txOptions.from).actionChallengeMake(_nodeAddress, txOptions);
 
     // Capture data
     let ds2 = await getTxData();
@@ -246,14 +246,14 @@ export async function daoNodeTrustedMemberChallengeMake(_nodeAddress, txOptions)
 // Decide a challenges outcome
 export async function daoNodeTrustedMemberChallengeDecide(_nodeAddress, _expectedMemberStatus, txOptions) {
     // Load contracts
-    const rocketDAONodeTrusted = await RocketDAONodeTrusted.deployed();
-    const rocketDAONodeTrustedActions = await RocketDAONodeTrustedActions.deployed();
+    const lqgDAONodeTrusted = await LQGDAONodeTrusted.deployed();
+    const lqgDAONodeTrustedActions = await LQGDAONodeTrustedActions.deployed();
 
     // Get data about the tx
     function getTxData() {
         return Promise.all([
-            rocketDAONodeTrusted.getMemberIsValid(_nodeAddress),
-            rocketDAONodeTrusted.getMemberIsChallenged(_nodeAddress),
+            lqgDAONodeTrusted.getMemberIsValid(_nodeAddress),
+            lqgDAONodeTrusted.getMemberIsChallenged(_nodeAddress),
         ]).then(
             ([currentMemberStatus, memberChallengedStatus]) =>
                 ({ currentMemberStatus, memberChallengedStatus }),
@@ -261,7 +261,7 @@ export async function daoNodeTrustedMemberChallengeDecide(_nodeAddress, _expecte
     }
 
     // Add a new proposal
-    await rocketDAONodeTrustedActions.connect(txOptions.from).actionChallengeDecide(_nodeAddress, txOptions);
+    await lqgDAONodeTrustedActions.connect(txOptions.from).actionChallengeDecide(_nodeAddress, txOptions);
 
     // Capture data
     let ds2 = await getTxData();

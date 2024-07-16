@@ -1,6 +1,6 @@
 import { beforeEach, afterEach, before, after } from 'mocha';
 import { endSnapShot, startSnapShot } from './_utils/snapshotting';
-import { deployRocketPool } from './_helpers/deployment';
+import { deployLQGPool } from './_helpers/deployment';
 import { setDefaultParameters } from './_helpers/defaults';
 import { suppressLog } from './_helpers/console';
 import { injectBNHelpers } from './_helpers/bn';
@@ -49,8 +49,8 @@ afterEach(checkInvariants);
 afterEach(endSnapShot);
 
 before(async function() {
-  // Deploy Rocket Pool
-  await deployRocketPool();
+  // Deploy LQG Pool
+  await deployLQGPool();
   // Set starting parameters for all tests
   await setDefaultParameters();
 });

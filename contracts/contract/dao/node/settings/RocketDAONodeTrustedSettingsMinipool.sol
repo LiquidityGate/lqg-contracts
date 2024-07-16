@@ -3,17 +3,17 @@ pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-import "./RocketDAONodeTrustedSettings.sol";
-import "../../../../interface/dao/node/settings/RocketDAONodeTrustedSettingsMinipoolInterface.sol";
-import "../../../../interface/dao/protocol/settings/RocketDAOProtocolSettingsMinipoolInterface.sol";
+import "./LQGDAONodeTrustedSettings.sol";
+import "../../../../interface/dao/node/settings/LQGDAONodeTrustedSettingsMinipoolInterface.sol";
+import "../../../../interface/dao/protocol/settings/LQGDAOProtocolSettingsMinipoolInterface.sol";
 
 
 /// @notice The Trusted Node DAO Minipool settings
-contract RocketDAONodeTrustedSettingsMinipool is RocketDAONodeTrustedSettings, RocketDAONodeTrustedSettingsMinipoolInterface {
+contract LQGDAONodeTrustedSettingsMinipool is LQGDAONodeTrustedSettings, LQGDAONodeTrustedSettingsMinipoolInterface {
 
     using SafeMath for uint;
 
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketDAONodeTrustedSettings(_rocketStorageAddress, "minipool") {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGDAONodeTrustedSettings(_lqgStorageAddress, "minipool") {
         // Set version
         version = 2;
 
@@ -39,8 +39,8 @@ contract RocketDAONodeTrustedSettingsMinipool is RocketDAONodeTrustedSettings, R
         // Some safety guards for certain settings
         if(getBool(keccak256(abi.encodePacked(settingNameSpace, "deployed")))) {
             if(keccak256(abi.encodePacked(_settingPath)) == keccak256(abi.encodePacked("minipool.scrub.period"))) {
-                RocketDAOProtocolSettingsMinipoolInterface rocketDAOProtocolSettingsMinipool = RocketDAOProtocolSettingsMinipoolInterface(getContractAddress("rocketDAOProtocolSettingsMinipool"));
-                require(_value <= (rocketDAOProtocolSettingsMinipool.getLaunchTimeout().sub(1 hours)), "Scrub period must be less than launch timeout");
+                LQGDAOProtocolSettingsMinipoolInterface lqgDAOProtocolSettingsMinipool = LQGDAOProtocolSettingsMinipoolInterface(getContractAddress("lqgDAOProtocolSettingsMinipool"));
+                require(_value <= (lqgDAOProtocolSettingsMinipool.getLaunchTimeout().sub(1 hours)), "Scrub period must be less than launch timeout");
             }
         }
         // Update setting now

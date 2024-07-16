@@ -21,67 +21,67 @@ const defaultOpts = {
 };
 
 const contractNameMap = {
-    rocketVault: 'RocketVault',
-    rocketTokenRPL: 'RocketTokenRPL',
-    rocketTokenRPLFixedSupply: 'RocketTokenDummyRPL',
-    rocketTokenRETH: 'RocketTokenRETH',
-    rocketAuctionManager: 'RocketAuctionManager',
-    rocketDepositPool: 'RocketDepositPool',
-    rocketMinipoolDelegate: 'RocketMinipoolDelegate',
-    rocketMinipoolManager: 'RocketMinipoolManager',
-    rocketMinipoolQueue: 'RocketMinipoolQueue',
-    rocketMinipoolPenalty: 'RocketMinipoolPenalty',
-    rocketNetworkBalances: 'RocketNetworkBalances',
-    rocketNetworkFees: 'RocketNetworkFees',
-    rocketNetworkPrices: 'RocketNetworkPrices',
-    rocketNetworkPenalties: 'RocketNetworkPenalties',
-    rocketRewardsPool: 'RocketRewardsPool',
-    rocketClaimDAO: 'RocketClaimDAO',
-    rocketNodeDeposit: 'RocketNodeDeposit',
-    rocketNodeManager: 'RocketNodeManager',
-    rocketNodeStaking: 'RocketNodeStaking',
-    rocketDAOProposal: 'RocketDAOProposal',
-    rocketDAONodeTrusted: 'RocketDAONodeTrusted',
-    rocketDAONodeTrustedProposals: 'RocketDAONodeTrustedProposals',
-    rocketDAONodeTrustedActions: 'RocketDAONodeTrustedActions',
-    rocketDAONodeTrustedUpgrade: 'RocketDAONodeTrustedUpgrade',
-    rocketDAONodeTrustedSettingsMembers: 'RocketDAONodeTrustedSettingsMembers',
-    rocketDAONodeTrustedSettingsProposals: 'RocketDAONodeTrustedSettingsProposals',
-    rocketDAONodeTrustedSettingsMinipool: 'RocketDAONodeTrustedSettingsMinipool',
-    rocketDAOProtocol: 'RocketDAOProtocol',
-    rocketDAOProtocolProposals: 'RocketDAOProtocolProposals',
-    rocketDAOProtocolActions: 'RocketDAOProtocolActions',
-    rocketDAOProtocolSettingsInflation: 'RocketDAOProtocolSettingsInflation',
-    rocketDAOProtocolSettingsRewards: 'RocketDAOProtocolSettingsRewards',
-    rocketDAOProtocolSettingsAuction: 'RocketDAOProtocolSettingsAuction',
-    rocketDAOProtocolSettingsNode: 'RocketDAOProtocolSettingsNode',
-    rocketDAOProtocolSettingsNetwork: 'RocketDAOProtocolSettingsNetwork',
-    rocketDAOProtocolSettingsDeposit: 'RocketDAOProtocolSettingsDeposit',
-    rocketDAOProtocolSettingsMinipool: 'RocketDAOProtocolSettingsMinipool',
-    rocketMerkleDistributorMainnet: 'RocketMerkleDistributorMainnet',
-    rocketDAONodeTrustedSettingsRewards: 'RocketDAONodeTrustedSettingsRewards',
-    rocketSmoothingPool: 'RocketSmoothingPool',
-    rocketNodeDistributorFactory: 'RocketNodeDistributorFactory',
-    rocketNodeDistributorDelegate: 'RocketNodeDistributorDelegate',
-    rocketMinipoolFactory: 'RocketMinipoolFactory',
-    rocketMinipoolBase: 'RocketMinipoolBase',
-    rocketMinipoolBondReducer: 'RocketMinipoolBondReducer',
-    rocketNetworkSnapshots: 'RocketNetworkSnapshots',
-    rocketNetworkVoting: 'RocketNetworkVoting',
-    rocketDAOProtocolSettingsProposals: 'RocketDAOProtocolSettingsProposals',
-    rocketDAOProtocolVerifier: 'RocketDAOProtocolVerifier',
-    rocketDAOSecurity: 'RocketDAOSecurity',
-    rocketDAOSecurityActions: 'RocketDAOSecurityActions',
-    rocketDAOSecurityProposals: 'RocketDAOSecurityProposals',
-    rocketDAOProtocolSettingsSecurity: 'RocketDAOProtocolSettingsSecurity',
-    rocketDAOProtocolProposal: 'RocketDAOProtocolProposal',
+    lqgVault: 'LQGVault',
+    lqgTokenRPL: 'LQGTokenRPL',
+    lqgTokenRPLFixedSupply: 'LQGTokenDummyRPL',
+    lqgTokenRETH: 'LQGTokenRETH',
+    lqgAuctionManager: 'LQGAuctionManager',
+    lqgDepositPool: 'LQGDepositPool',
+    lqgMinipoolDelegate: 'LQGMinipoolDelegate',
+    lqgMinipoolManager: 'LQGMinipoolManager',
+    lqgMinipoolQueue: 'LQGMinipoolQueue',
+    lqgMinipoolPenalty: 'LQGMinipoolPenalty',
+    lqgNetworkBalances: 'LQGNetworkBalances',
+    lqgNetworkFees: 'LQGNetworkFees',
+    lqgNetworkPrices: 'LQGNetworkPrices',
+    lqgNetworkPenalties: 'LQGNetworkPenalties',
+    lqgRewardsPool: 'LQGRewardsPool',
+    lqgClaimDAO: 'LQGClaimDAO',
+    lqgNodeDeposit: 'LQGNodeDeposit',
+    lqgNodeManager: 'LQGNodeManager',
+    lqgNodeStaking: 'LQGNodeStaking',
+    lqgDAOProposal: 'LQGDAOProposal',
+    lqgDAONodeTrusted: 'LQGDAONodeTrusted',
+    lqgDAONodeTrustedProposals: 'LQGDAONodeTrustedProposals',
+    lqgDAONodeTrustedActions: 'LQGDAONodeTrustedActions',
+    lqgDAONodeTrustedUpgrade: 'LQGDAONodeTrustedUpgrade',
+    lqgDAONodeTrustedSettingsMembers: 'LQGDAONodeTrustedSettingsMembers',
+    lqgDAONodeTrustedSettingsProposals: 'LQGDAONodeTrustedSettingsProposals',
+    lqgDAONodeTrustedSettingsMinipool: 'LQGDAONodeTrustedSettingsMinipool',
+    lqgDAOProtocol: 'LQGDAOProtocol',
+    lqgDAOProtocolProposals: 'LQGDAOProtocolProposals',
+    lqgDAOProtocolActions: 'LQGDAOProtocolActions',
+    lqgDAOProtocolSettingsInflation: 'LQGDAOProtocolSettingsInflation',
+    lqgDAOProtocolSettingsRewards: 'LQGDAOProtocolSettingsRewards',
+    lqgDAOProtocolSettingsAuction: 'LQGDAOProtocolSettingsAuction',
+    lqgDAOProtocolSettingsNode: 'LQGDAOProtocolSettingsNode',
+    lqgDAOProtocolSettingsNetwork: 'LQGDAOProtocolSettingsNetwork',
+    lqgDAOProtocolSettingsDeposit: 'LQGDAOProtocolSettingsDeposit',
+    lqgDAOProtocolSettingsMinipool: 'LQGDAOProtocolSettingsMinipool',
+    lqgMerkleDistributorMainnet: 'LQGMerkleDistributorMainnet',
+    lqgDAONodeTrustedSettingsRewards: 'LQGDAONodeTrustedSettingsRewards',
+    lqgSmoothingPool: 'LQGSmoothingPool',
+    lqgNodeDistributorFactory: 'LQGNodeDistributorFactory',
+    lqgNodeDistributorDelegate: 'LQGNodeDistributorDelegate',
+    lqgMinipoolFactory: 'LQGMinipoolFactory',
+    lqgMinipoolBase: 'LQGMinipoolBase',
+    lqgMinipoolBondReducer: 'LQGMinipoolBondReducer',
+    lqgNetworkSnapshots: 'LQGNetworkSnapshots',
+    lqgNetworkVoting: 'LQGNetworkVoting',
+    lqgDAOProtocolSettingsProposals: 'LQGDAOProtocolSettingsProposals',
+    lqgDAOProtocolVerifier: 'LQGDAOProtocolVerifier',
+    lqgDAOSecurity: 'LQGDAOSecurity',
+    lqgDAOSecurityActions: 'LQGDAOSecurityActions',
+    lqgDAOSecurityProposals: 'LQGDAOSecurityProposals',
+    lqgDAOProtocolSettingsSecurity: 'LQGDAOProtocolSettingsSecurity',
+    lqgDAOProtocolProposal: 'LQGDAOProtocolProposal',
     addressQueueStorage: 'AddressQueueStorage',
     addressSetStorage: 'AddressSetStorage',
 };
 
-export class RocketPoolDeployer {
+export class LQGPoolDeployer {
     signer = null;
-    rocketStorageInstance = null;
+    lqgStorageInstance = null;
     contractPlan = {};
     deployedContracts = {};
     skippedContracts = [];
@@ -101,9 +101,9 @@ export class RocketPoolDeployer {
         }
 
         // Setup default contract deployment plan
-        this.contractPlan['rocketStorage'] = {
+        this.contractPlan['lqgStorage'] = {
             constructorArgs: [],
-            artifact: artifacts.require('RocketStorage'),
+            artifact: artifacts.require('LQGStorage'),
         };
 
         for (const contract in contractNameMap) {
@@ -114,14 +114,14 @@ export class RocketPoolDeployer {
         }
 
         // Override constructor args on certain contracts
-        this.contractPlan['rocketTokenRPL'].constructorArgs = () => [this.rocketStorageInstance.target, this.deployedContracts['rocketTokenRPLFixedSupply'].address];
-        this.contractPlan['rocketMinipoolDelegate'].constructorArgs = [];
-        this.contractPlan['rocketNodeDistributorDelegate'].constructorArgs = [];
-        this.contractPlan['rocketMinipoolBase'].constructorArgs = [];
+        this.contractPlan['lqgTokenRPL'].constructorArgs = () => [this.lqgStorageInstance.target, this.deployedContracts['lqgTokenRPLFixedSupply'].address];
+        this.contractPlan['lqgMinipoolDelegate'].constructorArgs = [];
+        this.contractPlan['lqgNodeDistributorDelegate'].constructorArgs = [];
+        this.contractPlan['lqgMinipoolBase'].constructorArgs = [];
 
         // Setup deployment
         this.addStage('Deploy storage', 0, [
-                async () => this.deployNetworkContract('rocketStorage'),
+                async () => this.deployNetworkContract('lqgStorage'),
                 async () => this.setString('protocol.version', opts.protocolVersion),
                 async () => this.setUint('deploy.block', this.deployBlock),
             ],
@@ -144,22 +144,22 @@ export class RocketPoolDeployer {
         if (opts.fixedSupplyTokenAddress === null) {
             // Has to be deployed before RPL token as it's used in constructor
             this.addStage('Deploy dummy RPL fixed supply token', 20, [
-                    async () => this.deployNetworkContract('rocketTokenRPLFixedSupply'),
+                    async () => this.deployNetworkContract('lqgTokenRPLFixedSupply'),
                 ],
             );
         } else {
             this.addStage('Setup RPL fixed supply', 20, [
-                    async () => this.setNetworkContractAddress('rocketTokenRPLFixedSupply', opts.fixedSupplyTokenAddress),
-                    async () => this.setNetworkContractAbi('rocketTokenRPLFixedSupply', artifacts.require('rocketTokenRPLFixedSupply').abi),
+                    async () => this.setNetworkContractAddress('lqgTokenRPLFixedSupply', opts.fixedSupplyTokenAddress),
+                    async () => this.setNetworkContractAbi('lqgTokenRPLFixedSupply', artifacts.require('lqgTokenRPLFixedSupply').abi),
                 ],
             );
             // No need to deploy this anymore
-            this.skippedContracts.push('rocketTokenRPLFixedSupply');
+            this.skippedContracts.push('lqgTokenRPLFixedSupply');
         }
 
         this.addStage('Deploy immutable contracts', 30, [
-                async () => this.deployNetworkContract('rocketVault'),
-                async () => this.deployNetworkContract('rocketTokenRETH'),
+                async () => this.deployNetworkContract('lqgVault'),
+                async () => this.deployNetworkContract('lqgTokenRETH'),
             ],
         );
 
@@ -169,7 +169,7 @@ export class RocketPoolDeployer {
         );
 
         this.addStage('Add combined minipool ABI', 50, [
-                async () => this.setNetworkContractAbi('rocketMinipool', compressABI(this.getMinipoolAbi())),
+                async () => this.setNetworkContractAbi('lqgMinipool', compressABI(this.getMinipoolAbi())),
             ],
         );
 
@@ -201,31 +201,31 @@ export class RocketPoolDeployer {
     }
 
     defaultConstructorArgs() {
-        return [this.rocketStorageInstance.target];
+        return [this.lqgStorageInstance.target];
     }
 
     getMinipoolAbi() {
-        // Construct ABI for rocketMinipool
-        const rocketMinipoolAbi = []
-            .concat(artifacts.require('RocketMinipoolDelegate').abi)
-            .concat(artifacts.require('RocketMinipoolBase').abi)
+        // Construct ABI for lqgMinipool
+        const lqgMinipoolAbi = []
+            .concat(artifacts.require('LQGMinipoolDelegate').abi)
+            .concat(artifacts.require('LQGMinipoolBase').abi)
             .filter(i => i.type !== 'fallback' && i.type !== 'receive');
 
-        rocketMinipoolAbi.push({ stateMutability: 'payable', type: 'fallback' });
-        rocketMinipoolAbi.push({ stateMutability: 'payable', type: 'receive' });
+        lqgMinipoolAbi.push({ stateMutability: 'payable', type: 'fallback' });
+        lqgMinipoolAbi.push({ stateMutability: 'payable', type: 'receive' });
 
-        return rocketMinipoolAbi;
+        return lqgMinipoolAbi;
     }
 
     async setDeploymentStatus() {
         // Disable direct access to storage now
         this.log('- Locking down storage');
-        await this.rocketStorageInstance.setDeployedStatus();
+        await this.lqgStorageInstance.setDeployedStatus();
     }
 
     async setString(name, value) {
         this.log('- Setting string `' + name + '` to ' + value, 'white');
-        await this.rocketStorageInstance.setString(
+        await this.lqgStorageInstance.setString(
             ethers.solidityPackedKeccak256(['string'], ['protocol.version']),
             value,
         );
@@ -233,7 +233,7 @@ export class RocketPoolDeployer {
 
     async setUint(name, value) {
         this.log('- Setting uint `' + name + '` to ' + value, 'white');
-        await this.rocketStorageInstance.setUint(
+        await this.lqgStorageInstance.setUint(
             ethers.solidityPackedKeccak256(['string'], ['protocol.version']),
             value,
         );
@@ -255,17 +255,17 @@ export class RocketPoolDeployer {
     async setNetworkContractAddress(name, address) {
         this.log(`- Setting address for "${name}" in storage to ${address}`);
         // Register the contract address as part of the network
-        await this.rocketStorageInstance.setBool(
+        await this.lqgStorageInstance.setBool(
             ethers.solidityPackedKeccak256(['string', 'address'], ['contract.exists', address]),
             true,
         );
         // Register the contract's name by address
-        await this.rocketStorageInstance.setString(
+        await this.lqgStorageInstance.setString(
             ethers.solidityPackedKeccak256(['string', 'address'], ['contract.name', address]),
             name,
         );
-        // Register the contract's address by name (rocketVault and rocketTokenRETH addresses already stored)
-        await this.rocketStorageInstance.setAddress(
+        // Register the contract's address by name (lqgVault and lqgTokenRETH addresses already stored)
+        await this.lqgStorageInstance.setAddress(
             ethers.solidityPackedKeccak256(['string', 'string'], ['contract.address', name]),
             address,
         );
@@ -275,7 +275,7 @@ export class RocketPoolDeployer {
         const compressedAbi = compressABI(abi);
         this.log(`- Setting abi for "${name}" in storage to ${compressedAbi.substr(0, 40)}...`);
         // Compress and store the ABI by name
-        await this.rocketStorageInstance.setString(
+        await this.lqgStorageInstance.setString(
             ethers.solidityPackedKeccak256(['string', 'string'], ['contract.abi', name]),
             compressedAbi,
         );
@@ -325,9 +325,9 @@ export class RocketPoolDeployer {
         const iface = new ethers.Interface(abi);
         const encodedConstructorArgs = iface.encodeDeploy(constructorArgs);
 
-        // Special case for rocketStorage as it's used for all value setting
-        if (name === 'rocketStorage') {
-            this.rocketStorageInstance = instance;
+        // Special case for lqgStorage as it's used for all value setting
+        if (name === 'lqgStorage') {
+            this.lqgStorageInstance = instance;
             const receipt = await rsTx.wait();
             this.deployBlock = receipt.blockNumber;
         }
@@ -348,31 +348,31 @@ export class RocketPoolDeployer {
     }
 
     async bootstrapProtocolDAOSetting(contractName, settingPath, value) {
-        const rocketDAOProtocol = this.deployedContracts['rocketDAOProtocol'].instance;
+        const lqgDAOProtocol = this.deployedContracts['lqgDAOProtocol'].instance;
 
         if (ethers.isAddress(value)) {
             this.log(`- Bootstrap pDAO setting address \`${settingPath}\` = "${value}" on \`${contractName}\``, 'white')
-            await rocketDAOProtocol.bootstrapSettingAddress(contractName, settingPath, value);
+            await lqgDAOProtocol.bootstrapSettingAddress(contractName, settingPath, value);
         } else {
             if (typeof (value) == 'number' || typeof (value) == 'string' || typeof (value) == 'bigint') {
                 this.log(`- Bootstrap pDAO setting uint \`${settingPath}\` = ${value} on \`${contractName}\``, 'white')
-                await rocketDAOProtocol.bootstrapSettingUint(contractName, settingPath, value);
+                await lqgDAOProtocol.bootstrapSettingUint(contractName, settingPath, value);
             }
             else if (typeof (value) == 'boolean') {
                 this.log(`- Bootstrap pDAO setting bool \`${settingPath}\` = ${value} on \`${contractName}\``, 'white')
-                await rocketDAOProtocol.bootstrapSettingBool(contractName, settingPath, value);
+                await lqgDAOProtocol.bootstrapSettingBool(contractName, settingPath, value);
             }
         }
     }
 
     async bootstrapProtocolDAOClaimers(trustedNodePerc, protocolPerc, nodePerc) {
-        const rocketDAOProtocol = this.deployedContracts['rocketDAOProtocol'].instance;
+        const lqgDAOProtocol = this.deployedContracts['lqgDAOProtocol'].instance;
         this.log(`- Bootstrap pDAO setting claimers: oDAO = ${ethers.formatEther(trustedNodePerc * 100n)}%, protocol = ${ethers.formatEther(protocolPerc * 100n)}%, node = ${ethers.formatEther(nodePerc * 100n)}% `, 'white')
-        await rocketDAOProtocol.bootstrapSettingClaimers(trustedNodePerc, protocolPerc, nodePerc);
+        await lqgDAOProtocol.bootstrapSettingClaimers(trustedNodePerc, protocolPerc, nodePerc);
     }
 
     async deploy() {
-        this.log(`Deploying RocketPool`, 'green');
+        this.log(`Deploying LQGPool`, 'green');
 
         // Sort stages by priority
         this.stages.sort((a, b) => a.priority - b.priority);

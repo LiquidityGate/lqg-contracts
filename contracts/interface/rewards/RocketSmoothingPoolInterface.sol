@@ -2,6 +2,6 @@
 pragma solidity >0.5.0 <0.9.0;
 pragma abicoder v2;
 
-interface RocketSmoothingPoolInterface {
+interface LQGSmoothingPoolInterface {
     function withdrawEther(address _to, uint256 _amount) external;
 }

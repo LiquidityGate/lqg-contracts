@@ -4,7 +4,7 @@ pragma solidity >0.5.0 <0.9.0;
 
 import "../util/IERC20.sol";
 
-interface RocketTokenRPLInterface is IERC20 {
+interface LQGTokenRPLInterface is IERC20 {
     function getInflationCalcTime() external view returns(uint256);
     function getInflationIntervalTime() external view returns(uint256);
     function getInflationIntervalRate() external view returns(uint256);

@@ -2,17 +2,17 @@ pragma solidity 0.7.6;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-import "./RocketBase.sol";
+import "./LQGBase.sol";
 import "./util/SafeERC20.sol";
-import "../interface/RocketVaultInterface.sol";
-import "../interface/RocketVaultWithdrawerInterface.sol";
+import "../interface/LQGVaultInterface.sol";
+import "../interface/LQGVaultWithdrawerInterface.sol";
 import "../interface/util/IERC20Burnable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 // ETH and rETH are stored here to prevent contract upgrades from affecting balances
-// The RocketVault contract must not be upgraded
+// The LQGVault contract must not be upgraded
 
-contract RocketVault is RocketBase, RocketVaultInterface {
+contract LQGVault is LQGBase, LQGVaultInterface {
 
     // Libs
     using SafeMath for uint;
@@ -31,7 +31,7 @@ contract RocketVault is RocketBase, RocketVaultInterface {
     event TokenTransfer(bytes32 indexed by, bytes32 indexed to, address indexed tokenAddress, uint256 amount, uint256 time);
 
 	// Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         version = 1;
     }
 
@@ -48,7 +48,7 @@ contract RocketVault is RocketBase, RocketVaultInterface {
     }
 
     // Accept an ETH deposit from a network contract
-    // Only accepts calls from Rocket Pool network contracts
+    // Only accepts calls from LQG Pool network contracts
     function depositEther() override external payable onlyLatestNetworkContract {
         // Valid amount?
         require(msg.value > 0, "No valid amount of ETH given to deposit");
@@ -61,7 +61,7 @@ contract RocketVault is RocketBase, RocketVaultInterface {
     }
 
     // Withdraw an amount of ETH to a network contract
-    // Only accepts calls from Rocket Pool network contracts
+    // Only accepts calls from LQG Pool network contracts
     function withdrawEther(uint256 _amount) override external onlyLatestNetworkContract {
         // Valid amount?
         require(_amount > 0, "No valid amount of ETH given to withdraw");
@@ -71,7 +71,7 @@ contract RocketVault is RocketBase, RocketVaultInterface {
         require(etherBalances[contractName] >= _amount, "Insufficient contract ETH balance");
         etherBalances[contractName] = etherBalances[contractName].sub(_amount);
         // Withdraw
-        RocketVaultWithdrawerInterface withdrawer = RocketVaultWithdrawerInterface(msg.sender);
+        LQGVaultWithdrawerInterface withdrawer = LQGVaultWithdrawerInterface(msg.sender);
         withdrawer.receiveVaultWithdrawalETH{value: _amount}();
         // Emit ether withdrawn event
         emit EtherWithdrawn(contractName, _amount, block.timestamp);
@@ -94,7 +94,7 @@ contract RocketVault is RocketBase, RocketVaultInterface {
     }
 
     // Withdraw an amount of a ERC20 token to an address
-    // Only accepts calls from Rocket Pool network contracts
+    // Only accepts calls from LQG Pool network contracts
     function withdrawToken(address _withdrawalAddress, IERC20 _tokenAddress, uint256 _amount) override external onlyLatestNetworkContract {
         // Valid amount?
         require(_amount > 0, "No valid amount of tokens given to withdraw");
@@ -105,13 +105,13 @@ contract RocketVault is RocketBase, RocketVaultInterface {
         // Get the token ERC20 instance
         IERC20 tokenContract = IERC20(_tokenAddress);
         // Withdraw to the desired address
-        require(tokenContract.transfer(_withdrawalAddress, _amount), "Rocket Vault token withdrawal unsuccessful");
+        require(tokenContract.transfer(_withdrawalAddress, _amount), "LQG Vault token withdrawal unsuccessful");
         // Emit token withdrawn event
         emit TokenWithdrawn(contractKey, address(_tokenAddress), _amount, block.timestamp);
     }
 
     // Transfer token from one contract to another
-    // Only accepts calls from Rocket Pool network contracts
+    // Only accepts calls from LQG Pool network contracts
     function transferToken(string memory _networkContractName, IERC20 _tokenAddress, uint256 _amount) override external onlyLatestNetworkContract {
         // Valid amount?
         require(_amount > 0, "No valid amount of tokens given to transfer");
@@ -128,7 +128,7 @@ contract RocketVault is RocketBase, RocketVaultInterface {
     }
 
     // Burns an amount of a token that implements a burn(uint256) method
-    // Only accepts calls from Rocket Pool network contracts
+    // Only accepts calls from LQG Pool network contracts
     function burnToken(IERC20Burnable _tokenAddress, uint256 _amount) override external onlyLatestNetworkContract {
         // Get contract key
         bytes32 contractKey = keccak256(abi.encodePacked(getContractName(msg.sender), _tokenAddress));

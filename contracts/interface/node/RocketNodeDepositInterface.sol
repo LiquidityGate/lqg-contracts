@@ -4,7 +4,7 @@ pragma solidity >0.5.0 <0.9.0;
 
 import "../../types/MinipoolDeposit.sol";
 
-interface RocketNodeDepositInterface {
+interface LQGNodeDepositInterface {
     function getNodeDepositCredit(address _nodeAddress) external view returns (uint256);
     function getNodeEthBalance(address _nodeAddress) external view returns (uint256);
     function getNodeCreditAndBalance(address _nodeAddress) external view returns (uint256);

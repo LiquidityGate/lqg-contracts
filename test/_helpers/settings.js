@@ -1,39 +1,39 @@
 import {
-    RocketDAOProtocolSettingsAuction,
-    RocketDAOProtocolSettingsDeposit,
-    RocketDAOProtocolSettingsMinipool,
-    RocketDAOProtocolSettingsNetwork,
-    RocketDAOProtocolSettingsNode,
+    LQGDAOProtocolSettingsAuction,
+    LQGDAOProtocolSettingsDeposit,
+    LQGDAOProtocolSettingsMinipool,
+    LQGDAOProtocolSettingsNetwork,
+    LQGDAOProtocolSettingsNode,
 } from '../_utils/artifacts';
 
 // Auction settings
 export async function getAuctionSetting(setting) {
-    const rocketAuctionSettings = await RocketDAOProtocolSettingsAuction.deployed();
-    return rocketAuctionSettings['get' + setting]();
+    const lqgAuctionSettings = await LQGDAOProtocolSettingsAuction.deployed();
+    return lqgAuctionSettings['get' + setting]();
 }
 
 // Deposit settings
 export async function getDepositSetting(setting) {
-    const rocketDAOProtocolSettingsDeposit = await RocketDAOProtocolSettingsDeposit.deployed();
-    return rocketDAOProtocolSettingsDeposit['get' + setting]();
+    const lqgDAOProtocolSettingsDeposit = await LQGDAOProtocolSettingsDeposit.deployed();
+    return lqgDAOProtocolSettingsDeposit['get' + setting]();
 }
 
 // Minipool settings
 export async function getMinipoolSetting(setting) {
-    const rocketDAOProtocolSettingsMinipool = await RocketDAOProtocolSettingsMinipool.deployed();
-    return rocketDAOProtocolSettingsMinipool['get' + setting]();
+    const lqgDAOProtocolSettingsMinipool = await LQGDAOProtocolSettingsMinipool.deployed();
+    return lqgDAOProtocolSettingsMinipool['get' + setting]();
 }
 
 // Network settings
 export async function getNetworkSetting(setting) {
-    const rocketDAOProtocolSettingsNetwork = await RocketDAOProtocolSettingsNetwork.deployed();
-    return rocketDAOProtocolSettingsNetwork['get' + setting]();
+    const lqgDAOProtocolSettingsNetwork = await LQGDAOProtocolSettingsNetwork.deployed();
+    return lqgDAOProtocolSettingsNetwork['get' + setting]();
 }
 
 // Node settings
 export async function getNodeSetting(setting) {
-    const rocketDAOProtocolSettingsNode = await RocketDAOProtocolSettingsNode.deployed();
-    return rocketDAOProtocolSettingsNode['get' + setting]();
+    const lqgDAOProtocolSettingsNode = await LQGDAOProtocolSettingsNode.deployed();
+    return lqgDAOProtocolSettingsNode['get' + setting]();
 }
 
 

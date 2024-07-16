@@ -1,9 +1,9 @@
 {
-  "name": "rocketpool",
+  "name": "lqgpool",
   "version": "3.0.0",
   "description": "A next generation decentralised Ethereum 2.0 proof of stake protocol",
-  "repository": "git@github.com:rocket-pool/rocketpool.git",
-  "author": "David Rugendyke <contact@rocketpool.net>",
+  "repository": "git@github.com:lqg-pool/lqgpool.git",
+  "author": "David Rugendyke <contact@lqgpool.net>",
   "scripts": {
     "compile": "hardhat compile",
     "deploy": "hardhat run scripts/deploy.js",

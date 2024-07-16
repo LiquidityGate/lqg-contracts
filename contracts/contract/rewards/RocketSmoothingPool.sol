@@ -3,19 +3,19 @@ pragma abicoder v2;
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-import "../RocketBase.sol";
-import "../../interface/rewards/RocketSmoothingPoolInterface.sol";
+import "../LQGBase.sol";
+import "../../interface/rewards/LQGSmoothingPoolInterface.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 /*
 Receives priority fees and MEV via fee_recipient
 
-NOTE: This contract intentionally does not use RocketVault to store ETH because there is no way to account for ETH being
+NOTE: This contract intentionally does not use LQGVault to store ETH because there is no way to account for ETH being
 added to this contract via fee_recipient. This also means if this contract is upgraded, the ETH must be manually
 transferred from this contract to the upgraded one.
 */
 
-contract RocketSmoothingPool is RocketBase, RocketSmoothingPoolInterface {
+contract LQGSmoothingPool is LQGBase, LQGSmoothingPoolInterface {
 
     // Libs
     using SafeMath for uint256;
@@ -24,7 +24,7 @@ contract RocketSmoothingPool is RocketBase, RocketSmoothingPoolInterface {
     event EtherWithdrawn(string indexed by, address indexed to, uint256 amount, uint256 time);
 
     // Construct
-    constructor(RocketStorageInterface _rocketStorageAddress) RocketBase(_rocketStorageAddress) {
+    constructor(LQGStorageInterface _lqgStorageAddress) LQGBase(_lqgStorageAddress) {
         // Version
         version = 1;
     }
@@ -33,7 +33,7 @@ contract RocketSmoothingPool is RocketBase, RocketSmoothingPoolInterface {
     receive() payable external {}
 
     // Withdraws ETH to given address
-    // Only accepts calls from Rocket Pool network contracts
+    // Only accepts calls from LQG Pool network contracts
     function withdrawEther(address _to, uint256 _amount) override external onlyLatestNetworkContract {
         // Valid amount?
         require(_amount > 0, "No valid amount of ETH given to withdraw");

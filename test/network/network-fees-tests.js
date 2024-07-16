@@ -1,7 +1,7 @@
 import { before, describe, it } from 'mocha';
 import { printTitle } from '../_utils/formatting';
 import { getNodeFeeByDemand } from '../_helpers/network';
-import { RocketDAOProtocolSettingsNetwork } from '../_utils/artifacts';
+import { LQGDAOProtocolSettingsNetwork } from '../_utils/artifacts';
 import { setDAOProtocolBootstrapSetting } from '../dao/scenario-dao-protocol-bootstrap';
 import { assertBN } from '../_helpers/bn';
 import { globalSnapShot } from '../_utils/snapshotting';
@@ -11,7 +11,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketNetworkFees', () => {
+    describe('LQGNetworkFees', () => {
         let owner;
 
         // Constants
@@ -29,10 +29,10 @@ export default function() {
             ] = await ethers.getSigners();
 
             // Set network settings
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.node.fee.minimum', minNodeFee, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.node.fee.target', targetNodeFee, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.node.fee.maximum', maxNodeFee, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.node.fee.demand.range', demandRange, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.node.fee.minimum', minNodeFee, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.node.fee.target', targetNodeFee, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.node.fee.maximum', maxNodeFee, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.node.fee.demand.range', demandRange, { from: owner });
         });
 
         it(printTitle('network node fee', 'has correct value based on node demand'), async () => {

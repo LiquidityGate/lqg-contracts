@@ -9,13 +9,13 @@ import {
     setDAOProtocolBootstrapSettingMulti,
 } from './scenario-dao-protocol-bootstrap';
 import {
-    RocketDAOProtocolSettingsAuction,
-    RocketDAOProtocolSettingsDeposit,
-    RocketDAOProtocolSettingsInflation,
-    RocketDAOProtocolSettingsMinipool,
-    RocketDAOProtocolSettingsNetwork,
-    RocketDAOProtocolSettingsProposals,
-    RocketDAOProtocolSettingsRewards,
+    LQGDAOProtocolSettingsAuction,
+    LQGDAOProtocolSettingsDeposit,
+    LQGDAOProtocolSettingsInflation,
+    LQGDAOProtocolSettingsMinipool,
+    LQGDAOProtocolSettingsNetwork,
+    LQGDAOProtocolSettingsProposals,
+    LQGDAOProtocolSettingsRewards,
 } from '../_utils/artifacts';
 import {
     cloneLeaves,
@@ -68,7 +68,7 @@ const hre = require('hardhat');
 const ethers = hre.ethers;
 
 export default function() {
-    describe('RocketDAOProtocol', () => {
+    describe('LQGDAOProtocol', () => {
         // Accounts
         let owner, random, proposer, node1, node2, securityMember1;
         let nodeMap = {};
@@ -114,10 +114,10 @@ export default function() {
             votePhase2Time = await getDaoProtocolVotePhase2Time();
 
             // Set the reward claim period
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.submit.balances.frequency', balanceSubmissionFrequency, { from: owner });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsRewards, 'rewards.claimsperiods', rewardClaimBalanceIntervals, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.submit.balances.frequency', balanceSubmissionFrequency, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsRewards, 'rewards.claimsperiods', rewardClaimBalanceIntervals, { from: owner });
             // Set maximum minipool count higher for test
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsMinipool, 'minipool.maximum.count', 100, { from: owner });
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsMinipool, 'minipool.maximum.count', 100, { from: owner });
         });
 
         //
@@ -139,7 +139,7 @@ export default function() {
         // Update a setting
         it(printTitle('random', 'fails to update a setting as they are not the guardian'), async () => {
             // Fails to change a setting
-            await shouldRevert(setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsAuction, 'auction.lot.create.enabled', true, {
+            await shouldRevert(setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsAuction, 'auction.lot.create.enabled', true, {
                 from: random,
             }), 'User updated bootstrap setting', 'Account is not a temporary guardian');
 
@@ -149,9 +149,9 @@ export default function() {
         it(printTitle('random', 'fails to update multiple settings as they are not the guardian'), async () => {
             // Fails to change multiple settings
             await shouldRevert(setDAOProtocolBootstrapSettingMulti([
-                    RocketDAOProtocolSettingsAuction,
-                    RocketDAOProtocolSettingsDeposit,
-                    RocketDAOProtocolSettingsInflation,
+                    LQGDAOProtocolSettingsAuction,
+                    LQGDAOProtocolSettingsDeposit,
+                    LQGDAOProtocolSettingsInflation,
                 ],
                 [
                     'auction.lot.create.enabled',
@@ -171,25 +171,25 @@ export default function() {
         // Verify each setting contract is enabled correctly. These settings are tested in greater detail in the relevent contracts
         it(printTitle('guardian', 'updates a setting in each settings contract while bootstrap mode is enabled'), async () => {
             // Set via bootstrapping
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsAuction, 'auction.lot.create.enabled', true, {
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsAuction, 'auction.lot.create.enabled', true, {
                 from: owner,
             });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsDeposit, 'deposit.minimum', '2'.ether, {
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsDeposit, 'deposit.minimum', '2'.ether, {
                 from: owner,
             });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsInflation, 'rpl.inflation.interval.blocks', 400, {
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsInflation, 'rpl.inflation.interval.blocks', 400, {
                 from: owner,
             });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsMinipool, 'minipool.submit.withdrawable.enabled', true, {
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsMinipool, 'minipool.submit.withdrawable.enabled', true, {
                 from: owner,
             });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsNetwork, 'network.submit.prices.enabled', true, {
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsNetwork, 'network.submit.prices.enabled', true, {
                 from: owner,
             });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsRewards, 'rpl.rewards.claim.period.blocks', 100, {
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsRewards, 'rpl.rewards.claim.period.blocks', 100, {
                 from: owner,
             });
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsInflation, 'network.reth.deposit.delay', 500, {
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsInflation, 'network.reth.deposit.delay', 500, {
                 from: owner,
             });
         });
@@ -198,9 +198,9 @@ export default function() {
         it(printTitle('guardian', 'updates multiple settings at once while bootstrap mode is enabled'), async () => {
             // Set via bootstrapping
             await setDAOProtocolBootstrapSettingMulti([
-                    RocketDAOProtocolSettingsAuction,
-                    RocketDAOProtocolSettingsDeposit,
-                    RocketDAOProtocolSettingsInflation,
+                    LQGDAOProtocolSettingsAuction,
+                    LQGDAOProtocolSettingsDeposit,
+                    LQGDAOProtocolSettingsInflation,
                 ],
                 [
                     'auction.lot.create.enabled',
@@ -220,7 +220,7 @@ export default function() {
         // Update a setting, then try again
         it(printTitle('guardian', 'updates a setting, then fails to update a setting again after bootstrap mode is disabled'), async () => {
             // Set via bootstrapping
-            await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsAuction, 'auction.lot.create.enabled', true, {
+            await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsAuction, 'auction.lot.create.enabled', true, {
                 from: owner,
             });
             // Enable governance so we can disable bootstrap
@@ -230,7 +230,7 @@ export default function() {
                 from: owner,
             });
             // Attempt to change a setting again
-            await shouldRevert(setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsAuction, 'auction.lot.create.enabled', true, {
+            await shouldRevert(setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsAuction, 'auction.lot.create.enabled', true, {
                 from: owner,
             }), 'Guardian updated bootstrap setting after mode disabled', 'Bootstrap mode not engaged');
 
@@ -240,9 +240,9 @@ export default function() {
         it(printTitle('guardian', 'updates multiple settings, then fails to update multiple settings again after bootstrap mode is disabled'), async () => {
             // Set via bootstrapping
             await setDAOProtocolBootstrapSettingMulti([
-                    RocketDAOProtocolSettingsAuction,
-                    RocketDAOProtocolSettingsDeposit,
-                    RocketDAOProtocolSettingsInflation,
+                    LQGDAOProtocolSettingsAuction,
+                    LQGDAOProtocolSettingsDeposit,
+                    LQGDAOProtocolSettingsInflation,
                 ],
                 [
                     'auction.lot.create.enabled',
@@ -265,9 +265,9 @@ export default function() {
             });
             // Attempt to change a setting again
             await shouldRevert(setDAOProtocolBootstrapSettingMulti([
-                    RocketDAOProtocolSettingsAuction,
-                    RocketDAOProtocolSettingsDeposit,
-                    RocketDAOProtocolSettingsInflation,
+                    LQGDAOProtocolSettingsAuction,
+                    LQGDAOProtocolSettingsDeposit,
+                    LQGDAOProtocolSettingsInflation,
                 ],
                 [
                     'auction.lot.create.enabled',
@@ -1025,7 +1025,7 @@ export default function() {
                     await createNode(1, challenger);
 
                     // Set challenge bond to some high value
-                    await setDAOProtocolBootstrapSetting(RocketDAOProtocolSettingsProposals, 'proposal.challenge.bond', '10000'.ether, { from: owner });
+                    await setDAOProtocolBootstrapSetting(LQGDAOProtocolSettingsProposals, 'proposal.challenge.bond', '10000'.ether, { from: owner });
 
                     // Create a valid proposal
                     const { propId, leaves } = await createValidProposal();

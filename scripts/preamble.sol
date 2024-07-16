@@ -15,14 +15,14 @@
    * |    DECENTRALISED STAKING PROTOCOL FOR ETHEREUM    |
    * +---------------------------------------------------+
    *
-   *  Rocket Pool is a first-of-its-kind Ethereum staking pool protocol, designed to
+   *  LQG Pool is a first-of-its-kind Ethereum staking pool protocol, designed to
    *  be community-owned, decentralised, permissionless, & trustless.
    *
-   *  For more information about Rocket Pool, visit https://rocketpool.net
+   *  For more information about LQG Pool, visit https://lqgpool.net
    *
-   *  Authored by the Rocket Pool Core Team
-   *  Contributors: https://github.com/rocket-pool/rocketpool/graphs/contributors
-   *  A special thanks to the Rocket Pool community for all their contributions.
+   *  Authored by the LQG Pool Core Team
+   *  Contributors: https://github.com/lqg-pool/lqgpool/graphs/contributors
+   *  A special thanks to the LQG Pool community for all their contributions.
    *
    */
 
